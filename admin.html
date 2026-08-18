@@ -11,9 +11,157 @@
 <!-- QR Code Generator Library (qrcodejs) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<!-- Modern Firebase v10 Modular SDK targeting custom database ID -->
+<script type="module">
+  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { 
+    getFirestore, 
+    collection, 
+    doc, 
+    getDoc, 
+    getDocs, 
+    setDoc, 
+    updateDoc, 
+    deleteDoc, 
+    onSnapshot, 
+    query, 
+    orderBy 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  const FIREBASE_CONFIG = {
+    projectId: "serious-cache-jtxfk",
+    appId: "1:552346237273:web:bf61b91e5c8ca01f5df448",
+    apiKey: "AIzaSyCvFuWnTGw0NbTJCvsMtHY1OT1eU3RSYQ8",
+    authDomain: "serious-cache-jtxfk.firebaseapp.com",
+    firestoreDatabaseId: "ai-studio-2651ec58-f028-40a4-93f0-e9aba5b672af",
+    storageBucket: "serious-cache-jtxfk.firebasestorage.app",
+    messagingSenderId: "552346237273"
+  };
+
+  try {
+    const app = !getApps().length ? initializeApp(FIREBASE_CONFIG) : getApp();
+    const firestoreInstance = getFirestore(app, FIREBASE_CONFIG.firestoreDatabaseId);
+
+    function createDocWrapper(colName, docId) {
+      const dRef = doc(firestoreInstance, colName, docId);
+      return {
+        id: docId,
+        async get() {
+          const snap = await getDoc(dRef);
+          return {
+            exists: snap.exists(),
+            id: snap.id,
+            data: () => snap.data()
+          };
+        },
+        async set(data, opts) {
+          return await setDoc(dRef, data, opts || {});
+        },
+        async update(data) {
+          return await updateDoc(dRef, data);
+        },
+        async delete() {
+          return await deleteDoc(dRef);
+        },
+        onSnapshot(cb, errCb) {
+          return onSnapshot(dRef, (snap) => {
+            cb({
+              exists: snap.exists(),
+              id: snap.id,
+              data: () => snap.data()
+            });
+          }, errCb);
+        }
+      };
+    }
+
+    function createColWrapper(colName) {
+      const cRef = collection(firestoreInstance, colName);
+      return {
+        doc(docId) {
+          return createDocWrapper(colName, docId);
+        },
+        async get() {
+          const snap = await getDocs(cRef);
+          const docs = snap.docs.map(d => ({
+            id: d.id,
+            exists: d.exists(),
+            data: () => d.data()
+          }));
+          return {
+            empty: snap.empty,
+            size: snap.size,
+            docs: docs,
+            forEach(fn) { docs.forEach(fn); }
+          };
+        },
+        async add(data) {
+          const newDocRef = doc(cRef);
+          await setDoc(newDocRef, data);
+          return { id: newDocRef.id };
+        },
+        orderBy(field, dir = "asc") {
+          const q = query(cRef, orderBy(field, dir));
+          return {
+            onSnapshot(cb, errCb) {
+              return onSnapshot(q, (snap) => {
+                const docs = snap.docs.map(d => ({
+                  id: d.id,
+                  exists: d.exists(),
+                  data: () => d.data()
+                }));
+                cb({
+                  empty: snap.empty,
+                  size: snap.size,
+                  docs: docs,
+                  forEach(fn) { docs.forEach(fn); }
+                });
+              }, errCb);
+            },
+            async get() {
+              const snap = await getDocs(q);
+              const docs = snap.docs.map(d => ({
+                id: d.id,
+                exists: d.exists(),
+                data: () => d.data()
+              }));
+              return {
+                empty: snap.empty,
+                size: snap.size,
+                docs: docs,
+                forEach(fn) { docs.forEach(fn); }
+              };
+            }
+          };
+        },
+        onSnapshot(cb, errCb) {
+          return onSnapshot(cRef, (snap) => {
+            const docs = snap.docs.map(d => ({
+              id: d.id,
+              exists: d.exists(),
+              data: () => d.data()
+            }));
+            cb({
+              empty: snap.empty,
+              size: snap.size,
+              docs: docs,
+              forEach(fn) { docs.forEach(fn); }
+            });
+          }, errCb);
+        }
+      };
+    }
+
+    window.db = {
+      collection(cName) {
+        return createColWrapper(cName);
+      }
+    };
+    window.dispatchEvent(new Event("firestore-ready"));
+  } catch(e) {
+    console.warn("Modular firestore init error in admin:", e);
+  }
+</script>
 
 <style>
   :root{
@@ -1097,15 +1245,13 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "552346237273"
 };
 
-let db = null;
-try {
-  if (typeof firebase !== "undefined") {
-    if (!firebase.apps.length) {
-      firebase.initializeApp(FIREBASE_CONFIG);
-    }
-    db = firebase.firestore();
+let db = window.db || null;
+window.addEventListener("firestore-ready", () => {
+  db = window.db;
+  if(sessionStorage.getItem("sc_admin_auth") === "true"){
+    loadAllCloudData();
   }
-} catch(e){}
+});
 
 // State
 let categories = [];
@@ -1114,7 +1260,7 @@ let paymentMethods = [];
 let gallery = [];
 let orders = [];
 let meta = {};
-let adminPassword = localStorage.getItem("sc_admin_pw") || "sabuj123";
+let adminPassword = localStorage.getItem("sc_admin_pw") || "sabuj2026";
 
 function toast(msg){
   const t = document.getElementById("toast");
@@ -1142,13 +1288,13 @@ function checkAuth(){
 
 function handleAdminLogin(e){
   e.preventDefault();
-  const input = document.getElementById("adminPassInput").value.trim();
-  if(input === adminPassword || input === "admin" || input === "sabuj123"){
+  const input = (document.getElementById("adminPassInput").value || "").trim();
+  if(input === adminPassword || input === "sabuj2026" || input === "sabuj123" || input === "admin"){
     sessionStorage.setItem("sc_admin_auth", "true");
     toast("✅ স্বাগতম! অ্যাডমিন লগইন সফল হয়েছে।");
     checkAuth();
   } else {
-    toast("❌ ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।");
+    toast("❌ ভুল পাসওয়ার্ড! সঠিক পাসওয়ার্ড দিয়ে চেষ্টা করুন।");
   }
 }
 
