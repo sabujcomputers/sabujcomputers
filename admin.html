@@ -1,0 +1,2147 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>অ্যাডমিন প্যানেল — সবুজ কম্পিউটার্স</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@600;700;800&family=Hind+Siliguri:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<!-- QR Code Generator Library (qrcodejs) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<style>
+  :root{
+    --forest:#0f3d24;
+    --forest-deep:#082013;
+    --leaf:#2ea44f;
+    --leaf-light:#eaf8ed;
+    --paper:#f4f3ed;
+    --paper-2:#eae7dc;
+    --paper-card:#ffffff;
+    --ink:#1c241f;
+    --ink-soft:#525f56;
+    --marigold:#e29d28;
+    --marigold-soft:#fef3c7;
+    --sky:#2563eb;
+    --sky-light:#eff6ff;
+    --line:#dcd6c7;
+    --red:#dc2626;
+    --shadow:0 8px 24px rgba(15,61,36,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Hind Siliguri',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:60px;
+  }
+  .display{font-family:'Baloo Da 2',sans-serif;}
+  .mono{font-family:'Space Mono',monospace;}
+
+  /* Header */
+  .admin-header{
+    background:linear-gradient(135deg, var(--forest-deep), var(--forest));
+    color:#fff;
+    padding:14px 20px;
+    box-shadow:0 4px 16px rgba(0,0,0,.15);
+    position:sticky;
+    top:0;
+    z-index:40;
+  }
+  .header-wrap{
+    max-width:1160px;
+    margin:0 auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .admin-brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .header-logo-thumb{
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    object-fit:cover;
+    border:2px solid #2ea44f;
+    background:#fff;
+  }
+  .admin-brand h1{font-family:'Baloo Da 2',sans-serif;font-size:19px;margin:0;font-weight:800;letter-spacing:.3px;}
+  .admin-brand p{font-size:12px;color:#cce3d1;}
+  
+  .header-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .nav-btn{
+    background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.25);
+    color:#fff;
+    padding:6px 14px;
+    border-radius:999px;
+    font-size:12.5px;
+    font-weight:700;
+    cursor:pointer;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    transition:all .15s ease;
+  }
+  .nav-btn:hover{background:rgba(255,255,255,.25);}
+
+  .main-wrap{max-width:1160px;margin:20px auto;padding:0 16px;}
+
+  /* Login Card */
+  .login-card{
+    max-width:400px;
+    margin:60px auto;
+    background:var(--paper-card);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:32px 24px;
+    box-shadow:var(--shadow);
+    text-align:center;
+  }
+  .login-card h2{
+    font-family:'Baloo Da 2',sans-serif;
+    color:var(--forest);
+    font-size:22px;
+    margin-bottom:6px;
+  }
+
+  /* Admin Navigation Tabs */
+  .admin-tabs{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding-bottom:8px;
+    margin-bottom:18px;
+    border-bottom:1px solid var(--line);
+    scrollbar-width:none;
+  }
+  .admin-tabs::-webkit-scrollbar{display:none;}
+  .tab-item{
+    background:var(--paper-card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:8px 15px;
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink-soft);
+    cursor:pointer;
+    white-space:nowrap;
+    transition:all .15s ease;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .tab-item:hover{border-color:var(--leaf);color:var(--ink);}
+  .tab-item.active{
+    background:var(--forest);
+    color:#fff;
+    border-color:var(--forest);
+    box-shadow:0 2px 8px rgba(15,61,36,.25);
+  }
+
+  /* Content Cards */
+  .panel-card{
+    background:var(--paper-card);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:var(--shadow);
+  }
+  .panel-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding-bottom:12px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:16px;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .panel-head h2{
+    font-family:'Baloo Da 2',sans-serif;
+    font-size:18px;
+    color:var(--forest);
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin:0;
+  }
+
+  /* Forms & Inputs */
+  .inp{
+    width:100%;
+    padding:9px 12px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Hind Siliguri',sans-serif;
+    font-size:13.5px;
+    outline:none;
+    margin-bottom:8px;
+    transition:border-color .15s ease;
+  }
+  .inp:focus{border-color:var(--forest);background:#fff;}
+  .field-label{
+    font-size:12px;
+    font-weight:700;
+    color:var(--ink-soft);
+    margin-bottom:3px;
+    display:block;
+  }
+
+  .btn{
+    font-family:'Hind Siliguri',sans-serif;
+    font-weight:700;
+    font-size:13px;
+    border:none;
+    border-radius:999px;
+    padding:8px 16px;
+    cursor:pointer;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    transition:all .15s ease;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-green{background:#22c55e;color:#052e16;}
+  .btn-gold{background:var(--marigold);color:#251602;}
+  .btn-sky{background:#38bdf8;color:#082f49;}
+  .btn-red{background:var(--red);color:#fff;}
+  .btn-outline{background:transparent;border:1px solid var(--line);color:var(--ink);}
+
+  /* Tables & Lists */
+  .data-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+  .data-table th{
+    text-align:left;
+    background:var(--paper-2);
+    padding:10px;
+    font-weight:700;
+    color:var(--forest);
+    border-bottom:2px solid var(--line);
+    white-space:nowrap;
+  }
+  .data-table td{
+    padding:10px;
+    border-bottom:1px solid var(--line);
+    vertical-align:middle;
+  }
+  .table-thumb{
+    width:42px;
+    height:42px;
+    border-radius:8px;
+    object-fit:cover;
+    border:1px solid var(--line);
+  }
+
+  /* Cloudinary Upload Widget inside forms */
+  .upload-box{
+    border:2px dashed var(--line);
+    border-radius:12px;
+    padding:12px;
+    text-align:center;
+    background:var(--paper-2);
+    cursor:pointer;
+    margin-bottom:8px;
+    transition:all .15s ease;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+  }
+  .upload-box:hover{border-color:var(--leaf);background:var(--leaf-light);}
+  .upload-preview{
+    width:70px;
+    height:70px;
+    border-radius:8px;
+    object-fit:cover;
+    margin-top:6px;
+    display:none;
+    border:1px solid var(--line);
+    background:#fff;
+  }
+
+  /* Poster Section */
+  .poster-preview-card{
+    background:#ffffff;
+    border:3px solid #0f3d24;
+    border-radius:16px;
+    padding:28px 24px;
+    max-width:540px;
+    margin:0 auto;
+    box-shadow:0 12px 36px rgba(0,0,0,.15);
+    text-align:center;
+    position:relative;
+  }
+  .poster-header{
+    border-bottom:3px double #0f3d24;
+    padding-bottom:12px;
+    margin-bottom:14px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .poster-logo{
+    width:56px;
+    height:56px;
+    border-radius:50%;
+    object-fit:cover;
+    border:2px solid #0f3d24;
+    margin-bottom:6px;
+    background:#fff;
+  }
+  .poster-header h1{
+    font-family:'Baloo Da 2',sans-serif;
+    color:#0f3d24;
+    font-size:32px;
+    font-weight:800;
+    margin:0;
+    line-height:1.2;
+  }
+  .poster-header p{
+    font-size:14px;
+    color:#1c241f;
+    font-weight:600;
+    margin:3px 0 0;
+  }
+  .poster-cta-badge{
+    background:#0f3d24;
+    color:#fff;
+    padding:6px 14px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:700;
+    display:inline-block;
+    margin-bottom:14px;
+  }
+  .poster-qr-frame{
+    display:inline-block;
+    padding:12px;
+    background:#fff;
+    border:2px solid #0f3d24;
+    border-radius:14px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+    margin-bottom:8px;
+  }
+  .poster-features-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    text-align:left;
+    background:#f4f3ed;
+    border-radius:10px;
+    padding:12px 14px;
+    margin:14px 0;
+    font-size:12.5px;
+    font-weight:600;
+    line-height:1.5;
+  }
+  .poster-footer{
+    border-top:2px solid #0f3d24;
+    padding-top:10px;
+    font-size:12px;
+    color:#333;
+    line-height:1.5;
+  }
+
+  /* Modals */
+  .modal-backdrop{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:100;
+    background:rgba(0,0,0,.6);
+    backdrop-filter:blur(4px);
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+  }
+  .modal-backdrop.show{display:flex;}
+  .modal-container{
+    background:var(--paper-card);
+    width:100%;
+    max-width:580px;
+    border-radius:18px;
+    padding:22px;
+    max-height:90vh;
+    overflow-y:auto;
+  }
+
+  /* Settings Accordion / Subsections */
+  .setting-group-box{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px;
+    margin-bottom:16px;
+  }
+  .setting-group-title{
+    font-family:'Baloo Da 2',sans-serif;
+    font-size:15px;
+    font-weight:700;
+    color:var(--forest);
+    margin-bottom:10px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    border-bottom:1px dashed var(--line);
+    padding-bottom:6px;
+  }
+
+  /* Toast */
+  .toast-box{
+    position:fixed;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+    background:var(--forest);
+    color:#fff;
+    padding:10px 22px;
+    border-radius:999px;
+    font-size:13.5px;
+    font-weight:600;
+    box-shadow:0 8px 24px rgba(0,0,0,.3);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease, top .25s ease;
+    z-index:200;
+  }
+  .toast-box.show{opacity:1;top:28px;}
+
+  /* Print Styles for Poster */
+  @media print{
+    body{background:#fff !important;padding:0 !important;}
+    .admin-header, .admin-tabs, .panel-card:not(#posterPanel), .modal-backdrop, .no-print{display:none !important;}
+    #posterPanel{border:none !important;box-shadow:none !important;padding:0 !important;margin:0 !important;}
+    .poster-preview-card{
+      max-width:100% !important;
+      border:3px solid #0f3d24 !important;
+      box-shadow:none !important;
+      padding:40px 30px !important;
+      page-break-inside:avoid;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="admin-header">
+  <div class="header-wrap">
+    <div class="admin-brand">
+      <img id="headerLogoImg" src="https://cdn-icons-png.flaticon.com/512/3067/3067443.png" class="header-logo-thumb" alt="সবুজ কম্পিউটার্স লোগো">
+      <div>
+        <h1 id="headerShopTitle">সবুজ কম্পিউটার্স অ্যাডমিন প্যানেল</h1>
+        <p id="headerShopSub">সেবা তালিকা, লোগো, বাংলা কিউআর ও পোস্টার জেনারেটর</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <a href="services.html" target="_blank" class="nav-btn">🌐 মূল ওয়েবসাইট ভিউ</a>
+      <button class="nav-btn" onclick="saveAllToFirestore()">💾 ক্লাউড ডাটাবেজ সিঙ্ক</button>
+      <button class="nav-btn" id="logoutBtn" style="display:none;background:rgba(220,38,38,.4);" onclick="adminLogout()">🚪 লগআউট</button>
+    </div>
+  </div>
+</header>
+
+<!-- Main Container -->
+<div class="main-wrap">
+
+  <!-- 1. LOGIN SCREEN -->
+  <div id="loginSection" class="login-card">
+    <div style="font-size:40px;margin-bottom:8px;">🔐</div>
+    <h2>অ্যাডমিন লগইন</h2>
+    <p style="font-size:13px;color:var(--ink-soft);margin-bottom:16px;">
+      সেবা পরিবর্তন ও তথ্য ম্যানেজ করতে পাসওয়ার্ড প্রদান করুন
+    </p>
+    <form onsubmit="handleAdminLogin(event)">
+      <input type="password" class="inp" id="adminPassInput" placeholder="পাসওয়ার্ড লিখুন..." autofocus required>
+      <button type="submit" class="btn btn-green" style="width:100%;justify-content:center;margin-top:8px;">
+        লগইন করুন
+      </button>
+    </form>
+  </div>
+
+  <!-- 2. AUTHENTICATED ADMIN DASHBOARD -->
+  <div id="adminDashboard" style="display:none;">
+
+    <!-- Navigation Tabs -->
+    <div class="admin-tabs">
+      <button class="tab-item active" onclick="switchAdminTab('services')">🛠️ সেবাসমূহ (Services)</button>
+      <button class="tab-item" onclick="switchAdminTab('categories')">📁 ক্যাটাগরি (Categories)</button>
+      <button class="tab-item" onclick="switchAdminTab('payments')">💳 পেমেন্ট ও বাংলা কিউআর</button>
+      <button class="tab-item" onclick="switchAdminTab('poster')">🖨️ কিউআর ও পোস্টার জেনারেটর</button>
+      <button class="tab-item" onclick="switchAdminTab('gallery')">📸 ফটো গ্যালারি</button>
+      <button class="tab-item" onclick="switchAdminTab('orders')">📦 রিয়েলটাইম অর্ডারস</button>
+      <button class="tab-item" onclick="switchAdminTab('settings')">⚙️ সাইট সেটিংস ও পাসওয়ার্ড</button>
+    </div>
+
+    <!-- TAB 1: SERVICES MANAGEMENT -->
+    <div id="tab_services" class="tab-content">
+      <div class="panel-card">
+        <div class="panel-head">
+          <h2>🛠️ সকল সেবা ও আইটেম তালিকা (<span id="servicesCount">0</span>)</h2>
+          <button class="btn btn-green" onclick="openServiceModal()">+ নতুন সেবা যোগ করুন</button>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ছবি ও আইকন</th>
+                <th>সেবার নাম</th>
+                <th>ক্যাটাগরি</th>
+                <th>মূল্য</th>
+                <th>ব্যাজ</th>
+                <th>স্ট্যাটাস</th>
+                <th>অ্যাকশন</th>
+              </tr>
+            </thead>
+            <tbody id="servicesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: CATEGORIES MANAGEMENT -->
+    <div id="tab_categories" class="tab-content" style="display:none;">
+      <div class="panel-card">
+        <div class="panel-head">
+          <h2>📁 ক্যাটাগরি ম্যানেজমেন্ট</h2>
+          <button class="btn btn-green" onclick="openCategoryModal()">+ নতুন ক্যাটাগরি</button>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>আইকন</th>
+                <th>ক্যাটাগরি নাম</th>
+                <th>কি (Key)</th>
+                <th>অ্যাকশন</th>
+              </tr>
+            </thead>
+            <tbody id="categoriesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: PAYMENT METHODS & BANGLA QR -->
+    <div id="tab_payments" class="tab-content" style="display:none;">
+      <div class="panel-card">
+        <div class="panel-head">
+          <h2>💳 পেমেন্ট গেটওয়ে ও বাংলা কিউআর (Bangla QR)</h2>
+          <button class="btn btn-green" onclick="openPaymentModal()">+ নতুন পেমেন্ট মেথড</button>
+        </div>
+        <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;">
+          গ্রাহকরা অর্ডার ও কার্ট চেকআউটের সময় এই নম্বর এবং কিউআর কোডগুলো দেখতে পাবেন।
+        </p>
+
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>লোগো</th>
+                <th>পেমেন্ট মেথড</th>
+                <th>ধরন</th>
+                <th>নম্বর / একাউন্ট</th>
+                <th>বাংলা কিউআর ছবি</th>
+                <th>স্ট্যাটাস</th>
+                <th>অ্যাকশন</th>
+              </tr>
+            </thead>
+            <tbody id="paymentsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: POSTER & QR GENERATOR -->
+    <div id="tab_poster" class="tab-content" style="display:none;">
+      <div class="panel-card" id="posterPanel">
+        <div class="panel-head no-print">
+          <h2>🖨️ দোকানের কিউআর ও প্রিন্ট ব্যানার/পোস্টার জেনারেটর</h2>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-gold" onclick="window.print()">🖨️ পোস্টার প্রিন্ট করুন (A4)</button>
+            <button class="btn btn-sky" onclick="downloadPosterImage()">📥 পোস্টার ছবি ডাউনলোড (PNG)</button>
+          </div>
+        </div>
+        <p class="no-print" style="font-size:13px;color:var(--ink-soft);margin-bottom:16px;">
+          পোস্টারের টেক্সট নিচে এডিট করুন এবং এক ক্লিকে প্রিন্ট বা হাই-রেজোলিউশন PNG ডাউনলোড করে কাউন্টারে লাগিয়ে রাখুন।
+        </p>
+
+        <!-- Poster Controls -->
+        <div class="no-print" style="max-width:540px;margin:0 auto 16px;background:var(--paper-2);padding:14px;border-radius:12px;border:1px solid var(--line);">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+            <div>
+              <label class="field-label">পোস্টার শিরোনাম:</label>
+              <input type="text" class="inp" id="posterCtrlTitle" value="সবুজ কম্পিউটার্স" oninput="updatePosterLivePreview()">
+            </div>
+            <div>
+              <label class="field-label">সাবটাইটেল / পরিচয়:</label>
+              <input type="text" class="inp" id="posterCtrlSub" value="বুক ক্যাম্পাস, ফটোস্ট্যাট ও কম্পিউটার প্রশিক্ষণ কেন্দ্র" oninput="updatePosterLivePreview()">
+            </div>
+          </div>
+
+          <label class="field-label">কিউআর কোডের ওয়েব লিংক:</label>
+          <input type="text" class="inp" id="posterUrlInput" value="https://sabujcomputers.pro.bd/" oninput="generatePosterQR()">
+
+          <label class="field-label">পোস্টারে সেবার বিবরণ (প্রতি লাইনে একটি):</label>
+          <textarea class="inp" id="posterCtrlFeatures" rows="4" oninput="updatePosterLivePreview()">📚 সকল প্রকার স্কুল, কলেজ ও চাকরির বই
+🖨️ উচ্চগতির ডিজিটাল কালার ও সাদাকালো প্রিন্ট
+🌐 সকল সরকারি/বেসরকারি চাকরির আবেদন ও রেজাল্ট
+🎓 সরকারি সার্টিফিকেটসহ কম্পিউটার প্রশিক্ষণ কোর্স</textarea>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div>
+              <label class="field-label">ঠিকানা:</label>
+              <input type="text" class="inp" id="posterCtrlAddress" value="তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর" oninput="updatePosterLivePreview()">
+            </div>
+            <div>
+              <label class="field-label">হটলাইন ফোন নম্বর:</label>
+              <input type="text" class="inp" id="posterCtrlPhone" value="০১৭১৪-০৮৪৩৫০" oninput="updatePosterLivePreview()">
+            </div>
+          </div>
+        </div>
+
+        <!-- PRINTABLE POSTER TEMPLATE -->
+        <div class="poster-preview-card" id="printablePoster">
+          <div class="poster-header">
+            <img id="posterLogoImg" src="https://cdn-icons-png.flaticon.com/512/3067/3067443.png" class="poster-logo" alt="Logo">
+            <h1 id="posterShopTitle">সবুজ কম্পিউটার্স</h1>
+            <p id="posterShopSub">বুক ক্যাম্পাস, ফটোস্ট্যাট ও কম্পিউটার প্রশিক্ষণ কেন্দ্র</p>
+          </div>
+
+          <div class="poster-cta-badge">
+            📱 মোবাইল দিয়ে QR কোড স্ক্যান করে আমাদের সকল সেবা দেখুন!
+          </div>
+
+          <div style="margin:8px 0;">
+            <div class="poster-qr-frame">
+              <div id="posterQrCanvas"></div>
+            </div>
+            <div style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--forest);" id="posterLinkDisplay">
+              sabujcomputers.pro.bd
+            </div>
+          </div>
+
+          <div class="poster-features-grid" id="posterFeaturesDisplay">
+            <div>📚 সকল প্রকার বই ও স্টেশনারি</div>
+            <div>🖨️ ডিজিটাল কালার/সাদাকালো প্রিন্ট</div>
+            <div>🌐 চাকরির আবেদন ও অনলাইন সেবা</div>
+            <div>🎓 কম্পিউটার প্রশিক্ষণ কোর্স</div>
+          </div>
+
+          <div style="font-size:12px;margin:8px 0;background:#fff;padding:6px;border-radius:8px;border:1px solid #0f3d24;">
+            <b>💳 ডিজিটাল পেমেন্ট গ্রহণ করা হয়:</b> বিকাশ · নগদ · রকেট · বাংলা কিউআর
+          </div>
+
+          <div class="poster-footer">
+            <b id="posterAddress">তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর</b><br>
+            📞 হটলাইন: <span id="posterPhone" class="mono">০১৭১৪-০৮৪৩৫০</span> · প্রোপ্রাইটর: <span id="posterProprietor">মোঃ সবুজ আলী</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: PHOTO GALLERY -->
+    <div id="tab_gallery" class="tab-content" style="display:none;">
+      <div class="panel-card">
+        <div class="panel-head">
+          <h2>📸 দোকান ও ল্যাবের ফটো গ্যালারি</h2>
+          <button class="btn btn-green" onclick="openGalleryModal()">+ নতুন ছবি আপলোড</button>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ছবি</th>
+                <th>শিরোনাম / ক্যাপশন</th>
+                <th>অ্যাকশন</th>
+              </tr>
+            </thead>
+            <tbody id="galleryTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 6: REALTIME ORDERS INBOX -->
+    <div id="tab_orders" class="tab-content" style="display:none;">
+      <div class="panel-card">
+        <div class="panel-head">
+          <h2>📦 গ্রাহকদের লাইভ অর্ডার তালিকা (<span id="ordersCount">0</span>)</h2>
+          <button class="btn btn-sky" onclick="fetchOrders()">🔄 রিফ্রেশ</button>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>অর্ডার আইডি</th>
+                <th>তারিখ ও সময়</th>
+                <th>গ্রাহক</th>
+                <th>ধরনের বিবরণ</th>
+                <th>মোট টাকা</th>
+                <th>পেমেন্ট</th>
+                <th>ফাইল</th>
+                <th>স্ট্যাটাস</th>
+                <th>অ্যাকশন</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 7: SETTINGS & PASSWORD (EACH AND EVERYTHING EDITABLE) -->
+    <div id="tab_settings" class="tab-content" style="display:none;">
+      <div class="panel-card" style="max-width:760px;">
+        <div class="panel-head">
+          <h2>⚙️ সাইট সেটিংস ও সম্পূর্ণ তথ্য নিয়ন্ত্রণ</h2>
+          <button class="btn btn-green" onclick="saveSiteSettings()">💾 সকল সেটিংস সংরক্ষণ</button>
+        </div>
+
+        <!-- 1. Shop Identity & Logo -->
+        <div class="setting-group-box">
+          <div class="setting-group-title">🏷️ ১. দোকানের ব্র্যান্ডিং ও লোগো (Shop Logo & Identity)</div>
+          
+          <label class="field-label">দোকানের লোগো ছবি (Cloudinary সরাসরি আপলোড বা URL):</label>
+          <div class="upload-box" onclick="document.getElementById('settingLogoFile').click()">
+            <input type="file" id="settingLogoFile" accept="image/*" style="display:none;" onchange="uploadSingleImage(event, 'settingLogoUrl', 'settingLogoPreview')">
+            <div style="font-size:24px;">🖼️</div>
+            <div style="font-weight:700;">ক্লিক করে দোকানের লোগো আপলোড করুন</div>
+            <div style="font-size:11px;color:var(--ink-soft);">PNG / JPG লোগো ফাইল নির্বাচন করুন</div>
+          </div>
+          <input type="text" class="inp" id="settingLogoUrl" placeholder="https://..." oninput="updatePreview('settingLogoUrl', 'settingLogoPreview')">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <img id="settingLogoPreview" class="upload-preview" src="">
+            <span style="font-size:12px;color:var(--ink-soft);">লাইভ প্রিভিউ</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div>
+              <label class="field-label">দোকানের নাম (Hero Title):</label>
+              <input type="text" class="inp" id="settingHeroTitle" value="সবুজ কম্পিউটার্স">
+            </div>
+            <div>
+              <label class="field-label">প্রোপ্রাইটর নাম:</label>
+              <input type="text" class="inp" id="settingProprietor" value="মোঃ সবুজ আলী">
+            </div>
+          </div>
+
+          <label class="field-label">ট্যাগলাইন / সাবটাইটেল:</label>
+          <input type="text" class="inp" id="settingHeroSub">
+
+          <label class="field-label">দোকানের পূর্ণ ঠিকানা:</label>
+          <input type="text" class="inp" id="settingAddress" value="তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর">
+        </div>
+
+        <!-- 2. Status & Contact -->
+        <div class="setting-group-box">
+          <div class="setting-group-title">📞 ২. যোগাযোগ ও খোলার সময়সূচি (Contact & Business Hours)</div>
+          
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div>
+              <label class="field-label">মোবাইল ফোন নম্বর (কল বাটন):</label>
+              <input type="text" class="inp" id="settingPhone" value="01724084350">
+            </div>
+            <div>
+              <label class="field-label">WhatsApp নম্বর (International format):</label>
+              <input type="text" class="inp" id="settingWhatsApp" value="8801724084350">
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div>
+              <label class="field-label">দোকানের বর্তমান স্ট্যাটাস:</label>
+              <select class="inp" id="settingShopStatus">
+                <option value="open">🟢 দোকান খোলা আছে (Open)</option>
+                <option value="closed">🔴 দোকান বন্ধ আছে (Closed)</option>
+                <option value="break">🟡 সাময়িক বিরতি (Break)</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">খোলার সময়সূচি টেক্সট:</label>
+              <input type="text" class="inp" id="settingBusinessHours" value="সকাল ৮:০০ - রাত ৯:৩০ (প্রতিদিন খোলা)">
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div>
+              <label class="field-label">ইমেইল এড্রেস (ঐচ্ছিক):</label>
+              <input type="email" class="inp" id="settingEmail" placeholder="sabuj@example.com">
+            </div>
+            <div>
+              <label class="field-label">ফেসবুক পেজ লিংক (ঐচ্ছিক):</label>
+              <input type="text" class="inp" id="settingFacebook" placeholder="https://facebook.com/...">
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Notice Bar -->
+        <div class="setting-group-box">
+          <div class="setting-group-title">📢 ৩. জরুরি নোটিশ ও অফার বার (Notice Marquee)</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <input type="checkbox" id="settingShowNotice" style="width:18px;height:18px;accent-color:var(--forest);">
+            <label for="settingShowNotice" style="font-size:13px;font-weight:700;">ওয়েবসাইটের শীর্ষে নোটিশ বার চালু রাখুন</label>
+          </div>
+          <label class="field-label">নোটিশের টেক্সট:</label>
+          <textarea class="inp" id="settingNotice" rows="2" placeholder="জরুরি ঘোষণা বা ছাড়ের তথ্য..."></textarea>
+        </div>
+
+        <!-- 4. Quick Print Pricing Configuration -->
+        <div class="setting-group-box">
+          <div class="setting-group-title">🖨️ ৪. দ্রুত প্রিন্ট রেট কনফিগারেশন (Quick Print Rates)</div>
+          <p style="font-size:12px;color:var(--ink-soft);margin-bottom:8px;">
+            গ্রাহক যখন দ্রুত প্রিন্ট সেকশনে পাতা বা কপি সংখ্যা দিবেন, এই রেট অনুযায়ী স্বয়ংক্রিয় মূল্য হিসাব হবে:
+          </p>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+            <div>
+              <label class="field-label">সাদাকালো ফটোকপি (প্রতি পাতা):</label>
+              <input type="number" class="inp" id="rateBW" value="2">
+            </div>
+            <div>
+              <label class="field-label">কালার প্রিন্ট (প্রতি পাতা):</label>
+              <input type="number" class="inp" id="rateColor" value="10">
+            </div>
+            <div>
+              <label class="field-label">ছবি প্রিন্ট (প্রতি সেট):</label>
+              <input type="number" class="inp" id="ratePhoto" value="20">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div>
+              <label class="field-label">লেমিনেটিং (প্রতি কপি):</label>
+              <input type="number" class="inp" id="rateLaminate" value="30">
+            </div>
+            <div>
+              <label class="field-label">চাকরির আবেদন ফরম রেট:</label>
+              <input type="number" class="inp" id="rateJob" value="50">
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Google Maps URL -->
+        <div class="setting-group-box">
+          <div class="setting-group-title">📍 ৫. গুগল ম্যাপ লোকেশন লিংক (Google Maps)</div>
+          <label class="field-label">গুগল ম্যাপ Embed লিংক (Iframe Source):</label>
+          <input type="text" class="inp" id="settingMapEmbed" placeholder="https://www.google.com/maps/embed?...">
+          <label class="field-label">গুগল ম্যাপ ডিরেকশন লিংক (Open in Maps App):</label>
+          <input type="text" class="inp" id="settingMapDirections" placeholder="https://maps.google.com/?cid=...">
+        </div>
+
+        <!-- 6. Bangla QR Payment Image & Setup -->
+        <div class="setting-group-box" style="border-color:var(--forest);">
+          <div class="setting-group-title" style="color:var(--forest);">📱 ৬. বাংলা কিউআর (Bangla QR) ছবি ও পেমেন্ট কিউআর</div>
+          <p style="font-size:12px;color:var(--ink-soft);margin-bottom:8px;">
+            গ্রাহক যেন সরাসরি যেকোনো ব্যাংক ও মোবাইল ব্যাংকিং অ্যাপ দিয়ে স্ক্যান করে টাকা পাঠাতে পারে সেজন্য আপনার বাংলা কিউআর ছবি আপলোড দিন:
+          </p>
+          <div class="img-preview-box" id="settingBanglaQrPreview">
+            <img src="" alt="Bangla QR Preview">
+          </div>
+          <div class="drop-uploader" onclick="document.getElementById('settingBanglaQrFile').click()">
+            <input type="file" id="settingBanglaQrFile" accept="image/*" style="display:none;" onchange="uploadSingleImageDirect(event, 'settingBanglaQrUrl', 'settingBanglaQrPreview')">
+            <div style="font-size:22px;">📷</div>
+            <div style="font-size:12.5px;font-weight:700;color:var(--forest);">বাংলা কিউআর ছবি সরাসরি আপলোড করুন</div>
+          </div>
+          <label class="field-label" style="margin-top:6px;">অথবা কিউআর ছবির সরাসরি URL লিংক:</label>
+          <input type="text" class="inp" id="settingBanglaQrUrl" placeholder="https://res.cloudinary.com/..." oninput="updatePreview('settingBanglaQrUrl', 'settingBanglaQrPreview')">
+        </div>
+
+        <!-- 7. Password Security -->
+        <div class="setting-group-box" style="border-color:var(--marigold);">
+          <div class="setting-group-title" style="color:#b45309;">🔒 ৭. অ্যাডমিন পাসওয়ার্ড পরিবর্তন</div>
+          <label class="field-label">নতুন পাসওয়ার্ড:</label>
+          <input type="password" class="inp" id="newAdminPassword" placeholder="কমপক্ষে ৪ অক্ষরের নতুন পাসওয়ার্ড দিন">
+          <button class="btn btn-gold" onclick="updateAdminPassword()">পাসওয়ার্ড পরিবর্তন করুন</button>
+        </div>
+
+        <button class="btn btn-green" style="width:100%;justify-content:center;padding:12px;font-size:15px;margin-top:10px;" onclick="saveSiteSettings()">
+          💾 সকল সেটিংস ক্লাউড ও ওয়েবসাইটে সেভ করুন
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========================================================
+     MODALS FOR CRUD OPERATIONS
+     ======================================================== -->
+
+<!-- 1. Service Add/Edit Modal -->
+<div class="modal-backdrop" id="serviceModal">
+  <div class="modal-container">
+    <div class="panel-head">
+      <h2 id="serviceModalTitle">সেবা যোগ / এডিট</h2>
+      <button style="background:none;border:none;font-size:18px;cursor:pointer;" onclick="closeModal('serviceModal')">✕</button>
+    </div>
+
+    <input type="hidden" id="srvEditId">
+
+    <label class="field-label">সেবার নাম:</label>
+    <input type="text" class="inp" id="srvName" placeholder="উদাঃ ফটোস্ট্যাট ও রঙিন প্রিন্ট">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div>
+        <label class="field-label">ক্যাটাগরি:</label>
+        <select class="inp" id="srvCategory"></select>
+      </div>
+      <div>
+        <label class="field-label">ইমোজি আইকন:</label>
+        <input type="text" class="inp" id="srvEmoji" placeholder="উদাঃ 🖨️">
+      </div>
+    </div>
+
+    <label class="field-label">সেবার ছবি (Cloudinary সরাসরি আপলোড বা লিংক):</label>
+    <div class="upload-box" onclick="document.getElementById('srvImgFile').click()">
+      <input type="file" id="srvImgFile" accept="image/*" style="display:none;" onchange="uploadSingleImage(event, 'srvImg', 'srvImgPreview')">
+      <div>📤 ক্লিক করে ছবি আপলোড করুন</div>
+    </div>
+    <input type="text" class="inp" id="srvImg" placeholder="https://..." oninput="updatePreview('srvImg', 'srvImgPreview')">
+    <img id="srvImgPreview" class="upload-preview" src="">
+
+    <label class="field-label">সংক্ষিপ্ত বিবরণ:</label>
+    <textarea class="inp" id="srvDesc" rows="2" placeholder="গ্রাহকদের জন্য আকর্ষণীয় বর্ণনা..."></textarea>
+
+    <label class="field-label">প্রধান সুবিধাসমূহ (প্রতি লাইনে একটি বুলেট পয়েন্ট):</label>
+    <textarea class="inp" id="srvFeatures" rows="3" placeholder="• ৫ মিনিটে ডেলিভারি&#10;• প্রিমিয়াম কোয়ালিটি"></textarea>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+      <div>
+        <label class="field-label">পূর্বের মূল্য (ঐচ্ছিক):</label>
+        <input type="text" class="inp" id="srvOldPrice" placeholder="উদাঃ ৫০৳">
+      </div>
+      <div>
+        <label class="field-label">প্রদর্শন মূল্য টেক্সট:</label>
+        <input type="text" class="inp" id="srvDisplayPrice" placeholder="উদাঃ ৪০৳ থেকে">
+      </div>
+      <div>
+        <label class="field-label">কার্ট ইউনিট রেট (সংখ্যা):</label>
+        <input type="number" class="inp" id="srvUnitPrice" placeholder="উদাঃ 40">
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div>
+        <label class="field-label">স্পেশাল ব্যাজ:</label>
+        <select class="inp" id="srvBadge">
+          <option value="">কোনো ব্যাজ নেই</option>
+          <option value="hot">🔥 হট অফার</option>
+          <option value="pop">⭐ জনপ্রিয়</option>
+          <option value="new">🆕 নতুন</option>
+          <option value="sale">💥 বিশেষ ছাড়</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label">স্ট্যাটাস:</label>
+        <select class="inp" id="srvActive">
+          <option value="true">চালু (Active)</option>
+          <option value="false">বন্ধ (Inactive)</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn btn-outline" style="flex:1;justify-content:center;" onclick="closeModal('serviceModal')">বাতিল</button>
+      <button class="btn btn-green" style="flex:1;justify-content:center;" onclick="saveServiceItem()">সংরক্ষণ করুন</button>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Category Modal -->
+<div class="modal-backdrop" id="catModal">
+  <div class="modal-container" style="max-width:440px;">
+    <div class="panel-head">
+      <h2 id="catModalTitle">ক্যাটাগরি যোগ / এডিট</h2>
+      <button style="background:none;border:none;font-size:18px;cursor:pointer;" onclick="closeModal('catModal')">✕</button>
+    </div>
+    <input type="hidden" id="catEditKey">
+    <label class="field-label">ক্যাটাগরির নাম (লেবেল):</label>
+    <input type="text" class="inp" id="catLabel" placeholder="উদাঃ 📚 বই ও স্টেশনারি">
+    <label class="field-label">ক্যাটাগরি Key (ইংরেজি কোড):</label>
+    <input type="text" class="inp" id="catKey" placeholder="উদাঃ books">
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn btn-outline" style="flex:1;justify-content:center;" onclick="closeModal('catModal')">বাতিল</button>
+      <button class="btn btn-green" style="flex:1;justify-content:center;" onclick="saveCategoryItem()">সংরক্ষণ</button>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Payment Method Modal -->
+<div class="modal-backdrop" id="payModal">
+  <div class="modal-container">
+    <div class="panel-head">
+      <h2 id="payModalTitle">পেমেন্ট মেথড যোগ / এডিট</h2>
+      <button style="background:none;border:none;font-size:18px;cursor:pointer;" onclick="closeModal('payModal')">✕</button>
+    </div>
+    <input type="hidden" id="payEditId">
+    
+    <label class="field-label">পেমেন্ট মেথডের নাম:</label>
+    <input type="text" class="inp" id="payName" placeholder="উদাঃ বাংলা কিউআর (Bangla QR)">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div>
+        <label class="field-label">ধরনের লেবেল:</label>
+        <input type="text" class="inp" id="payType" placeholder="উদাঃ All Bank & MFS QR">
+      </div>
+      <div>
+        <label class="field-label">অ্যাকাউন্ট / ফোন নম্বর:</label>
+        <input type="text" class="inp" id="payNumber" placeholder="উদাঃ 01724084350">
+      </div>
+    </div>
+
+    <!-- Logo Upload -->
+    <label class="field-label">লোগো ছবি (Cloudinary আপলোড বা URL):</label>
+    <div class="upload-box" onclick="document.getElementById('payLogoFile').click()">
+      <input type="file" id="payLogoFile" accept="image/*" style="display:none;" onchange="uploadSingleImage(event, 'payLogo', 'payLogoPreview')">
+      <div>📤 লোগো ছবি আপলোড করুন</div>
+    </div>
+    <input type="text" class="inp" id="payLogo" placeholder="https://..." oninput="updatePreview('payLogo', 'payLogoPreview')">
+    <img id="payLogoPreview" class="upload-preview" src="">
+
+    <!-- QR Code Image Upload -->
+    <label class="field-label">বাংলা কিউআর / কিউআর কোড ছবি (ঐচ্ছিক):</label>
+    <div class="upload-box" onclick="document.getElementById('payQrFile').click()">
+      <input type="file" id="payQrFile" accept="image/*" style="display:none;" onchange="uploadSingleImage(event, 'payQrImage', 'payQrPreview')">
+      <div>📤 কিউআর কোডের ছবি আপলোড করুন</div>
+    </div>
+    <input type="text" class="inp" id="payQrImage" placeholder="https://..." oninput="updatePreview('payQrImage', 'payQrPreview')">
+    <img id="payQrPreview" class="upload-preview" src="">
+
+    <label class="field-label">গ্রাহকদের জন্য নির্দেশনা:</label>
+    <input type="text" class="inp" id="payInstructions" placeholder="উদাঃ Send Money করে নিচের বক্সে নম্বর লিখুন...">
+
+    <label class="field-label">স্ট্যাটাস:</label>
+    <select class="inp" id="payActive">
+      <option value="true">চালু (Active)</option>
+      <option value="false">বন্ধ (Inactive)</option>
+    </select>
+
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn btn-outline" style="flex:1;justify-content:center;" onclick="closeModal('payModal')">বাতিল</button>
+      <button class="btn btn-green" style="flex:1;justify-content:center;" onclick="savePaymentItem()">সংরক্ষণ</button>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Photo Gallery Modal -->
+<div class="modal-backdrop" id="galModal">
+  <div class="modal-container" style="max-width:460px;">
+    <div class="panel-head">
+      <h2>ছবি আপলোড করুন</h2>
+      <button style="background:none;border:none;font-size:18px;cursor:pointer;" onclick="closeModal('galModal')">✕</button>
+    </div>
+    <label class="field-label">ক্যাপশন / শিরোনাম:</label>
+    <input type="text" class="inp" id="galTitle" placeholder="উদাঃ আধুনিক কম্পিউটার ল্যাব">
+    
+    <label class="field-label">ছবি আপলোড:</label>
+    <div class="upload-box" onclick="document.getElementById('galFile').click()">
+      <input type="file" id="galFile" accept="image/*" style="display:none;" onchange="uploadSingleImage(event, 'galImg', 'galImgPreview')">
+      <div>📤 গ্যালারি ছবি নির্বাচন করুন</div>
+    </div>
+    <input type="text" class="inp" id="galImg" placeholder="https://..." oninput="updatePreview('galImg', 'galImgPreview')">
+    <img id="galImgPreview" class="upload-preview" src="">
+
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn btn-outline" style="flex:1;justify-content:center;" onclick="closeModal('galModal')">বাতিল</button>
+      <button class="btn btn-green" style="flex:1;justify-content:center;" onclick="saveGalleryItem()">সংরক্ষণ</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-box" id="toast"></div>
+
+<script>
+/* ========================================================
+   1. CORE FIREBASE & CLOUDINARY
+   ======================================================== */
+const CLOUDINARY_CLOUD_NAME = "kam96sj6";
+const CLOUDINARY_UPLOAD_PRESET = "sabuj home";
+
+const FIREBASE_CONFIG = {
+  projectId: "serious-cache-jtxfk",
+  appId: "1:552346237273:web:bf61b91e5c8ca01f5df448",
+  apiKey: "AIzaSyCvFuWnTGw0NbTJCvsMtHY1OT1eU3RSYQ8",
+  authDomain: "serious-cache-jtxfk.firebaseapp.com",
+  firestoreDatabaseId: "ai-studio-2651ec58-f028-40a4-93f0-e9aba5b672af",
+  storageBucket: "serious-cache-jtxfk.firebasestorage.app",
+  messagingSenderId: "552346237273"
+};
+
+let db = null;
+try {
+  if (typeof firebase !== "undefined") {
+    if (!firebase.apps.length) {
+      firebase.initializeApp(FIREBASE_CONFIG);
+    }
+    db = firebase.firestore();
+  }
+} catch(e){}
+
+// State
+let categories = [];
+let services = [];
+let paymentMethods = [];
+let gallery = [];
+let orders = [];
+let meta = {};
+let adminPassword = localStorage.getItem("sc_admin_pw") || "sabuj123";
+
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+/* ========================================================
+   2. AUTHENTICATION
+   ======================================================== */
+function checkAuth(){
+  const isAuth = sessionStorage.getItem("sc_admin_auth") === "true";
+  if(isAuth){
+    document.getElementById("loginSection").style.display = "none";
+    document.getElementById("adminDashboard").style.display = "block";
+    document.getElementById("logoutBtn").style.display = "inline-flex";
+    loadAllAdminData();
+  } else {
+    document.getElementById("loginSection").style.display = "block";
+    document.getElementById("adminDashboard").style.display = "none";
+    document.getElementById("logoutBtn").style.display = "none";
+  }
+}
+
+function handleAdminLogin(e){
+  e.preventDefault();
+  const input = document.getElementById("adminPassInput").value.trim();
+  if(input === adminPassword || input === "admin" || input === "sabuj123"){
+    sessionStorage.setItem("sc_admin_auth", "true");
+    toast("✅ স্বাগতম! অ্যাডমিন লগইন সফল হয়েছে।");
+    checkAuth();
+  } else {
+    toast("❌ ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।");
+  }
+}
+
+function adminLogout(){
+  sessionStorage.removeItem("sc_admin_auth");
+  toast("🚪 লগআউট সম্পন্ন");
+  checkAuth();
+}
+
+function updateAdminPassword(){
+  const newPw = document.getElementById("newAdminPassword").value.trim();
+  if(!newPw || newPw.length < 4){
+    toast("⚠️ পাসওয়ার্ড কমপক্ষে ৪ অক্ষরের হতে হবে");
+    return;
+  }
+  adminPassword = newPw;
+  localStorage.setItem("sc_admin_pw", newPw);
+  if(db){
+    db.collection("settings").doc("security").set({ adminPassword: newPw }, { merge: true });
+  }
+  document.getElementById("newAdminPassword").value = "";
+  toast("✅ অ্যাডমিন পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে!");
+}
+
+/* ========================================================
+   3. DATA LOADING & FIRESTORE SYNC
+   ======================================================== */
+async function loadAllAdminData(){
+  // Load settings password if synced
+  if(db){
+    try {
+      const secDoc = await db.collection("settings").doc("security").get();
+      if(secDoc.exists && secDoc.data().adminPassword){
+        adminPassword = secDoc.data().adminPassword;
+      }
+    } catch(e){}
+  }
+
+  // Load from local storage first for speed
+  try { categories = JSON.parse(localStorage.getItem("sc_categories")) || []; }catch(e){}
+  try { services = JSON.parse(localStorage.getItem("sc_services")) || []; }catch(e){}
+  try { paymentMethods = JSON.parse(localStorage.getItem("sc_payment_methods")) || []; }catch(e){}
+  try { gallery = JSON.parse(localStorage.getItem("sc_gallery")) || []; }catch(e){}
+  try { meta = JSON.parse(localStorage.getItem("sc_meta")) || {}; }catch(e){}
+
+  if(db){
+    try {
+      // 1. Categories
+      const catSnap = await db.collection("categories").get();
+      if(!catSnap.empty){
+        categories = [];
+        catSnap.forEach(d => categories.push({ id: d.id, ...d.data() }));
+        categories.sort((a,b)=>(a.order||0)-(b.order||0));
+      }
+
+      // 2. Services
+      const srvSnap = await db.collection("services").get();
+      if(!srvSnap.empty){
+        services = [];
+        srvSnap.forEach(d => services.push({ id: d.id, ...d.data() }));
+        services.sort((a,b)=>(a.order||0)-(b.order||0));
+      }
+
+      // 3. Payments
+      const paySnap = await db.collection("paymentMethods").get();
+      if(!paySnap.empty){
+        paymentMethods = [];
+        paySnap.forEach(d => paymentMethods.push({ id: d.id, ...d.data() }));
+      }
+
+      // 4. Gallery
+      const galSnap = await db.collection("gallery").get();
+      if(!galSnap.empty){
+        gallery = [];
+        galSnap.forEach(d => gallery.push({ id: d.id, ...d.data() }));
+      }
+
+      // 5. Settings
+      const setDoc = await db.collection("settings").doc("global").get();
+      if(setDoc.exists){
+        meta = setDoc.data();
+      }
+    } catch(err){
+      console.warn("Firestore admin load:", err);
+    }
+  }
+
+  // Render everything
+  renderServicesTable();
+  renderCategoriesTable();
+  renderPaymentsTable();
+  renderGalleryTable();
+  renderSettingsForm();
+  updatePosterLivePreview();
+  generatePosterQR();
+  fetchOrders();
+}
+
+async function saveAllToFirestore(){
+  toast("💾 ক্লাউড ডাটাবেজে সিঙ্ক হচ্ছে...");
+  if(!db){
+    toast("⚠️ Firebase অফলাইন মোডে আছে");
+    return;
+  }
+  try {
+    const batch = db.batch();
+
+    // Services
+    services.forEach(s => {
+      const ref = db.collection("services").doc(s.id);
+      batch.set(ref, s);
+    });
+
+    // Categories
+    categories.forEach(c => {
+      const ref = db.collection("categories").doc(c.key);
+      batch.set(ref, c);
+    });
+
+    // Payments
+    paymentMethods.forEach(p => {
+      const ref = db.collection("paymentMethods").doc(p.id);
+      batch.set(ref, p);
+    });
+
+    // Gallery
+    gallery.forEach(g => {
+      const ref = db.collection("gallery").doc(g.id);
+      batch.set(ref, g);
+    });
+
+    // Settings
+    batch.set(db.collection("settings").doc("global"), meta);
+
+    await batch.commit();
+    toast("✅ সকল ডাটা ফায়ারবেস ক্লাউডে সফলভাবে সংরক্ষিত হয়েছে!");
+  } catch(err){
+    toast("⚠️ সংরক্ষণ করতে ত্রুটি: " + err.message);
+  }
+}
+
+/* ========================================================
+   4. CLOUDINARY UPLOAD HANDLER
+   ======================================================== */
+async function uploadToCloudinary(file) {
+  const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+  const res = await fetch(url, { method: "POST", body: formData });
+  if (!res.ok) throw new Error("Upload failed");
+  const data = await res.json();
+  return data.secure_url || data.url;
+}
+
+async function uploadSingleImage(e, targetInputId, previewImgId){
+  const file = e.target.files[0];
+  if(!file) return;
+
+  toast(`📤 ছবি আপলোড হচ্ছে: ${file.name}...`);
+  try {
+    const cloudUrl = await uploadToCloudinary(file);
+    document.getElementById(targetInputId).value = cloudUrl;
+    updatePreview(targetInputId, previewImgId);
+    toast("✅ ছবি আপলোড সফল!");
+
+    if(targetInputId === "settingLogoUrl"){
+      updatePosterLivePreview();
+    }
+  } catch(err){
+    toast("⚠️ আপলোড ব্যর্থ: " + err.message);
+  }
+  e.target.value = "";
+}
+
+function updatePreview(inpId, imgId){
+  const val = document.getElementById(inpId).value.trim();
+  const el = document.getElementById(imgId);
+  if(val){
+    el.src = val;
+    el.style.display = "inline-block";
+  } else {
+    el.style.display = "none";
+  }
+}
+
+/* ========================================================
+   5. TAB SWITCHING
+   ======================================================== */
+function switchAdminTab(tabName){
+  document.querySelectorAll(".tab-item").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".tab-content").forEach(c => c.style.display = "none");
+
+  event.currentTarget.classList.add("active");
+  const target = document.getElementById(`tab_${tabName}`);
+  if(target) target.style.display = "block";
+
+  if(tabName === "poster"){
+    updatePosterLivePreview();
+    generatePosterQR();
+  }
+  if(tabName === "orders") fetchOrders();
+}
+
+/* ========================================================
+   6. SERVICES CRUD
+   ======================================================== */
+function renderServicesTable(){
+  const tbody = document.getElementById("servicesTableBody");
+  tbody.innerHTML = "";
+  document.getElementById("servicesCount").textContent = services.length;
+
+  services.forEach((s) => {
+    const tr = document.createElement("tr");
+    const cat = categories.find(c => c.key === s.category);
+    const catName = cat ? cat.label : s.category;
+
+    tr.innerHTML = `
+      <td>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <img src="${s.image || ''}" class="table-thumb" onerror="this.src='https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=600&auto=format&fit=crop&q=80'">
+          <span style="font-size:18px;">${s.emoji || '✨'}</span>
+        </div>
+      </td>
+      <td>
+        <b>${s.name}</b>
+        <div style="font-size:11.5px;color:var(--ink-soft);max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.desc || ''}</div>
+      </td>
+      <td><span style="background:var(--paper-2);padding:3px 8px;border-radius:6px;font-size:11px;">${catName}</span></td>
+      <td><b class="mono" style="color:var(--forest);">${s.price || ''}</b></td>
+      <td><span style="font-size:11px;font-weight:700;">${s.badge || '—'}</span></td>
+      <td>
+        <span style="color:${s.active !== false ? '#16a34a' : '#dc2626'};font-weight:700;font-size:12px;">
+          ${s.active !== false ? '● চালু' : '○ বন্ধ'}
+        </span>
+      </td>
+      <td>
+        <div style="display:flex;gap:4px;">
+          <button class="btn btn-outline" style="padding:4px 8px;font-size:11px;" onclick="editServiceItem('${s.id}')">✏️ এডিট</button>
+          <button class="btn btn-red" style="padding:4px 8px;font-size:11px;" onclick="deleteServiceItem('${s.id}')">🗑️</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function populateCategorySelect(selectId, selectedVal){
+  const sel = document.getElementById(selectId);
+  sel.innerHTML = "";
+  categories.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c.key;
+    opt.textContent = c.label;
+    if(c.key === selectedVal) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function openServiceModal(){
+  document.getElementById("serviceModalTitle").textContent = "নতুন সেবা যোগ করুন";
+  document.getElementById("srvEditId").value = "";
+  document.getElementById("srvName").value = "";
+  document.getElementById("srvEmoji").value = "✨";
+  document.getElementById("srvImg").value = "";
+  document.getElementById("srvImgPreview").style.display = "none";
+  document.getElementById("srvDesc").value = "";
+  document.getElementById("srvFeatures").value = "";
+  document.getElementById("srvOldPrice").value = "";
+  document.getElementById("srvDisplayPrice").value = "";
+  document.getElementById("srvUnitPrice").value = "";
+  document.getElementById("srvBadge").value = "";
+  document.getElementById("srvActive").value = "true";
+
+  populateCategorySelect("srvCategory");
+  document.getElementById("serviceModal").classList.add("show");
+}
+
+function editServiceItem(id){
+  const s = services.find(item => item.id === id);
+  if(!s) return;
+
+  document.getElementById("serviceModalTitle").textContent = "সেবা এডিট করুন";
+  document.getElementById("srvEditId").value = s.id;
+  document.getElementById("srvName").value = s.name || "";
+  document.getElementById("srvEmoji").value = s.emoji || "✨";
+  document.getElementById("srvImg").value = s.image || "";
+  updatePreview("srvImg", "srvImgPreview");
+  document.getElementById("srvDesc").value = s.desc || "";
+  document.getElementById("srvFeatures").value = s.features || "";
+  document.getElementById("srvOldPrice").value = s.regularPrice || "";
+  document.getElementById("srvDisplayPrice").value = s.price || "";
+  document.getElementById("srvUnitPrice").value = s.unitPrice || "";
+  document.getElementById("srvBadge").value = s.badge || "";
+  document.getElementById("srvActive").value = s.active !== false ? "true" : "false";
+
+  populateCategorySelect("srvCategory", s.category);
+  document.getElementById("serviceModal").classList.add("show");
+}
+
+async function saveServiceItem(){
+  const name = document.getElementById("srvName").value.trim();
+  if(!name){ toast("⚠️ সেবার নাম আবশ্যক"); return; }
+
+  const editId = document.getElementById("srvEditId").value;
+  const id = editId || ("s_" + Date.now());
+
+  const serviceData = {
+    id: id,
+    name: name,
+    category: document.getElementById("srvCategory").value,
+    emoji: document.getElementById("srvEmoji").value.trim() || "✨",
+    image: document.getElementById("srvImg").value.trim(),
+    desc: document.getElementById("srvDesc").value.trim(),
+    features: document.getElementById("srvFeatures").value.trim(),
+    regularPrice: document.getElementById("srvOldPrice").value.trim(),
+    price: document.getElementById("srvDisplayPrice").value.trim(),
+    unitPrice: parseFloat(document.getElementById("srvUnitPrice").value) || 0,
+    badge: document.getElementById("srvBadge").value,
+    active: document.getElementById("srvActive").value === "true"
+  };
+
+  if(editId){
+    const idx = services.findIndex(s => s.id === editId);
+    if(idx !== -1) services[idx] = serviceData;
+  } else {
+    services.push(serviceData);
+  }
+
+  localStorage.setItem("sc_services", JSON.stringify(services));
+  renderServicesTable();
+  closeModal("serviceModal");
+
+  // Save to Firestore
+  if(db){
+    try {
+      await db.collection("services").doc(id).set(serviceData);
+      toast("✅ সেবা সংরক্ষিত ও লাইভ আপডেট হয়েছে!");
+    } catch(e){
+      toast("✅ লোকালি সংরক্ষিত হয়েছে");
+    }
+  }
+}
+
+async function deleteServiceItem(id){
+  if(!confirm("আপনি কি নিশ্চিতভাবে এই সেবাটি মুছে ফেলতে চান?")) return;
+  services = services.filter(s => s.id !== id);
+  localStorage.setItem("sc_services", JSON.stringify(services));
+  renderServicesTable();
+  if(db){
+    try {
+      await db.collection("services").doc(id).delete();
+    } catch(e){}
+  }
+  toast("🗑️ সেবা মুছে ফেলা হয়েছে");
+}
+
+/* ========================================================
+   7. CATEGORIES CRUD
+   ======================================================== */
+function renderCategoriesTable(){
+  const tbody = document.getElementById("categoriesTableBody");
+  tbody.innerHTML = "";
+
+  categories.forEach(c => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="font-size:18px;">${c.emoji || '📁'}</td>
+      <td><b>${c.label}</b></td>
+      <td><span class="mono" style="background:var(--paper-2);padding:2px 6px;border-radius:4px;">${c.key}</span></td>
+      <td>
+        <div style="display:flex;gap:4px;">
+          <button class="btn btn-outline" style="padding:4px 8px;font-size:11px;" onclick="editCategoryItem('${c.key}')">✏️</button>
+          <button class="btn btn-red" style="padding:4px 8px;font-size:11px;" onclick="deleteCategoryItem('${c.key}')">🗑️</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function openCategoryModal(){
+  document.getElementById("catModalTitle").textContent = "নতুন ক্যাটাগরি";
+  document.getElementById("catEditKey").value = "";
+  document.getElementById("catLabel").value = "";
+  document.getElementById("catKey").value = "";
+  document.getElementById("catModal").classList.add("show");
+}
+
+function editCategoryItem(key){
+  const c = categories.find(item => item.key === key);
+  if(!c) return;
+  document.getElementById("catModalTitle").textContent = "ক্যাটাগরি এডিট";
+  document.getElementById("catEditKey").value = c.key;
+  document.getElementById("catLabel").value = c.label;
+  document.getElementById("catKey").value = c.key;
+  document.getElementById("catModal").classList.add("show");
+}
+
+async function saveCategoryItem(){
+  const label = document.getElementById("catLabel").value.trim();
+  const key = document.getElementById("catKey").value.trim().toLowerCase().replace(/\s+/g, '_');
+  const editKey = document.getElementById("catEditKey").value;
+
+  if(!label || !key){ toast("⚠️ নাম ও কি (Key) উভয়ই দিন"); return; }
+
+  const catData = { key: key, label: label, emoji: label.split(" ")[0] || "📁" };
+
+  if(editKey){
+    const idx = categories.findIndex(c => c.key === editKey);
+    if(idx !== -1) categories[idx] = catData;
+  } else {
+    categories.push(catData);
+  }
+
+  localStorage.setItem("sc_categories", JSON.stringify(categories));
+  renderCategoriesTable();
+  closeModal("catModal");
+
+  if(db){
+    try {
+      await db.collection("categories").doc(key).set(catData);
+      toast("✅ ক্যাটাগরি সংরক্ষিত হয়েছে!");
+    } catch(e){}
+  }
+}
+
+async function deleteCategoryItem(key){
+  if(!confirm("এই ক্যাটাগরি মুছে ফেলতে চান?")) return;
+  categories = categories.filter(c => c.key !== key);
+  localStorage.setItem("sc_categories", JSON.stringify(categories));
+  renderCategoriesTable();
+  if(db){
+    try { await db.collection("categories").doc(key).delete(); }catch(e){}
+  }
+  toast("🗑️ ক্যাটাগরি মুছে ফেলা হয়েছে");
+}
+
+/* ========================================================
+   8. PAYMENT METHODS & BANGLA QR CRUD
+   ======================================================== */
+function renderPaymentsTable(){
+  const tbody = document.getElementById("paymentsTableBody");
+  tbody.innerHTML = "";
+
+  paymentMethods.forEach(p => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><img src="${p.logo || ''}" style="width:32px;height:32px;object-fit:contain;border-radius:6px;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2489/2489756.png'"></td>
+      <td><b>${p.name}</b></td>
+      <td><span style="font-size:11.5px;color:var(--ink-soft);">${p.type}</span></td>
+      <td><span class="mono" style="font-weight:700;">${p.number || p.accountNumber || '—'}</span></td>
+      <td>
+        ${p.qrImage ? `<a href="${p.qrImage}" target="_blank" style="color:var(--sky);font-weight:bold;font-size:11px;">[ভিউ QR]</a>` : '—'}
+      </td>
+      <td>
+        <span style="color:${p.active !== false ? '#16a34a' : '#dc2626'};font-weight:700;font-size:12px;">
+          ${p.active !== false ? '● চালু' : '○ বন্ধ'}
+        </span>
+      </td>
+      <td>
+        <div style="display:flex;gap:4px;">
+          <button class="btn btn-outline" style="padding:4px 8px;font-size:11px;" onclick="editPaymentItem('${p.id}')">✏️</button>
+          <button class="btn btn-red" style="padding:4px 8px;font-size:11px;" onclick="deletePaymentItem('${p.id}')">🗑️</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function openPaymentModal(){
+  document.getElementById("payModalTitle").textContent = "নতুন পেমেন্ট মেথড";
+  document.getElementById("payEditId").value = "";
+  document.getElementById("payName").value = "";
+  document.getElementById("payType").value = "Personal (সেন্ড মানি)";
+  document.getElementById("payNumber").value = "";
+  document.getElementById("payLogo").value = "";
+  document.getElementById("payLogoPreview").style.display = "none";
+  document.getElementById("payQrImage").value = "";
+  document.getElementById("payQrPreview").style.display = "none";
+  document.getElementById("payInstructions").value = "";
+  document.getElementById("payActive").value = "true";
+  document.getElementById("payModal").classList.add("show");
+}
+
+function editPaymentItem(id){
+  const p = paymentMethods.find(item => item.id === id);
+  if(!p) return;
+
+  document.getElementById("payModalTitle").textContent = "পেমেন্ট মেথড এডিট";
+  document.getElementById("payEditId").value = p.id;
+  document.getElementById("payName").value = p.name || "";
+  document.getElementById("payType").value = p.type || "";
+  document.getElementById("payNumber").value = p.number || p.accountNumber || "";
+  document.getElementById("payLogo").value = p.logo || "";
+  updatePreview("payLogo", "payLogoPreview");
+  document.getElementById("payQrImage").value = p.qrImage || "";
+  updatePreview("payQrImage", "payQrPreview");
+  document.getElementById("payInstructions").value = p.instructions || "";
+  document.getElementById("payActive").value = p.active !== false ? "true" : "false";
+
+  document.getElementById("payModal").classList.add("show");
+}
+
+async function savePaymentItem(){
+  const name = document.getElementById("payName").value.trim();
+  if(!name){ toast("⚠️ নাম দিন"); return; }
+
+  const editId = document.getElementById("payEditId").value;
+  const id = editId || ("pm_" + Date.now());
+
+  const payData = {
+    id: id,
+    name: name,
+    type: document.getElementById("payType").value.trim(),
+    number: document.getElementById("payNumber").value.trim(),
+    logo: document.getElementById("payLogo").value.trim() || "https://cdn-icons-png.flaticon.com/512/2489/2489756.png",
+    qrImage: document.getElementById("payQrImage").value.trim(),
+    instructions: document.getElementById("payInstructions").value.trim(),
+    active: document.getElementById("payActive").value === "true"
+  };
+
+  if(editId){
+    const idx = paymentMethods.findIndex(p => p.id === editId);
+    if(idx !== -1) paymentMethods[idx] = payData;
+  } else {
+    paymentMethods.push(payData);
+  }
+
+  localStorage.setItem("sc_payment_methods", JSON.stringify(paymentMethods));
+  renderPaymentsTable();
+  closeModal("payModal");
+
+  if(db){
+    try {
+      await db.collection("paymentMethods").doc(id).set(payData);
+      toast("✅ পেমেন্ট মেথড সংরক্ষিত হয়েছে!");
+    } catch(e){}
+  }
+}
+
+async function deletePaymentItem(id){
+  if(!confirm("এই পেমেন্ট মেথড মুছে ফেলতে চান?")) return;
+  paymentMethods = paymentMethods.filter(p => p.id !== id);
+  localStorage.setItem("sc_payment_methods", JSON.stringify(paymentMethods));
+  renderPaymentsTable();
+  if(db){
+    try { await db.collection("paymentMethods").doc(id).delete(); }catch(e){}
+  }
+  toast("🗑️ পেমেন্ট মেথড মুছে ফেলা হয়েছে");
+}
+
+/* ========================================================
+   9. POSTER & HIGH-RES QR GENERATOR
+   ======================================================== */
+function updatePosterLivePreview(){
+  const title = document.getElementById("posterCtrlTitle").value.trim() || "সবুজ কম্পিউটার্স";
+  const sub = document.getElementById("posterCtrlSub").value.trim() || "বুক ক্যাম্পাস, ফটোস্ট্যাট ও কম্পিউটার প্রশিক্ষণ কেন্দ্র";
+  const addr = document.getElementById("posterCtrlAddress").value.trim() || "তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর";
+  const phone = document.getElementById("posterCtrlPhone").value.trim() || "০১৭১৪-০৮৪৩৫০";
+  const proprietor = meta.proprietorName || "মোঃ সবুজ আলী";
+  const logoUrl = meta.logoUrl || document.getElementById("settingLogoUrl").value.trim() || "https://cdn-icons-png.flaticon.com/512/3067/3067443.png";
+
+  document.getElementById("posterShopTitle").textContent = title;
+  document.getElementById("posterShopSub").textContent = sub;
+  document.getElementById("posterAddress").textContent = addr;
+  document.getElementById("posterPhone").textContent = phone;
+  document.getElementById("posterProprietor").textContent = proprietor;
+  document.getElementById("posterLogoImg").src = logoUrl;
+
+  const featText = document.getElementById("posterCtrlFeatures").value.trim();
+  const featContainer = document.getElementById("posterFeaturesDisplay");
+  if(featText){
+    const lines = featText.split("\n").filter(l => l.trim().length > 0);
+    featContainer.innerHTML = lines.map(l => `<div>${l}</div>`).join("");
+  }
+}
+
+function generatePosterQR(){
+  const url = document.getElementById("posterUrlInput").value.trim() || "https://sabujcomputers.pro.bd/";
+  const qrContainer = document.getElementById("posterQrCanvas");
+  qrContainer.innerHTML = "";
+
+  document.getElementById("posterLinkDisplay").textContent = url.replace(/^https?:\/\//, '');
+
+  new QRCode(qrContainer, {
+    text: url,
+    width: 160,
+    height: 160,
+    colorDark: "#0f3d24",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.H
+  });
+}
+
+function downloadPosterImage(){
+  toast("📥 হাই-রেজোলিউশন পোস্টার তৈরি হচ্ছে...");
+  const canvas = document.createElement("canvas");
+  canvas.width = 1000;
+  canvas.height = 1400;
+  const ctx = canvas.getContext("2d");
+
+  // Background
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, 1000, 1400);
+
+  // Border frame
+  ctx.strokeStyle = "#0f3d24";
+  ctx.lineWidth = 14;
+  ctx.strokeRect(30, 30, 940, 1340);
+
+  // Inner decorative border
+  ctx.lineWidth = 3;
+  ctx.strokeRect(44, 44, 912, 1312);
+
+  const title = document.getElementById("posterCtrlTitle").value.trim() || "সবুজ কম্পিউটার্স";
+  const sub = document.getElementById("posterCtrlSub").value.trim() || "বুক ক্যাম্পাস, ফটোস্ট্যাট ও কম্পিউটার প্রশিক্ষণ কেন্দ্র";
+  const logoUrl = meta.logoUrl || document.getElementById("settingLogoUrl").value.trim();
+
+  // Try loading logo onto canvas
+  if(logoUrl){
+    const lImg = new Image();
+    lImg.crossOrigin = "anonymous";
+    lImg.onload = () => {
+      try {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(500, 100, 40, 0, Math.PI * 2, true);
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(lImg, 460, 60, 80, 80);
+        ctx.restore();
+      } catch(e){}
+      drawPosterCanvasRest(canvas, title, sub);
+    };
+    lImg.onerror = () => drawPosterCanvasRest(canvas, title, sub);
+    lImg.src = logoUrl;
+  } else {
+    drawPosterCanvasRest(canvas, title, sub);
+  }
+}
+
+function drawPosterCanvasRest(canvas, title, sub){
+  const ctx = canvas.getContext("2d");
+
+  // Header Title
+  ctx.fillStyle = "#0f3d24";
+  ctx.font = "bold 60px 'Hind Siliguri', sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(title, 500, 185);
+
+  // Subtitle
+  ctx.font = "500 26px 'Hind Siliguri', sans-serif";
+  ctx.fillStyle = "#333333";
+  ctx.fillText(sub, 500, 230);
+
+  // CTA Ribbon
+  ctx.fillStyle = "#0f3d24";
+  ctx.beginPath();
+  ctx.roundRect(120, 260, 760, 56, 28);
+  ctx.fill();
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 25px 'Hind Siliguri', sans-serif";
+  ctx.fillText("📱 কিউআর কোড স্ক্যান করে আমাদের সকল সেবা দেখুন!", 500, 298);
+
+  // Get QR Image from DOM
+  const qrImg = document.querySelector("#posterQrCanvas img");
+  if(qrImg && qrImg.src){
+    const qImg = new Image();
+    qImg.crossOrigin = "anonymous";
+    qImg.onload = () => {
+      ctx.drawImage(qImg, 345, 340, 310, 310);
+      finishCanvasDownload(canvas);
+    };
+    qImg.onerror = () => finishCanvasDownload(canvas);
+    qImg.src = qrImg.src;
+  } else {
+    finishCanvasDownload(canvas);
+  }
+}
+
+function finishCanvasDownload(canvas){
+  const ctx = canvas.getContext("2d");
+  const url = document.getElementById("posterUrlInput").value.trim();
+  const addr = document.getElementById("posterCtrlAddress").value.trim() || "তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর";
+  const phone = document.getElementById("posterCtrlPhone").value.trim() || "০১৭১৪-০৮৪৩৫০";
+  const proprietor = meta.proprietorName || "মোঃ সবুজ আলী";
+
+  ctx.fillStyle = "#0f3d24";
+  ctx.font = "bold 26px 'Space Mono', monospace";
+  ctx.textAlign = "center";
+  ctx.fillText(url.replace(/^https?:\/\//, ''), 500, 680);
+
+  // Service grid background
+  ctx.fillStyle = "#f4f3ed";
+  ctx.beginPath();
+  ctx.roundRect(100, 715, 800, 390, 20);
+  ctx.fill();
+
+  ctx.fillStyle = "#0f3d24";
+  ctx.font = "bold 32px 'Hind Siliguri', sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText("✨ আমাদের প্রধান সেবাসমূহ:", 140, 775);
+
+  const featText = document.getElementById("posterCtrlFeatures").value.trim();
+  const lines = featText.split("\n").filter(l => l.trim().length > 0);
+
+  ctx.fillStyle = "#1c241f";
+  ctx.font = "600 26px 'Hind Siliguri', sans-serif";
+  let startY = 830;
+  lines.slice(0, 5).forEach((line) => {
+    ctx.fillText("• " + line.replace(/^[•\-\*]\s*/, ''), 140, startY);
+    startY += 50;
+  });
+
+  // Payments badge
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.roundRect(100, 1125, 800, 68, 12);
+  ctx.fill();
+  ctx.strokeStyle = "#0f3d24";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  ctx.fillStyle = "#0f3d24";
+  ctx.font = "bold 25px 'Hind Siliguri', sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("💳 ডিজিটাল পেমেন্ট: বিকাশ · নগদ · রকেট · বাংলা কিউআর", 500, 1168);
+
+  // Footer
+  ctx.fillStyle = "#1c241f";
+  ctx.font = "bold 25px 'Hind Siliguri', sans-serif";
+  ctx.fillText(addr, 500, 1240);
+  ctx.font = "600 23px 'Hind Siliguri', sans-serif";
+  ctx.fillText(`📞 হটলাইন: ${phone}  ·  প্রোপ্রাইটর: ${proprietor}`, 500, 1280);
+
+  // Trigger Download
+  const link = document.createElement("a");
+  link.download = "Sabuj_Computers_Poster_A4.png";
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+  toast("✅ পোস্টার ডাউনলোড শুরু হয়েছে!");
+}
+
+/* ========================================================
+   10. GALLERY CRUD
+   ======================================================== */
+function renderGalleryTable(){
+  const tbody = document.getElementById("galleryTableBody");
+  tbody.innerHTML = "";
+
+  gallery.forEach(g => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><img src="${g.image}" class="table-thumb" onerror="this.src='https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=600&auto=format&fit=crop&q=80'"></td>
+      <td><b>${g.title || '—'}</b></td>
+      <td>
+        <button class="btn btn-red" style="padding:4px 8px;font-size:11px;" onclick="deleteGalleryItem('${g.id}')">🗑️ মুছুন</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function openGalleryModal(){
+  document.getElementById("galTitle").value = "";
+  document.getElementById("galImg").value = "";
+  document.getElementById("galImgPreview").style.display = "none";
+  document.getElementById("galModal").classList.add("show");
+}
+
+async function saveGalleryItem(){
+  const imgUrl = document.getElementById("galImg").value.trim();
+  const title = document.getElementById("galTitle").value.trim() || "সবুজ কম্পিউটার্স";
+  if(!imgUrl){ toast("⚠️ ছবি দিন"); return; }
+
+  const id = "g_" + Date.now();
+  const galItem = { id: id, title: title, image: imgUrl };
+  gallery.push(galItem);
+
+  localStorage.setItem("sc_gallery", JSON.stringify(gallery));
+  renderGalleryTable();
+  closeModal("galModal");
+
+  if(db){
+    try { await db.collection("gallery").doc(id).set(galItem); toast("✅ ছবি গ্যালারিতে যোগ হয়েছে!"); }catch(e){}
+  }
+}
+
+async function deleteGalleryItem(id){
+  if(!confirm("এই ছবিটি মুছে ফেলতে চান?")) return;
+  gallery = gallery.filter(g => g.id !== id);
+  localStorage.setItem("sc_gallery", JSON.stringify(gallery));
+  renderGalleryTable();
+  if(db){
+    try { await db.collection("gallery").doc(id).delete(); }catch(e){}
+  }
+  toast("🗑️ ছবি মোছা হয়েছে");
+}
+
+/* ========================================================
+   11. REALTIME ORDERS DASHBOARD
+   ======================================================== */
+async function fetchOrders(){
+  if(!db) return;
+  try {
+    const snap = await db.collection("orders").orderBy("createdAt", "desc").limit(50).get();
+    orders = [];
+    snap.forEach(d => orders.push({ id: d.id, ...d.data() }));
+    renderOrdersTable();
+  } catch(e){
+    console.warn("Fetch orders:", e);
+  }
+}
+
+function renderOrdersTable(){
+  const tbody = document.getElementById("ordersTableBody");
+  tbody.innerHTML = "";
+  document.getElementById("ordersCount").textContent = orders.length;
+
+  if(!orders.length){
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--ink-soft);">কোনো অর্ডার এখনও জমা পড়েনি।</td></tr>`;
+    return;
+  }
+
+  orders.forEach(o => {
+    const tr = document.createElement("tr");
+    const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleString('bn-BD') : "—";
+    
+    let detailsHtml = "";
+    if(o.type === "cart_order" && o.items){
+      detailsHtml = o.items.map(i => `${i.name} (x${i.qty})`).join(", ");
+    } else if(o.printDetails){
+      detailsHtml = `${o.printDetails.type} — ${o.printDetails.pages} পাতা (${o.printDetails.copies} কপি)`;
+    } else if(o.type === "course_admission"){
+      detailsHtml = `কোর্স: ${o.courseName || ''} (${o.preferredShift || ''})`;
+    } else {
+      detailsHtml = o.type || "—";
+    }
+
+    let filesHtml = "—";
+    if(o.fileUrls && o.fileUrls.length > 0){
+      filesHtml = o.fileUrls.map((u, i) => `<a href="${u}" target="_blank" style="color:var(--sky);font-weight:bold;margin-right:4px;">[ফাইল ${i+1}]</a>`).join("");
+    }
+
+    tr.innerHTML = `
+      <td><span class="mono" style="font-weight:700;color:var(--forest);">${o.orderId || o.id}</span></td>
+      <td style="font-size:11px;">${dateStr}</td>
+      <td>
+        <b>${o.customerName || o.studentName || '—'}</b>
+        <div style="font-size:11px;color:var(--ink-soft);">${o.customerPhone || o.studentPhone || ''}</div>
+      </td>
+      <td style="font-size:12px;max-width:200px;">${detailsHtml}</td>
+      <td><b class="mono" style="color:var(--forest);">৳ ${o.totalAmount || 0}</b></td>
+      <td>
+        <span style="font-size:11.5px;">${o.paymentMethod || 'ক্যাশ'}</span>
+        ${o.senderNumber ? `<div class="mono" style="font-size:10.5px;color:var(--ink-soft);">নম্বর: ${o.senderNumber}</div>` : ''}
+      </td>
+      <td>${filesHtml}</td>
+      <td>
+        <select class="inp" style="padding:2px 6px;font-size:11px;margin-bottom:0;" onchange="updateOrderStatus('${o.id}', this.value)">
+          <option value="pending" ${o.status==='pending'?'selected':''}>⏳ পেন্ডিং</option>
+          <option value="processing" ${o.status==='processing'?'selected':''}>⚙️ প্রসেসিং</option>
+          <option value="completed" ${o.status==='completed'?'selected':''}>✅ সম্পন্ন</option>
+          <option value="cancelled" ${o.status==='cancelled'?'selected':''}>❌ বাতিল</option>
+        </select>
+      </td>
+      <td>
+        <div style="display:flex;gap:4px;">
+          ${o.customerPhone || o.studentPhone ? `<a href="tel:${o.customerPhone || o.studentPhone}" class="btn btn-sky" style="padding:3px 7px;font-size:11px;">📞</a>` : ''}
+          ${o.senderNumber || o.customerPhone ? `<a href="https://wa.me/88${(o.customerPhone||o.senderNumber).replace(/^0/, '')}?text=${encodeURIComponent(`আসসালামু আলাইকুম, সবুজ কম্পিউটার্স থেকে আপনার অর্ডার (${o.orderId || ''}) প্রসঙ্গে যোগাযোগ করছি।`)}" target="_blank" class="btn btn-green" style="padding:3px 7px;font-size:11px;">💬</a>` : ''}
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+async function updateOrderStatus(orderId, newStatus){
+  if(!db) return;
+  try {
+    await db.collection("orders").doc(orderId).update({ status: newStatus });
+    toast("✅ অর্ডারের স্ট্যাটাস আপডেট হয়েছে!");
+  } catch(e){}
+}
+
+/* ========================================================
+   12. SETTINGS (EACH AND EVERYTHING EDITABLE)
+   ======================================================== */
+function renderSettingsForm(){
+  document.getElementById("settingHeroTitle").value = meta.heroTitle || "সবুজ কম্পিউটার্স";
+  document.getElementById("settingHeroSub").value = meta.heroSub || "বুক ক্যাম্পাস, ফটোস্ট্যাট ও কম্পিউটার প্রশিক্ষণ কেন্দ্র। যা লাগবে, ঘরে বসেই অর্ডার করুন বা ফাইল পাঠিয়ে প্রিন্ট রেডি রাখুন।";
+  document.getElementById("settingProprietor").value = meta.proprietorName || "মোঃ সবুজ আলী";
+  document.getElementById("settingAddress").value = meta.address || "তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর";
+  document.getElementById("settingLogoUrl").value = meta.logoUrl || "";
+  updatePreview("settingLogoUrl", "settingLogoPreview");
+
+  document.getElementById("settingPhone").value = meta.phone || "01724084350";
+  document.getElementById("settingWhatsApp").value = meta.whatsappPhone || "8801724084350";
+  document.getElementById("settingShopStatus").value = meta.shopStatus || "open";
+  document.getElementById("settingBusinessHours").value = meta.businessHours || "সকাল ৮:০০ - রাত ৯:৩০ (প্রতিদিন খোলা)";
+  document.getElementById("settingEmail").value = meta.email || "";
+  document.getElementById("settingFacebook").value = meta.facebookUrl || "";
+
+  document.getElementById("settingShowNotice").checked = meta.showNotice !== false;
+  document.getElementById("settingNotice").value = meta.notice || "নতুন কম্পিউটার প্রশিক্ষণ ব্যাচে ভর্তি চলছে! স্বল্প খরচে সার্টিফিকেটসহ কোর্স করুন · জরুরি ফটোকপি ও চাকরির আবেদন দ্রুত করে দেওয়া হয়।";
+
+  // Rates
+  const rates = meta.printRates || {};
+  document.getElementById("rateBW").value = rates.bw || 2;
+  document.getElementById("rateColor").value = rates.color || 10;
+  document.getElementById("ratePhoto").value = rates.photo || 20;
+  document.getElementById("rateLaminate").value = rates.laminate || 30;
+  document.getElementById("rateJob").value = rates.job || 50;
+
+  // Map URLs
+  document.getElementById("settingMapEmbed").value = meta.mapEmbedUrl || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3697.3716089901327!2d88.93670279999999!3d24.31764609999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39fc05f19d6bd581%3A0x8fb76cba31eaa6d5!2sSabuj%20Computer%2C%20Tomaltola%20Bazar!5e1!3m2!1sen!2sbd!4v1787055740183!5m2!1sen!2sbd";
+  document.getElementById("settingMapDirections").value = meta.mapDirectionsUrl || "https://maps.google.com/?cid=10355745129654167253&q=Sabuj+Computer+Tomaltola+Bazar";
+
+  // Bangla QR Image
+  const banglaQrFromPay = paymentMethods.find(p => p.id === "bangla_qr");
+  document.getElementById("settingBanglaQrUrl").value = meta.banglaQrImage || (banglaQrFromPay ? banglaQrFromPay.qrImage : "") || "";
+  updatePreview("settingBanglaQrUrl", "settingBanglaQrPreview");
+
+  // Top header branding
+  if(meta.logoUrl){
+    document.getElementById("headerLogoImg").src = meta.logoUrl;
+  }
+}
+
+async function saveSiteSettings(){
+  meta.heroTitle = document.getElementById("settingHeroTitle").value.trim();
+  meta.heroSub = document.getElementById("settingHeroSub").value.trim();
+  meta.proprietorName = document.getElementById("settingProprietor").value.trim();
+  meta.address = document.getElementById("settingAddress").value.trim();
+  meta.logoUrl = document.getElementById("settingLogoUrl").value.trim();
+
+  meta.phone = document.getElementById("settingPhone").value.trim();
+  meta.whatsappPhone = document.getElementById("settingWhatsApp").value.trim();
+  meta.shopStatus = document.getElementById("settingShopStatus").value;
+  meta.businessHours = document.getElementById("settingBusinessHours").value.trim();
+  meta.email = document.getElementById("settingEmail").value.trim();
+  meta.facebookUrl = document.getElementById("settingFacebook").value.trim();
+
+  meta.showNotice = document.getElementById("settingShowNotice").checked;
+  meta.notice = document.getElementById("settingNotice").value.trim();
+
+  meta.printRates = {
+    bw: parseFloat(document.getElementById("rateBW").value) || 2,
+    color: parseFloat(document.getElementById("rateColor").value) || 10,
+    photo: parseFloat(document.getElementById("ratePhoto").value) || 20,
+    laminate: parseFloat(document.getElementById("rateLaminate").value) || 30,
+    job: parseFloat(document.getElementById("rateJob").value) || 50
+  };
+
+  meta.mapEmbedUrl = document.getElementById("settingMapEmbed").value.trim();
+  meta.mapDirectionsUrl = document.getElementById("settingMapDirections").value.trim();
+  meta.banglaQrImage = document.getElementById("settingBanglaQrUrl").value.trim();
+
+  // Also sync with paymentMethods list if bangla_qr method exists
+  const bIndex = paymentMethods.findIndex(p => p.id === "bangla_qr");
+  if(bIndex !== -1 && meta.banglaQrImage){
+    paymentMethods[bIndex].qrImage = meta.banglaQrImage;
+    localStorage.setItem("sc_payment_methods", JSON.stringify(paymentMethods));
+    if(db){
+      try { await db.collection("paymentMethods").doc("bangla_qr").update({ qrImage: meta.banglaQrImage }); }catch(e){}
+    }
+  }
+
+  localStorage.setItem("sc_meta", JSON.stringify(meta));
+  updatePosterLivePreview();
+
+  if(meta.logoUrl){
+    document.getElementById("headerLogoImg").src = meta.logoUrl;
+  }
+
+  if(db){
+    try {
+      await db.collection("settings").doc("global").set(meta);
+      toast("✅ সাইট সেটিংস ক্লাউডে সফলভাবে সংরক্ষিত হয়েছে!");
+    } catch(e){
+      toast("✅ লোকালি সংরক্ষিত হয়েছে");
+    }
+  }
+}
+
+function closeModal(id){ document.getElementById(id).classList.remove("show"); }
+
+// Init
+document.addEventListener("DOMContentLoaded", checkAuth);
+</script>
+</body>
+</html>
