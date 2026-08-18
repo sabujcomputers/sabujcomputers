@@ -1,0 +1,2952 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>সবুজ কম্পিউটার্স — সেবা ও ডিজিটাল মূল্য তালিকা</title>
+<meta name="description" content="বুক ক্যাম্পাস, ফটোস্ট্যাট ও কম্পিউটার প্রশিক্ষণ কেন্দ্র। তমালতলা বাজার, বাগাতিপাড়া, নাটোর। ঘরে বসেই ফাইল পাঠিয়ে প্রিন্ট অর্ডার দিন।">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<!-- Firebase SDKs for Real-time Cloud Sync -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<style>
+  :root {
+    --forest: #0f3d24;
+    --forest-deep: #082013;
+    --leaf: #2ea44f;
+    --leaf-light: #eaf8ed;
+    --paper: #f4f3ed;
+    --paper-2: #eae7dc;
+    --paper-card: #ffffff;
+    --ink: #1c241f;
+    --ink-soft: #525f56;
+    --marigold: #e29d28;
+    --marigold-soft: #fef3c7;
+    --sky: #2563eb;
+    --sky-light: #eff6ff;
+    --line: #dcd6c7;
+    --red: #dc2626;
+    --radius-sm: 8px;
+    --radius-card: 14px;
+    --radius-pill: 999px;
+    --shadow-sm: 0 2px 8px rgba(15,61,36,.06);
+    --shadow: 0 10px 30px rgba(15,61,36,.10);
+  }
+
+  [data-theme="dark"] {
+    --forest: #22c55e;
+    --forest-deep: #052e16;
+    --leaf: #4ade80;
+    --leaf-light: #064e3b;
+    --paper: #0b1410;
+    --paper-2: #12201a;
+    --paper-card: #162a22;
+    --ink: #f0fdf4;
+    --ink-soft: #9ca3af;
+    --marigold: #fbbf24;
+    --marigold-soft: #78350f;
+    --sky: #60a5fa;
+    --sky-light: #1e3a8a;
+    --line: #264336;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,.3);
+    --shadow: 0 12px 32px rgba(0,0,0,.45);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: 'Hind Siliguri', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 90px;
+    transition: background-color .25s ease, color .25s ease;
+  }
+
+  .display { font-family: 'Baloo Da 2', sans-serif; }
+  .mono { font-family: 'Space Mono', monospace; }
+
+  /* Utility Animations */
+  .fade-in { animation: fadeIn .3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+
+  /* Top Emergency / Offer Notice Bar (Clean Headline Rolling Marquee) */
+  .notice-bar {
+    background: #08291a;
+    color: #f1f5f9;
+    font-size: 13.5px;
+    font-weight: 500;
+    padding: 0 16px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    z-index: 30;
+  }
+  .notice-label-badge {
+    background: var(--marigold);
+    color: #1f2937;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 11.5px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    z-index: 2;
+    box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    flex-shrink: 0;
+  }
+  .ticker-wrapper {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    margin-left: 12px;
+    display: flex;
+    align-items: center;
+  }
+  .ticker-content {
+    display: inline-block;
+    white-space: nowrap;
+    padding-left: 100%;
+    animation: marquee-ticker 28s linear infinite;
+    font-weight: 500;
+    letter-spacing: .3px;
+    color: #f8fafc;
+  }
+  .ticker-wrapper:hover .ticker-content {
+    animation-play-state: paused;
+  }
+  @keyframes marquee-ticker {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-100%, 0, 0); }
+  }
+
+  /* Clean & Elegant Hero Signboard */
+  .hero {
+    background: radial-gradient(circle at 50% 15%, #0f462a 0%, #082a19 65%, #051a10 100%);
+    color: #ffffff;
+    padding: 28px 20px 36px;
+    position: relative;
+    border-bottom: 3px solid var(--marigold);
+    box-shadow: var(--shadow);
+  }
+  .hero-content {
+    max-width: 920px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-logo-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #ffffff;
+    padding: 3px;
+    border: 2px solid var(--marigold);
+    box-shadow: 0 4px 16px rgba(0,0,0,.25);
+    margin-bottom: 10px;
+    transition: transform .2s ease;
+  }
+  .hero-logo-box:hover { transform: scale(1.04); }
+  .hero-logo-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  /* Refined, Elegant Brand Title */
+  .hero-brand-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .hero-title-text {
+    font-size: clamp(28px, 5.5vw, 42px);
+    font-weight: 800;
+    letter-spacing: .3px;
+    line-height: 1.15;
+    color: #ffffff;
+    text-shadow: 0 2px 10px rgba(0,0,0,.4);
+    margin: 0 0 2px;
+  }
+
+  .hero-tag {
+    font-size: clamp(13.5px, 2.6vw, 16px);
+    color: #e2f0e6;
+    max-width: 700px;
+    margin: 0 auto 16px;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .top-ctrls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 8px;
+  }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,0,0,.35);
+    border: 1px solid rgba(255,255,255,.18);
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 8px #4ade80;
+  }
+  .top-right-btns {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .theme-btn, .admin-link-btn {
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.22);
+    color: #ffffff;
+    border-radius: var(--radius-pill);
+    padding: 4px 11px;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    transition: all .15s ease;
+  }
+  .theme-btn:hover, .admin-link-btn:hover {
+    background: rgba(255,255,255,.22);
+    color: #ffffff;
+  }
+
+  /* Well-Organized Hero Action Hub */
+  .hero-primary-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    margin-bottom: 10px;
+  }
+  .hero-quick-strip {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+  }
+  .hero-quick-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #e2f0e6;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all .15s ease;
+  }
+  .hero-quick-pill:hover {
+    background: rgba(255,255,255,0.18);
+    color: #ffffff;
+    border-color: rgba(255,255,255,0.3);
+  }
+
+  /* Buttons */
+  .btn {
+    font-family: 'Hind Siliguri', sans-serif;
+    font-weight: 700;
+    font-size: 13.5px;
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 9px 18px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    transition: all .15s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: var(--shadow-sm);
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-green { background: #22c55e; color: #052e16; }
+  .btn-green:hover { background: #16a34a; color: #fff; }
+  .btn-gold { background: var(--marigold); color: #251602; }
+  .btn-gold:hover { background: #d97706; color: #fff; }
+  .btn-sky { background: #38bdf8; color: #082f49; }
+  .btn-sky:hover { background: #0284c7; color: #fff; }
+  .btn-bangla-qr {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+    color: #ffffff;
+    border: 1px solid rgba(255,255,255,.4);
+    box-shadow: 0 4px 14px rgba(217,119,6,.35);
+  }
+  .btn-bangla-qr:hover {
+    background: linear-gradient(135deg, #fbbf24 0%, #ea580c 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(217,119,6,.5);
+  }
+  .btn-glass {
+    background: rgba(255,255,255,.15);
+    color: #ffffff;
+    border: 1px solid rgba(255,255,255,.3);
+  }
+  .btn-glass:hover { background: rgba(255,255,255,.25); }
+
+  /* Toolbar */
+  .toolbar-wrap { margin-top: -18px; position: relative; z-index: 10; }
+  .toolbar {
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    padding: 10px 14px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .search-box {
+    flex: 1;
+    min-width: 220px;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .search-box span {
+    position: absolute;
+    left: 12px;
+    color: var(--ink-soft);
+    font-size: 15px;
+  }
+  .search-box input {
+    width: 100%;
+    padding: 9px 36px 9px 38px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--line);
+    background: var(--paper-2);
+    color: var(--ink);
+    font-family: 'Hind Siliguri', sans-serif;
+    font-size: 13.5px;
+    outline: none;
+    transition: all .2s ease;
+  }
+  .search-box input:focus {
+    border-color: var(--forest);
+    background: var(--paper-card);
+    box-shadow: 0 0 0 3px rgba(46,164,79,.15);
+  }
+  .search-clear {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    display: none;
+  }
+  .tool-btn {
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    border-radius: var(--radius-pill);
+    padding: 8px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all .15s ease;
+  }
+  .tool-btn:hover { background: var(--line); }
+
+  /* Quick Print Upload Section */
+  .print-upload-card {
+    background: var(--paper-card);
+    border: 2px dashed var(--leaf);
+    border-radius: var(--radius-card);
+    padding: 18px 20px;
+    margin-top: 18px;
+    box-shadow: var(--shadow-sm);
+    transition: border-color .2s ease;
+  }
+  .dropzone {
+    border: 2px dashed var(--line);
+    border-radius: 12px;
+    background: var(--paper-2);
+    padding: 18px 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .dropzone:hover {
+    border-color: var(--leaf);
+    background: var(--leaf-light);
+  }
+  .dropzone-icon { font-size: 30px; margin-bottom: 2px; }
+  .dropzone-title { font-size: 14px; font-weight: 700; color: var(--forest); }
+  .dropzone-sub { font-size: 12px; color: var(--ink-soft); }
+  
+  .file-chips-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .file-chip {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+  }
+  .file-prog-bar {
+    height: 3px;
+    background: var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .file-prog-fill {
+    height: 100%;
+    background: var(--leaf);
+    width: 0%;
+    transition: width .2s ease;
+  }
+
+  .form-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .field-group label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    margin-bottom: 4px;
+    display: block;
+  }
+  .inp {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Hind Siliguri', sans-serif;
+    font-size: 13.5px;
+    outline: none;
+    transition: border-color .15s ease;
+  }
+  .inp:focus { border-color: var(--forest); }
+
+  /* Category Filter Tabs */
+  .tabs-bar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(10px);
+    margin-top: 18px;
+  }
+  .tabs-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 10px 16px;
+    max-width: 1080px;
+    margin: 0 auto;
+    scrollbar-width: none;
+  }
+  .tabs-scroll::-webkit-scrollbar { display: none; }
+  .tab-pill {
+    flex: 0 0 auto;
+    font-family: 'Hind Siliguri', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 7px 15px;
+    border-radius: var(--radius-pill);
+    background: var(--paper-card);
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .tab-pill.active {
+    background: var(--forest);
+    color: #ffffff;
+    border-color: var(--forest);
+    box-shadow: 0 3px 10px rgba(15,61,36,.25);
+  }
+
+  .sec-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin: 24px 0 10px;
+    border-bottom: 2px solid var(--line);
+    padding-bottom: 6px;
+  }
+  .sec-heading h2 {
+    font-family: 'Baloo Da 2', sans-serif;
+    font-size: 20px;
+    color: var(--forest);
+    font-weight: 700;
+    margin: 0;
+  }
+  .sec-heading span {
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+
+  /* Services Grid */
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 12px;
+  }
+  
+  /* Service Card */
+  .srv-card {
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  .srv-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+    border-color: var(--leaf);
+  }
+  .srv-thumb-wrap {
+    position: relative;
+    width: 100%;
+    height: 145px;
+    background: var(--paper-2);
+    overflow: hidden;
+  }
+  .srv-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .4s ease;
+  }
+  .srv-card:hover .srv-thumb { transform: scale(1.05); }
+  
+  .srv-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+    box-shadow: 0 2px 6px rgba(0,0,0,.2);
+  }
+  .badge-hot { background: #ef4444; color: #fff; }
+  .badge-pop { background: #f59e0b; color: #1c1917; }
+  .badge-new { background: #3b82f6; color: #fff; }
+  .badge-sale { background: #10b981; color: #fff; }
+  
+  .srv-cat-tag {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(15,61,36,.85);
+    backdrop-filter: blur(4px);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+  }
+  .srv-emoji-icon {
+    position: absolute;
+    bottom: 8px;
+    left: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255,255,255,.94);
+    box-shadow: 0 4px 10px rgba(0,0,0,.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+  .srv-body {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  .srv-title {
+    font-family: 'Baloo Da 2', sans-serif;
+    font-size: 16.5px;
+    font-weight: 700;
+    margin: 0 0 4px;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .srv-desc {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    margin-bottom: 12px;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .srv-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    border-top: 1px dashed var(--line);
+    padding-top: 10px;
+    margin-top: auto;
+  }
+  .srv-price-box {
+    display: flex;
+    flex-direction: column;
+  }
+  .srv-old-price {
+    font-size: 11px;
+    text-decoration: line-through;
+    color: var(--red);
+    font-family: 'Space Mono', monospace;
+  }
+  .srv-price {
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 13.5px;
+    color: var(--forest);
+    background: var(--paper-2);
+    padding: 2px 7px;
+    border-radius: 6px;
+  }
+  .srv-action-btns {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-cart-add {
+    background: var(--leaf-light);
+    color: var(--forest);
+    border: 1px solid #86efac;
+    border-radius: 8px;
+    padding: 6px 11px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all .15s ease;
+  }
+  .btn-cart-add:hover { background: var(--leaf); color: #fff; }
+  .btn-cart-add.in-cart { background: var(--leaf); color: #fff; border-color: var(--leaf); }
+
+  /* Photo Gallery */
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .gallery-item {
+    position: relative;
+    height: 155px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    cursor: pointer;
+    background: var(--paper-2);
+  }
+  .gallery-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .3s ease;
+  }
+  .gallery-item:hover .gallery-img { transform: scale(1.08); }
+  .gallery-caption {
+    position: absolute;
+    bottom: 0;
+    inset-inline: 0;
+    padding: 6px 8px;
+    background: linear-gradient(0deg, rgba(0,0,0,.85), transparent);
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+
+  /* Payment Section & Bangla QR */
+  .payment-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .pay-panel {
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .pay-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .pay-panel-header b {
+    font-family: 'Baloo Da 2', sans-serif;
+    font-size: 16px;
+    color: var(--forest);
+  }
+  .pay-items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+  }
+  .pay-card-chip {
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: all .15s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .pay-card-chip:hover { border-color: var(--leaf); transform: translateY(-1px); }
+  .pay-card-chip.active {
+    border-color: var(--forest);
+    background: var(--leaf-light);
+  }
+  .pay-logo-img { width: 26px; height: 26px; object-fit: contain; border-radius: 6px; }
+  
+  .pay-display-box {
+    background: var(--paper-2);
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  /* Floating Cart Bar */
+  .floating-cart {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    width: calc(100% - 32px);
+    max-width: 540px;
+    background: var(--forest-deep);
+    color: #fff;
+    border-radius: var(--radius-pill);
+    padding: 8px 14px 8px 18px;
+    box-shadow: 0 12px 32px rgba(0,0,0,.45);
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid rgba(255,255,255,.15);
+    backdrop-filter: blur(10px);
+  }
+  .cart-count-tag {
+    background: var(--marigold);
+    color: #251602;
+    font-weight: 800;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    font-family: 'Space Mono', monospace;
+  }
+  .cart-total-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: #4ade80;
+    margin-left: 6px;
+  }
+
+  /* Modals */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(0,0,0,.65);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal-container {
+    background: var(--paper-card);
+    color: var(--ink);
+    width: 100%;
+    max-width: 540px;
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 24px 48px rgba(0,0,0,.35);
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+  }
+  .modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 14px;
+  }
+  .modal-head h3 {
+    font-family: 'Baloo Da 2', sans-serif;
+    font-size: 19px;
+    color: var(--forest);
+    margin: 0;
+  }
+  .modal-close-btn {
+    background: var(--paper-2);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Cart Modal Details */
+  .cart-item-card {
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    gap: 8px;
+  }
+  .qty-ctrl-btn {
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .checkout-pay-card {
+    border: 2px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    margin-bottom: 8px;
+    background: var(--paper);
+    transition: all .15s ease;
+  }
+  .checkout-pay-card.selected {
+    border-color: var(--forest);
+    background: var(--leaf-light);
+  }
+
+  /* Toast Notification */
+  .toast-box {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--forest);
+    color: #eef6ee;
+    padding: 10px 22px;
+    border-radius: var(--radius-pill);
+    font-size: 13.5px;
+    font-weight: 600;
+    box-shadow: 0 8px 24px rgba(0,0,0,.3);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease, top .25s ease;
+    z-index: 200;
+  }
+  .toast-box.show { opacity: 1; top: 28px; }
+
+  /* Print Media Query */
+  @media print {
+    body { background: #fff !important; color: #000 !important; padding-bottom: 0; }
+    .notice-bar, .hero, .tabs-bar, .toolbar-wrap, .print-upload-card, .payment-strip, .floating-cart, .modal-backdrop, footer, .srv-action-btns { display: none !important; }
+    .print-only-banner { display: block !important; text-align: center; margin-bottom: 16px; border-bottom: 2px solid #000; padding-bottom: 8px; }
+    .services-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+    .srv-card { border: 1px solid #888 !important; box-shadow: none !important; break-inside: avoid; }
+  }
+  .print-only-banner { display: none; }
+</style>
+</head>
+<body>
+
+<!-- Emergency / Offer Notice Bar (Smooth Headline Rolling Marquee) -->
+<div class="notice-bar" id="noticeBar">
+  <div class="notice-label-badge">
+    <span>📢</span>
+    <span>জরুরি হেডলাইন:</span>
+  </div>
+  <div class="ticker-wrapper">
+    <div class="ticker-content" id="noticeText">
+      নতুন কম্পিউটার প্রশিক্ষণ ব্যাচে ভর্তি চলছে! স্বল্প খরচে সার্টিফিকেটসহ কোর্স করুন · জরুরি ফটোকপি, চাকরির আবেদন ও ছবি ৫ মিনিটে প্রিন্ট করে দেওয়া হয় · বাংলা কিউআর দিয়ে যেকোনো ব্যাংক বা বিকাশ/নগদে ফি পরিশোধ করুন।
+    </div>
+  </div>
+</div>
+
+<!-- Print-Only Header -->
+<div class="print-only-banner">
+  <h1 id="printShopTitle" style="margin:0;font-family:'Baloo Da 2',sans-serif;font-size:24px;">সবুজ কম্পিউটার্স — সেবা ও মূল্য তালিকা</h1>
+  <p id="printShopSub" style="margin:4px 0;font-size:13px;">তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর · মোবাইল: ০১৭১৪-০৮৪৩৫০ · ওয়েব: sabujcomputers.pro.bd</p>
+</div>
+
+<!-- Hero Banner / Signboard -->
+<div class="hero">
+  <div class="top-ctrls wrap">
+    <div class="status-pill status-open" id="shopStatusPill">
+      <span class="status-dot"></span>
+      <span id="shopStatusText">দোকান খোলা আছে</span>
+    </div>
+    <div class="top-right-btns">
+      <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" title="থিম পরিবর্তন">
+        <span>🌙 ডার্ক মোড</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="hero-content">
+    <!-- Shop Logo Display -->
+    <div class="hero-logo-box" id="heroLogoBox">
+      <img id="heroLogoImg" src="https://cdn-icons-png.flaticon.com/512/3067/3067443.png" class="hero-logo-img" alt="সবুজ কম্পিউটার্স লোগো">
+    </div>
+
+    <!-- Clean, Prestigious Title -->
+    <div class="hero-brand-wrap">
+      <h1 id="heroTitle" class="display hero-title-text">সবুজ কম্পিউটার্স</h1>
+    </div>
+
+    <p class="hero-tag" id="heroSub">
+      বুক ক্যাম্পাস, ফটোস্ট্যাট ও কম্পিউটার প্রশিক্ষণ কেন্দ্র · তমালতলা বাজার, বাগাতিপাড়া, নাটোর
+    </p>
+    
+    <!-- Primary Action Hub -->
+    <div class="hero-primary-actions">
+      <button class="btn btn-green" onclick="openPrintModal()">
+        📄 ফাইল পাঠিয়ে প্রিন্ট অর্ডার
+      </button>
+      <button class="btn btn-bangla-qr" onclick="openBanglaQrModal()">
+        📱 বাংলা কিউআর পেমেন্ট
+      </button>
+      <button class="btn btn-sky" onclick="openCourseModal()">
+        🎓 কম্পিউটার কোর্স ভর্তি
+      </button>
+    </div>
+
+    <!-- Quick Direct Contact Strip -->
+    <div class="hero-quick-strip">
+      <a class="hero-quick-pill" id="heroWhatsAppBtn" href="https://wa.me/8801724084350" target="_blank" rel="noopener">
+        <span>💬 WhatsApp: ০১৭১৪-০৮৪৩৫০</span>
+      </a>
+      <a class="hero-quick-pill" id="heroCallBtn" href="tel:01724084350">
+        <span>📞 সরাসরি কল: ০১৭২৪-০৮৪৩৫০</span>
+      </a>
+      <a class="hero-quick-pill" href="#locationMapSection">
+        <span>📍 তমালতলা বাজার লোকেশন</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div class="wrap toolbar-wrap">
+  <div class="toolbar">
+    <div class="search-box">
+      <span>🔍</span>
+      <input type="text" id="searchInput" placeholder="সেবার নাম বা বিবরণ দিয়ে খুঁজুন (উদাঃ ফটোকপি, বই, ছবি, চাকরি)..." oninput="handleSearch(this.value)">
+      <button class="search-clear" id="searchClearBtn" onclick="clearSearch()">✕</button>
+    </div>
+    <button class="tool-btn" onclick="openPrintModal()">
+      📄 ফাইল পাঠান
+    </button>
+    <button class="tool-btn" onclick="window.print()">
+      🖨️ প্রিন্ট / PDF
+    </button>
+  </div>
+</div>
+
+<!-- Quick Print Upload Section -->
+<div class="wrap">
+  <div class="print-upload-card" id="dropCard">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+      <h2 style="font-family:'Baloo Da 2',sans-serif;font-size:18px;color:var(--forest);margin:0;display:flex;align-items:center;gap:6px;">
+        📄 ফাইল পাঠিয়ে দ্রুত প্রিন্ট অর্ডার (Quick Print Order)
+      </h2>
+      <span style="font-size:11.5px;color:var(--forest);font-weight:700;background:var(--leaf-light);padding:3px 10px;border-radius:var(--radius-pill);">
+        ⚡ ক্লাউডিনারি সুরক্ষিত আপলোড
+      </span>
+    </div>
+
+    <!-- Dropzone -->
+    <div class="dropzone" id="quickDropzone" onclick="document.getElementById('quickFileInput').click()">
+      <input type="file" id="quickFileInput" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp" style="display:none;" onchange="handleFileUpload(event, 'quick')">
+      <div class="dropzone-icon">📁</div>
+      <div class="dropzone-title">এখানে ক্লিক করে ফাইল সিলেক্ট করুন বা ড্র্যাগ করে ছাড়ুন</div>
+      <div class="dropzone-sub">সমর্থিত ফাইল: PDF, ছবি (JPG/PNG), Word Document (.doc/.docx) — সরাসরি প্রিন্টের জন্য প্রস্তুত হবে</div>
+    </div>
+
+    <!-- Uploaded Files List -->
+    <div class="file-chips-list" id="quickFileList"></div>
+
+    <!-- Form options -->
+    <div class="form-grid-3">
+      <div class="field-group">
+        <label>প্রিন্টের ধরন:</label>
+        <select class="inp" id="quickPrintType" onchange="calcQuickPrintPrice()">
+          <option value="bw">সাদাকালো ফটোকপি / প্রিন্ট (A4)</option>
+          <option value="color">রঙিন (Color) ডকুমেন্ট প্রিন্ট</option>
+          <option value="photo">পাসপোর্ট সাইজ ছবি প্রিন্ট (Lab Print)</option>
+          <option value="laminate">সার্টিফিকেট / NID লেমিনেটিং সহ</option>
+          <option value="job">চাকরির আবেদন ও ফরম প্রিন্ট</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label>কাগজ ও সাইড:</label>
+        <select class="inp" id="quickPrintSide">
+          <option value="A4 সাইজ (এক পিঠ)">A4 সাইজ — এক পিঠ (Single Side)</option>
+          <option value="A4 সাইজ (উভয় পিঠ)">A4 সাইজ — উভয় পিঠ (Both Side)</option>
+          <option value="Legal সাইজ (দলিল/স্ট্যাম্প)">Legal সাইজ (দলিল/স্ট্যাম্প)</option>
+          <option value="ফটো পেপার গ্লসি (Glossy)">ফটো পেপার গ্লসি (Glossy)</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label>মোট পাতা ও কপি সংখ্যা:</label>
+        <div style="display:flex;gap:6px;">
+          <input type="number" class="inp" id="quickPages" value="1" min="1" placeholder="পাতা" oninput="calcQuickPrintPrice()" style="width:50%;">
+          <input type="number" class="inp" id="quickCopies" value="1" min="1" placeholder="কপি" oninput="calcQuickPrintPrice()" style="width:50%;">
+        </div>
+      </div>
+    </div>
+
+    <!-- Calculated Price Banner -->
+    <div style="margin-top:12px;background:var(--paper-2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:13px;font-weight:700;color:var(--ink-soft);">আনুমানিক প্রদেয় মূল্য:</span>
+      <span style="font-family:'Space Mono',monospace;font-size:17px;font-weight:800;color:var(--forest);" id="quickTotalDisplay">৳ ২</span>
+    </div>
+
+    <div class="form-grid-3" style="margin-top:10px;">
+      <div class="field-group">
+        <label>আপনার নাম:</label>
+        <input type="text" class="inp" id="quickName" placeholder="আপনার নাম">
+      </div>
+      <div class="field-group">
+        <label>কখন নিতে আসবেন:</label>
+        <input type="text" class="inp" id="quickTime" placeholder="উদাঃ ২০ মিনিট পর / বিকেলে">
+      </div>
+      <div class="field-group">
+        <label>পেমেন্ট পদ্ধতি:</label>
+        <select class="inp" id="quickPaymentMethod">
+          <option value="bKash">বিকাশ (Send Money: 01724084350)</option>
+          <option value="Nagad">নগদ (Send Money: 01724084350)</option>
+          <option value="BanglaQR">বাংলা কিউআর (Bangla QR)</option>
+          <option value="Rocket">রকেট (017240843508)</option>
+          <option value="Cash">দোকানে এসে ক্যাশ পরিশোধ</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;">
+      <label style="font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:3px;display:block;">অতিরিক্ত নোট / কাজের বিস্তারিত:</label>
+      <input type="text" class="inp" id="quickNote" placeholder="উদাঃ ১ম পাতা রঙিন, বাকিগুলো সাদাকালো...">
+    </div>
+
+    <button class="btn btn-gold" style="width:100%;justify-content:center;margin-top:12px;padding:11px;font-size:14px;" onclick="sendQuickPrintOrder()">
+      💬 ফাইল ও বিবরণসহ WhatsApp-এ প্রিন্ট অর্ডার পাঠান
+    </button>
+  </div>
+</div>
+
+<!-- Category Tabs -->
+<div class="tabs-bar">
+  <div class="tabs-scroll" id="categoryTabsContainer"></div>
+</div>
+
+<!-- Main Services Section -->
+<div class="wrap">
+  <div id="servicesSectionContainer"></div>
+</div>
+
+<!-- Shop Photo Gallery Section -->
+<div class="wrap" id="galleryWrapper">
+  <div class="sec-heading">
+    <h2>📸 দোকান ও কম্পিউটার ল্যাবের ফটো গ্যালারি</h2>
+    <span>বাস্তব ছবি</span>
+  </div>
+  <div class="gallery-grid" id="shopGalleryGrid"></div>
+</div>
+
+<!-- Payment Gateways & Location Map -->
+<div class="wrap" id="locationMapSection">
+  <div class="payment-strip">
+    <!-- Payment Panel -->
+    <div class="pay-panel">
+      <div class="pay-panel-header">
+        <b>💳 অনলাইন পেমেন্ট মেথড ও বাংলা কিউআর</b>
+        <span style="font-size:11px;color:var(--leaf);font-weight:700;background:var(--leaf-light);padding:2px 8px;border-radius:var(--radius-pill);">
+          সেন্ড মানি / স্ক্যান
+        </span>
+      </div>
+      <p style="font-size:12.5px;color:var(--ink-soft);">
+        বিকাশ, নগদ, রকেট অথবা যেকোনো ব্যাংক অ্যাপ দিয়ে বাংলা কিউআর স্ক্যান করে পেমেন্ট করুন:
+      </p>
+
+      <div class="pay-items-grid" id="paymentChipsGrid"></div>
+
+      <div class="pay-display-box" id="paySelectedDisplay">
+        <div>
+          <b id="activePayName" style="font-size:13px;color:var(--forest);">বিকাশ (bKash)</b>
+          <div id="activePayNumber" class="mono" style="font-size:14px;font-weight:700;margin-top:2px;">01724084350</div>
+        </div>
+        <button class="btn btn-green" id="copyActivePayBtn" style="padding:5px 12px;font-size:12px;" onclick="copyActivePayNumber()">
+          কপি করুন
+        </button>
+      </div>
+
+      <!-- Bangla QR / Image preview if available -->
+      <div id="banglaQrBox" style="display:none;text-align:center;background:var(--paper-2);padding:10px;border-radius:10px;border:1px solid var(--line);">
+        <b style="font-size:12px;color:var(--forest);display:block;margin-bottom:4px;">📱 বাংলা কিউআর (Bangla QR Code) স্ক্যান করুন:</b>
+        <img id="banglaQrImg" src="" style="width:160px;height:160px;object-fit:contain;border-radius:8px;background:#fff;padding:4px;border:1px solid var(--line);" alt="Bangla QR">
+      </div>
+    </div>
+
+    <!-- Map & Location Panel -->
+    <div class="pay-panel">
+      <div class="pay-panel-header">
+        <b>📍 সরাসরি দোকানের লোকেশন ও গুগল ম্যাপ</b>
+        <span id="mapLocLabel" style="font-size:12px;color:var(--forest);font-weight:700;">বাগাতিপাড়া, নাটোর</span>
+      </div>
+      <p id="mapAddressText" style="font-size:12.5px;color:var(--ink-soft);">
+        সবুজ কম্পিউটার্স, তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর
+      </p>
+
+      <!-- Interactive Map -->
+      <div style="width:100%;height:180px;border-radius:12px;overflow:hidden;border:1px solid var(--line);">
+        <iframe id="mapIframe" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3697.3716089901327!2d88.93670279999999!3d24.31764609999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39fc05f19d6bd581%3A0x8fb76cba31eaa6d5!2sSabuj%20Computer%2C%20Tomaltola%20Bazar!5e1!3m2!1sen!2sbd!4v1787055740183!5m2!1sen!2sbd" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      </div>
+
+      <a id="mapDirectionsLink" href="https://maps.google.com/?cid=10355745129654167253&q=Sabuj+Computer+Tomaltola+Bazar" target="_blank" rel="noopener" class="btn btn-sky" style="justify-content:center;font-size:13px;">
+        🗺️ গুগল ম্যাপে বড় করে ডিরেকশন দেখুন
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer style="text-align:center;padding:32px 16px 20px;color:var(--ink-soft);font-size:13px;line-height:1.8;">
+  সব স্বত্ব সংরক্ষিত © <span id="footerShopTitle">সবুজ কম্পিউটার্স</span>, <span id="footerAddress">বাগাতিপাড়া, নাটোর</span><br>
+  প্রোপ্রাইটর: <span id="footerProprietor">মোঃ সবুজ আলী</span> · মোবাইল: <span id="footerPhone">০১৭১৪-০৮৪৩৫০</span><br>
+  ওয়েবসাইট: <a href="https://sabujcomputers.pro.bd/" target="_blank" rel="noopener" style="color:var(--forest);font-weight:700;">sabujcomputers.pro.bd</a> · <a href="admin.html" style="color:inherit;text-decoration:none;opacity:0.35;font-size:11px;" title="অ্যাডমিন">অ্যাডমিন</a>
+</footer>
+
+<!-- Floating Cart Bar -->
+<div class="floating-cart" id="floatingCart">
+  <div style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="openCartModal()">
+    <span style="font-size:18px;">🛒</span>
+    <span>নির্বাচিত সেবা:</span>
+    <span class="cart-count-tag" id="cartCountTag">0</span>
+    <span class="cart-total-tag" id="cartTotalTag">৳ ০</span>
+  </div>
+  <button class="btn btn-green" onclick="openCartModal()" style="padding:7px 16px;font-size:13px;">
+    💳 পেমেন্ট ও অর্ডার
+  </button>
+</div>
+
+<!-- MODAL: Service Details Popup -->
+<div class="modal-backdrop" id="serviceDetailsModal" onclick="handleBackdropClick(event, 'serviceDetailsModal')">
+  <div class="modal-container">
+    <div class="modal-head">
+      <h3 id="detailModalTitle">সেবার বিস্তারিত তথ্য</h3>
+      <button class="modal-close-btn" onclick="closeModal('serviceDetailsModal')">✕</button>
+    </div>
+    
+    <div style="width:100%;height:190px;border-radius:12px;overflow:hidden;background:var(--paper-2);margin-bottom:12px;position:relative;">
+      <img id="detailModalImg" src="" style="width:100%;height:100%;object-fit:cover;" alt="Service Thumbnail">
+      <div id="detailModalBadge" class="srv-badge badge-pop" style="display:none;"></div>
+      <div id="detailModalEmoji" class="srv-emoji-icon">✨</div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span id="detailModalCat" class="srv-cat-tag" style="position:static;">ক্যাটাগরি</span>
+      <div style="text-align:right;">
+        <span id="detailModalOldPrice" class="srv-old-price" style="display:none;"></span>
+        <span id="detailModalPrice" class="srv-price" style="font-size:16px;"></span>
+      </div>
+    </div>
+
+    <p id="detailModalDesc" style="font-size:13.5px;color:var(--ink-soft);line-height:1.6;margin-bottom:14px;"></p>
+
+    <!-- Key Features / Highlights list -->
+    <div id="detailModalFeaturesBox" style="background:var(--paper-2);border-radius:10px;padding:10px 12px;margin-bottom:14px;display:none;">
+      <b style="font-size:12.5px;color:var(--forest);display:block;margin-bottom:4px;">✨ প্রধান সুবিধাসমূহ:</b>
+      <div id="detailModalFeaturesList" style="font-size:12.5px;color:var(--ink);line-height:1.5;"></div>
+    </div>
+
+    <!-- Modal Quantity & Actions -->
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn btn-green" id="detailModalAddCartBtn" style="flex:1;justify-content:center;" onclick="addDetailItemToCart()">
+        🛒 কার্টে যোগ করুন
+      </button>
+      <a class="btn btn-gold" id="detailModalWhatsAppBtn" href="#" target="_blank" rel="noopener" style="justify-content:center;">
+        💬 WhatsApp এ অর্ডার
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Send File for Print -->
+<div class="modal-backdrop" id="printModal" onclick="handleBackdropClick(event, 'printModal')">
+  <div class="modal-container">
+    <div class="modal-head">
+      <h3>📄 ফাইল পাঠিয়ে প্রিন্ট অর্ডার দিন</h3>
+      <button class="modal-close-btn" onclick="closeModal('printModal')">✕</button>
+    </div>
+    <p style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;">
+      দোকানে আসার আগেই আপনার PDF, ছবি বা ডকুমেন্টের প্রিন্ট রেডি রাখুন:
+    </p>
+
+    <div class="dropzone" onclick="document.getElementById('modalFileInput').click()">
+      <input type="file" id="modalFileInput" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp" style="display:none;" onchange="handleFileUpload(event, 'modal')">
+      <div style="font-size:26px;">📁</div>
+      <div style="font-size:13.5px;font-weight:700;color:var(--forest);">ফাইল নির্বাচন করুন (PDF / ছবি / Word)</div>
+      <div style="font-size:11.5px;color:var(--ink-soft);">সরাসরি ক্লাউডিনারিতে সুরক্ষিত আপলোড হবে</div>
+    </div>
+    <div class="file-chips-list" id="modalFileList"></div>
+
+    <div style="margin-top:12px;">
+      <label class="field-group" style="font-size:12px;font-weight:700;color:var(--ink-soft);">প্রিন্টের ধরন:</label>
+      <select class="inp" id="modalPrintType">
+        <option value="সাদাকালো ফটোকপি / প্রিন্ট (A4)">সাদাকালো ফটোকপি / প্রিন্ট (A4)</option>
+        <option value="রঙিন (Color) ডকুমেন্ট প্রিন্ট">রঙিন (Color) ডকুমেন্ট প্রিন্ট</option>
+        <option value="পাসপোর্ট সাইজ ছবি প্রিন্ট">পাসপোর্ট সাইজ ছবি প্রিন্ট</option>
+        <option value="লেমিনেটিং সহ প্রিন্ট">লেমিনেটিং সহ প্রিন্ট</option>
+        <option value="চাকরির আবেদন ও ফরম">চাকরির আবেদন ও ফরম</option>
+      </select>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+      <div>
+        <label class="field-group" style="font-size:12px;font-weight:700;color:var(--ink-soft);">কপি সংখ্যা:</label>
+        <input type="text" class="inp" id="modalPrintCopies" placeholder="উদাঃ ১ সেট / ৫ কপি">
+      </div>
+      <div>
+        <label class="field-group" style="font-size:12px;font-weight:700;color:var(--ink-soft);">কখন নিতে আসবেন:</label>
+        <input type="text" class="inp" id="modalPrintTime" placeholder="উদাঃ ৩০ মিনিট পর">
+      </div>
+    </div>
+
+    <div style="margin-top:8px;">
+      <label class="field-group" style="font-size:12px;font-weight:700;color:var(--ink-soft);">নির্দেশনা / নোট:</label>
+      <input type="text" class="inp" id="modalPrintNote" placeholder="উদাঃ ১ম পৃষ্ঠা কালার হবে...">
+    </div>
+
+    <button class="btn btn-gold" style="width:100%;justify-content:center;margin-top:14px;padding:11px;" onclick="submitModalPrintOrder()">
+      💬 WhatsApp-এ ফাইলসহ পাঠান
+    </button>
+  </div>
+</div>
+
+<!-- MODAL: Course Booking -->
+<div class="modal-backdrop" id="courseModal" onclick="handleBackdropClick(event, 'courseModal')">
+  <div class="modal-container">
+    <div class="modal-head">
+      <h3>🎓 কম্পিউটার কোর্স ভর্তি / সিট বুকিং</h3>
+      <button class="modal-close-btn" onclick="closeModal('courseModal')">✕</button>
+    </div>
+    <p style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;">
+      সবুজ কম্পিউটার্স প্রশিক্ষণ কেন্দ্রে প্রফেশনাল কম্পিউটার কোর্স করে সরকারি সার্টিফিকেট নিন:
+    </p>
+
+    <div style="margin-bottom:8px;">
+      <label class="field-group" style="font-size:12px;font-weight:700;color:var(--ink-soft);">আপনার নাম:</label>
+      <input type="text" class="inp" id="studentName" placeholder="পূর্ণ নাম লিখুন">
+    </div>
+
+    <div style="margin-bottom:8px;">
+      <label class="field-group" style="font-size:12px;font-weight:700;color:var(--ink-soft);">মোবাইল নম্বর:</label>
+      <input type="text" class="inp" id="studentPhone" placeholder="০১৭xxxxxxxx">
+    </div>
+
+    <div style="margin-bottom:8px;">
+      <label class="field-group" style="font-size:12px;font-weight:700;color:var(--ink-soft);">কোর্স নির্বাচন করুন:</label>
+      <select class="inp" id="courseSelect">
+        <option value="বেসিক কম্পিউটার ও অফিস অ্যাপ্লিকেশন (Word, Excel, PPT)">বেসিক কম্পিউটার ও অফিস অ্যাপ্লিকেশন (৩/৬ মাস)</option>
+        <option value="গ্রাফিক্স ডিজাইন ও ফটোশপ (Photoshop, Illustrator)">গ্রাফিক্স ডিজাইন ও ফটো এডিটিং</option>
+        <option value="দ্রুত বাংলা ও ইংরেজি টাইপিং স্পেশাল">দ্রুত বাংলা ও ইংরেজি টাইপিং কোর্স</option>
+        <option value="ইন্টারনেট ও ফ্রিল্যান্সিং বেসিক">ইন্টারনেট ও ফ্রিল্যান্সিং বেসিক</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <label class="field-group" style="font-size:12px;font-weight:700;color:var(--ink-soft);">পছন্দের শিফট:</label>
+      <select class="inp" id="courseShift">
+        <option value="সকাল শিফট (৯টা–১১টা)">সকাল শিফট (সকাল ৯টা – ১১টা)</option>
+        <option value="বিকেল শিফট (৪টা–৬টা)">বিকেল শিফট (বিকেল ৪টা – ৬টা)</option>
+        <option value="সন্ধ্যা শিফট (৬টা–৮টা)">সন্ধ্যা শিফট (সন্ধ্যা ৬টা – ৮টা)</option>
+        <option value="শুক্রবার স্পেশাল ব্যাচ">শুক্রবার স্পেশাল ব্যাচ</option>
+      </select>
+    </div>
+
+    <button class="btn btn-sky" style="width:100%;justify-content:center;padding:11px;" onclick="submitCourseInquiry()">
+      🎓 ভর্তির আবেদন WhatsApp-এ পাঠান
+    </button>
+  </div>
+</div>
+
+<!-- MODAL: Cart & Multi-Payment Checkout -->
+<div class="modal-backdrop" id="cartModal" onclick="handleBackdropClick(event, 'cartModal')">
+  <div class="modal-container">
+    <div class="modal-head">
+      <h3>🛒 আপনার কার্ট ও পেমেন্ট (<span id="cartHeaderCount">0টি</span>)</h3>
+      <button class="modal-close-btn" onclick="closeModal('cartModal')">✕</button>
+    </div>
+
+    <!-- Cart items list -->
+    <div id="cartItemsList"></div>
+
+    <!-- Summary Total Box -->
+    <div style="background:var(--paper-2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-top:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--ink-soft);">
+        <span>আইটেম মোট:</span>
+        <span id="cartSubtotalVal" class="mono" style="font-weight:700;">৳ ০</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:800;color:var(--forest);margin-top:4px;border-top:1px dashed var(--line);padding-top:6px;">
+        <span>সর্বমোট পরিশোধযোগ্য:</span>
+        <span id="cartTotalVal" class="mono">৳ ০</span>
+      </div>
+    </div>
+
+    <!-- Dynamic Payment Selection -->
+    <div style="margin-top:14px;">
+      <label style="font-size:13px;font-weight:700;color:var(--forest);display:block;margin-bottom:6px;">
+        💳 পেমেন্ট পদ্ধতি নির্বাচন করুন:
+      </label>
+      <div id="cartPaymentMethodsContainer"></div>
+
+      <!-- Payment Instructions Box -->
+      <div style="background:var(--paper-2);border:1px dashed var(--line);border-radius:10px;padding:10px 12px;margin-top:8px;" id="cartPayDetailsBox">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <b id="cartPayTitle" style="font-size:13px;color:var(--forest);">বিকাশ (bKash)</b>
+          <button class="btn btn-green" id="cartCopyNumBtn" style="padding:3px 8px;font-size:11px;" onclick="copyCartSelectedNumber()">নম্বর কপি</button>
+        </div>
+        <div id="cartPayNumber" class="mono" style="font-size:14px;font-weight:700;margin:2px 0;">01724084350</div>
+        <div id="cartPayInstruction" style="font-size:12px;color:var(--ink-soft);">Send Money করুন</div>
+      </div>
+
+      <!-- Dedicated QR Image Display in Cart Modal when QR is selected -->
+      <div id="cartQrDisplayBox" style="display:none;text-align:center;background:#ffffff;border:2px solid var(--forest);border-radius:12px;padding:12px;margin-top:10px;box-shadow:0 4px 14px rgba(15,61,36,.1);">
+        <b style="font-size:12.5px;color:var(--forest);display:block;margin-bottom:6px;">📱 বাংলা কিউআর (Bangla QR) স্ক্যান করে পেমেন্ট করুন:</b>
+        <img id="cartQrImage" src="" style="width:180px;height:180px;object-fit:contain;border-radius:8px;border:1px solid var(--line);background:#fff;display:block;margin:0 auto;" alt="Bangla QR Code">
+        <div style="font-size:11.5px;color:var(--ink-soft);margin-top:6px;line-height:1.4;">
+          বিকাশ, নগদ, রকেট, সেলফিন বা যেকোনো ব্যাংক অ্যাপ দিয়ে স্ক্যান করুন
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer info input -->
+    <div style="margin-top:12px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div>
+          <label style="font-size:11.5px;font-weight:700;color:var(--ink-soft);display:block;margin-bottom:2px;">আপনার নাম:</label>
+          <input type="text" class="inp" id="cartCustName" placeholder="নাম">
+        </div>
+        <div>
+          <label style="font-size:11.5px;font-weight:700;color:var(--ink-soft);display:block;margin-bottom:2px;">মোবাইল নম্বর:</label>
+          <input type="text" class="inp" id="cartCustPhone" placeholder="০১৭xxxxxxxx">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div>
+          <label style="font-size:11.5px;font-weight:700;color:var(--ink-soft);display:block;margin-bottom:2px;">সেন্ডার মোবাইল (টাকা পাঠালে):</label>
+          <input type="text" class="inp" id="cartSenderNum" placeholder="০১৭xxxxxxxx">
+        </div>
+        <div>
+          <label style="font-size:11.5px;font-weight:700;color:var(--ink-soft);display:block;margin-bottom:2px;">TrxID / ট্রানজেকশন (ঐচ্ছিক):</label>
+          <input type="text" class="inp" id="cartTrxId" placeholder="উদাঃ 9K72JXXXX">
+        </div>
+      </div>
+
+      <label style="font-size:11.5px;font-weight:700;color:var(--ink-soft);display:block;margin-bottom:2px;">অতিরিক্ত নোট / পিকআপ সময়:</label>
+      <input type="text" class="inp" id="cartOrderNote" placeholder="উদাঃ বিকেলে এসে সংগ্রহ করব...">
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn btn-glass" style="color:var(--red);border:1px solid var(--line);" onclick="clearCart()">🗑️ খালি করুন</button>
+      <button class="btn btn-gold" id="cartSubmitBtn" style="flex:1;justify-content:center;" onclick="sendCartOrderWhatsApp()">
+        💬 অর্ডার নিশ্চিত ও WhatsApp-এ পাঠান
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Dedicated Bangla QR Scanner & Payment -->
+<div class="modal-backdrop" id="banglaQrModal" onclick="handleBackdropClick(event, 'banglaQrModal')">
+  <div class="modal-container" style="text-align:center;max-width:480px;">
+    <div class="modal-head">
+      <h3 style="display:flex;align-items:center;gap:6px;margin:0 auto;color:var(--forest);">
+        📱 বাংলা কিউআর (Bangla QR) পেমেন্ট
+      </h3>
+      <button class="modal-close-btn" onclick="closeModal('banglaQrModal')">✕</button>
+    </div>
+
+    <p style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;">
+      যেকোনো ব্যাংক অ্যাপ বা বিকাশ / নগদ / রকেট / সেলফিন দিয়ে সরাসরি স্ক্যান করে পেমেন্ট করুন:
+    </p>
+
+    <div style="background:#ffffff;border:2px solid var(--forest);border-radius:16px;padding:14px;display:inline-block;box-shadow:0 8px 24px rgba(15,61,36,.15);margin-bottom:12px;">
+      <img id="modalBanglaQrImg" src="https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80" style="width:220px;height:220px;object-fit:contain;border-radius:10px;display:block;" alt="Bangla QR Code">
+    </div>
+
+    <div style="background:var(--paper-2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:12px;text-align:left;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-size:12px;color:var(--ink-soft);font-weight:700;">মার্চেন্ট / দোকানের নাম:</span>
+        <span style="font-weight:800;color:var(--forest);font-size:13.5px;" id="banglaQrMerchantName">সবুজ কম্পিউটার্স</span>
+      </div>
+      <div style="font-size:11.5px;color:var(--ink-soft);line-height:1.5;">
+        ✅ সমর্থিত অ্যাপসমূহ: <b>বিকাশ, নগদ, রকেট, উপায়, সেলফিন (IBBL), সিটিটাচ, ব্র্যাক আস্থাসহ সকল ভিসা/মাস্টারকার্ড ও কিউআর সাপোর্টেড ব্যাংক অ্যাপ</b>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-sky" style="flex:1;justify-content:center;font-size:13px;" onclick="downloadBanglaQr()">
+        📥 কিউআর ছবি ডাউনলোড
+      </button>
+      <a class="btn btn-gold" id="banglaQrWhatsAppProofBtn" href="https://wa.me/8801724084350" target="_blank" rel="noopener" style="flex:1;justify-content:center;font-size:13px;">
+        💬 পেমেন্ট কনফার্মেশন
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Image Lightbox Modal for Gallery -->
+<div class="modal-backdrop" id="galleryModal" onclick="handleBackdropClick(event, 'galleryModal')">
+  <div class="modal-container" style="max-width:680px;padding:12px;background:#000;">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+      <button class="modal-close-btn" style="background:#222;color:#fff;" onclick="closeModal('galleryModal')">✕</button>
+    </div>
+    <img id="galleryModalImg" src="" style="width:100%;max-height:75vh;object-fit:contain;border-radius:8px;" alt="Gallery Lightbox">
+    <p id="galleryModalCaption" style="color:#eee;text-align:center;font-size:13.5px;margin:8px 0 0;font-weight:600;"></p>
+  </div>
+</div>
+
+<!-- MODAL: Order Placement Success & Direct WhatsApp Dispatch -->
+<div class="modal-backdrop" id="orderSuccessModal" onclick="handleBackdropClick(event, 'orderSuccessModal')">
+  <div class="modal-container" style="max-width:520px;text-align:center;">
+    <div style="width:60px;height:60px;border-radius:50%;background:#dcfce7;color:#16a34a;display:inline-flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 12px;">
+      ✓
+    </div>
+    <h3 style="color:var(--forest);font-family:'Baloo Da 2',sans-serif;font-size:22px;margin-bottom:4px;" id="orderSuccessTitle">
+      অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে!
+    </h3>
+    <p style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;" id="orderSuccessSub">
+      দয়া করে নিচের সবুজ বাটনে চাপ দিয়ে সরাসরি WhatsApp-এ বার্তাটি পাঠান যাতে আমরা এখনই কাজ শুরু করতে পারি:
+    </p>
+
+    <!-- Order summary box -->
+    <div style="background:var(--paper-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-align:left;margin-bottom:14px;font-size:12.5px;max-height:190px;overflow-y:auto;white-space:pre-wrap;line-height:1.6;" id="orderSuccessSummaryBox">
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <a class="btn btn-green" id="orderSuccessWhatsAppLink" href="#" target="_blank" rel="noopener" style="justify-content:center;padding:12px;font-size:14.5px;box-shadow:0 4px 14px rgba(22,163,74,.35);">
+        💬 WhatsApp এ মেসেজ পাঠান (বাধ্যতামূলক)
+      </a>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-glass" style="flex:1;justify-content:center;font-size:12px;" onclick="copyOrderSuccessText()">
+          📋 মেসেজ টেক্সট কপি
+        </button>
+        <button class="btn btn-glass" style="flex:1;justify-content:center;font-size:12px;" onclick="closeModal('orderSuccessModal')">
+          ✕ উইন্ডো বন্ধ করুন
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-box" id="toast"></div>
+
+<script>
+/* ========================================================
+   1. CORE CONFIGURATION & FIRESTORE
+   ======================================================== */
+const CLOUDINARY_CLOUD_NAME = "kam96sj6";
+const CLOUDINARY_UPLOAD_PRESET = "sabuj home";
+
+const FIREBASE_CONFIG = {
+  projectId: "serious-cache-jtxfk",
+  appId: "1:552346237273:web:bf61b91e5c8ca01f5df448",
+  apiKey: "AIzaSyCvFuWnTGw0NbTJCvsMtHY1OT1eU3RSYQ8",
+  authDomain: "serious-cache-jtxfk.firebaseapp.com",
+  firestoreDatabaseId: "ai-studio-2651ec58-f028-40a4-93f0-e9aba5b672af",
+  storageBucket: "serious-cache-jtxfk.firebasestorage.app",
+  messagingSenderId: "552346237273"
+};
+
+let db = null;
+try {
+  if (typeof firebase !== "undefined") {
+    if (!firebase.apps.length) {
+      firebase.initializeApp(FIREBASE_CONFIG);
+    }
+    db = firebase.firestore();
+  }
+} catch(e) {
+  console.warn("Firestore initialization error:", e);
+}
+
+// Default Seed Data
+const DEFAULT_CATEGORIES = [
+  { key: "books", label: "📚 বই ও স্টেশনারি", emoji: "📚" },
+  { key: "photo", label: "🖨️ ফটো ও প্রিন্ট", emoji: "🖨️" },
+  { key: "online", label: "🌐 অনলাইন সেবা", emoji: "🌐" },
+  { key: "training", label: "🎓 প্রশিক্ষণ", emoji: "🎓" }
+];
+
+const DEFAULT_SERVICES = [
+  {
+    id: "s1",
+    category: "books",
+    emoji: "📚",
+    badge: "pop",
+    image: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600&auto=format&fit=crop&q=80",
+    name: "সকল প্রকার বই",
+    desc: "স্কুল, কলেজ ও প্রতিযোগিতামূলক পরীক্ষার সকল বই সুলভ মূল্যে পাওয়া যায়।",
+    regularPrice: "৬০৳",
+    price: "৫০৳ থেকে",
+    unitPrice: 50,
+    active: true,
+    features: "• স্কুল, কলেজ ও মাদ্রাসার পাঠ্যবই\n• বিসিএস ও চাকরির গাইড বই\n• ইসলামিক ও গল্প-উপন্যাসের বই"
+  },
+  {
+    id: "s2",
+    category: "books",
+    emoji: "✏️",
+    badge: "",
+    image: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=600&auto=format&fit=crop&q=80",
+    name: "খাতা, কলম ও স্টেশনারি",
+    desc: "যাবতীয় শিক্ষা সামগ্রী ও অফিসের স্টেশনারি সুলভ মূল্যে বিক্রয় করা হয়।",
+    price: "২৫৳ থেকে",
+    unitPrice: 25,
+    active: true,
+    features: "• প্রিমিয়াম কোয়ালিটি খাতা ও ডায়েরি\n• ব্র্যান্ডেড জেল ও বলপেন কলম\n• জ্যামিতি বক্স, স্কেল ও ড্রয়িং সরঞ্জাম"
+  },
+  {
+    id: "s3",
+    category: "photo",
+    emoji: "📸",
+    badge: "hot",
+    image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=600&auto=format&fit=crop&q=80",
+    name: "ছবি তোলা (পাসপোর্ট/স্ট্যাম্প)",
+    desc: "পাসপোর্ট, স্ট্যাম্প সাইজ ও যেকোনো সাইজের হাই-কোয়ালিটি ছবি তোলা হয়।",
+    regularPrice: "৩০৳",
+    price: "২০৳ থেকে",
+    unitPrice: 20,
+    active: true,
+    features: "• ৫ মিনিটে ইনস্ট্যান্ট ডেলিভারি\n• কালার কারেকশন ও ব্যাকগ্রাউন্ড চেঞ্জ\n• হাই-কোয়ালিটি ল্যাব গ্লসি পেপারে প্রিন্ট"
+  },
+  {
+    id: "s4",
+    category: "photo",
+    emoji: "📄",
+    badge: "sale",
+    image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80",
+    name: "ফটোকপি (সাদাকালো ও রঙিন)",
+    desc: "যেকোনো কাগজপত্রের দ্রুত, নিখুঁত ও পরিষ্কার ফটোকপি।",
+    regularPrice: "২৳",
+    price: "১৳ / পাতা",
+    unitPrice: 1,
+    active: true,
+    features: "• হাই-স্পিড ডিজিটাল ফটোকপি\n• সিঙ্গেল ও বোথ সাইড প্রিন্ট\n• ৮০ জিএসএম ভারি কাগজের সুবিধা"
+  },
+  {
+    id: "s5",
+    category: "photo",
+    emoji: "🧾",
+    badge: "",
+    image: "https://images.unsplash.com/photo-1607344645866-009c320c5ab8?w=600&auto=format&fit=crop&q=80",
+    name: "লেমিনেটিং",
+    desc: "সার্টিফিকেট, এনআইডি কার্ড ও গুরুত্বপূর্ণ কাগজ টেকসই লেমিনেটিং।",
+    price: "২০৳ থেকে",
+    unitPrice: 20,
+    active: true,
+    features: "• ওয়াটারপ্রুফ ও টেকসই কোটিং\n• বাবল-মুক্ত নিখুঁত ফিনিশিং\n• NID ও সার্টিফিকেট স্পেশাল থিকনেস"
+  },
+  {
+    id: "s6",
+    category: "online",
+    emoji: "📝",
+    badge: "hot",
+    image: "https://images.unsplash.com/photo-1450133064473-71024230f91b?w=600&auto=format&fit=crop&q=80",
+    name: "সকল প্রকার চাকরির ফরম পূরণ",
+    desc: "সরকারি-বেসরকারি চাকরির আবেদন ফরম নির্ভুল ও অভিজ্ঞতার সাথে পূরণ।",
+    price: "৫০৳ থেকে",
+    unitPrice: 50,
+    active: true,
+    features: "• ছবি ও স্বাক্ষর সঠিক সাইজে রিসাইজ\n• টেলিটক ও অনলাইন পেমেন্ট সুবিধা\n• প্রবেশপত্র ডাউনলোড ও এসএমএস এলার্ট"
+  },
+  {
+    id: "s7",
+    category: "online",
+    emoji: "🔍",
+    badge: "",
+    image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&auto=format&fit=crop&q=80",
+    name: "পরীক্ষার ফলাফল ও এডমিট প্রিন্ট",
+    desc: "পিএসসি, জেএসসি, এসএসসি, এইচএসসি ও বিশ্ববিদ্যালয়ের ফলাফল ও এডমিট কার্ড।",
+    price: "১০৳",
+    unitPrice: 10,
+    active: true,
+    features: "• দ্রুত গ্রেডশিট ও মার্কশিট প্রিন্ট\n• জাতীয় বিশ্ববিদ্যালয় ও উন্মুক্ত বোর্ড সেবা"
+  },
+  {
+    id: "s8",
+    category: "online",
+    emoji: "🖥️",
+    badge: "",
+    image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600&auto=format&fit=crop&q=80",
+    name: "কম্পিউটার কম্পোজ (বাংলা/ইংরেজি)",
+    desc: "বাংলা, ইংরেজি ও আরবি ভাষায় নিখুঁত টাইপ, প্রশ্নপত্র ও ডকুমেন্ট কম্পোজ।",
+    price: "১৫৳ / পাতা",
+    unitPrice: 15,
+    active: true,
+    features: "• দ্রুত ও নির্ভুল টাইপিং\n• সিভি ও বায়োডাটা ডিজাইন"
+  },
+  {
+    id: "s9",
+    category: "training",
+    emoji: "🎓",
+    badge: "new",
+    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&auto=format&fit=crop&q=80",
+    name: "কম্পিউটার প্রশিক্ষণ কোর্স (সার্টিফিকেটসহ)",
+    desc: "মনোরম পরিবেশে স্বল্প খরচে প্রফেশনাল কম্পিউটার প্রশিক্ষণ, সরকারি অনুমোদিত সার্টিফিকেট সহ।",
+    regularPrice: "৩,৫০০৳",
+    price: "বিশেষ ছাড় চলছে",
+    unitPrice: 2500,
+    active: true,
+    features: "• ১ জন শিক্ষার্থীর জন্য ১টি কম্পিউটার\n• প্র্যাকটিক্যাল হ্যান্ডস-অন ক্লাস\n• কোর্স শেষে সরকারি সার্টিফিকেট প্রদান"
+  }
+];
+
+const DEFAULT_PAYMENT_METHODS = [
+  {
+    id: "bkash",
+    name: "বিকাশ (bKash)",
+    type: "Personal (সেন্ড মানি)",
+    number: "01724084350",
+    active: true,
+    logo: "https://freelogopng.com/images/all_img/1656234745bkash-app-logo.png",
+    instructions: "বিকাশ অ্যাপ বা *247# এ গিয়ে 'Send Money' করুন। মোট টাকার পরিমাণ পাঠিয়ে নিচে আপনার বিকাশ নম্বর ও TrxID লিখুন।"
+  },
+  {
+    id: "nagad",
+    name: "নগদ (Nagad)",
+    type: "Personal (সেন্ড মানি)",
+    number: "01724084350",
+    active: true,
+    logo: "https://freelogopng.com/images/all_img/1679248787Nagad-Logo.png",
+    instructions: "নগদ অ্যাপ বা *167# এ গিয়ে 'Send Money' করুন।"
+  },
+  {
+    id: "bangla_qr",
+    name: "বাংলা কিউআর (Bangla QR)",
+    type: "All Bank & MFS QR",
+    number: "সবুজ কম্পিউটার্স (Sabuj Computers)",
+    qrImage: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80",
+    active: true,
+    logo: "https://cdn-icons-png.flaticon.com/512/2489/2489756.png",
+    instructions: "যেকোনো ব্যাংক বা বিকাশ/নগদ অ্যাপ দিয়ে সরাসরি বাংলা কিউআর স্ক্যান করে পেমেন্ট করুন।"
+  },
+  {
+    id: "rocket",
+    name: "রকেট (Rocket)",
+    type: "Personal (সেন্ড মানি)",
+    number: "017240843508",
+    active: true,
+    logo: "https://upload.wikimedia.org/wikipedia/en/thumb/8/87/Dutch-Bangla_Bank_Rocket_logo.svg/640px-Dutch-Bangla_Bank_Rocket_logo.svg.png",
+    instructions: "DBBL রকেট একাউন্ট থেকে Send Money করুন (লাস্টে ১২ সংখ্যার একাউন্ট নম্বর)।"
+  },
+  {
+    id: "cash",
+    name: "দোকানে ক্যাশ পরিশোধ (Cash on Pickup)",
+    type: "দোকান কাউন্টার",
+    number: "তমালতলা বাজার, বাগাতিপাড়া",
+    active: true,
+    logo: "https://cdn-icons-png.flaticon.com/512/2489/2489756.png",
+    instructions: "দোকানে এসে কাজ নেওয়ার সময় কাউন্টারে ক্যাশ টাকা প্রদান করতে পারবেন।"
+  }
+];
+
+const DEFAULT_GALLERY = [
+  {
+    id: "g1",
+    title: "দোকানের সামনের পরিবেশ ও বুক ক্যাম্পাস",
+    image: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=800&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "g2",
+    title: "আধুনিক কম্পিউটার প্রশিক্ষণ ল্যাব",
+    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "g3",
+    title: "উচ্চগতির ডিজিটাল ফটোকপি ও প্রিন্ট জোন",
+    image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "g4",
+    title: "স্টুডিও ফটো ল্যাব ও এডিটিং কর্নার",
+    image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&auto=format&fit=crop&q=80"
+  }
+];
+
+const DEFAULT_META = {
+  heroTitle: "সবুজ কম্পিউটার্স",
+  heroSub: "বুক ক্যাম্পাস, ফটোস্ট্যাট ও কম্পিউটার প্রশিক্ষণ কেন্দ্র। যা লাগবে, ঘরে বসেই অর্ডার করুন বা ফাইল পাঠিয়ে প্রিন্ট রেডি রাখুন।",
+  proprietorName: "মোঃ সবুজ আলী",
+  address: "তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর",
+  logoUrl: "https://cdn-icons-png.flaticon.com/512/3067/3067443.png",
+  phone: "01724084350",
+  whatsappPhone: "8801724084350",
+  shopStatus: "open",
+  businessHours: "সকাল ৮:০০ - রাত ৯:৩০ (প্রতিদিন খোলা)",
+  showNotice: true,
+  notice: "নতুন কম্পিউটার প্রশিক্ষণ ব্যাচে ভর্তি চলছে! স্বল্প খরচে সার্টিফিকেটসহ কোর্স করুন · জরুরি ফটোকপি ও চাকরির আবেদন দ্রুত করে দেওয়া হয়।",
+  printRates: { bw: 2, color: 10, photo: 20, laminate: 30, job: 50 },
+  mapEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3697.3716089901327!2d88.93670279999999!3d24.31764609999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39fc05f19d6bd581%3A0x8fb76cba31eaa6d5!2sSabuj%20Computer%2C%20Tomaltola%20Bazar!5e1!3m2!1sen!2sbd!4v1787055740183!5m2!1sen!2sbd",
+  mapDirectionsUrl: "https://maps.google.com/?cid=10355745129654167253&q=Sabuj+Computer+Tomaltola+Bazar"
+};
+
+// Global App State
+let categories = DEFAULT_CATEGORIES;
+let services = DEFAULT_SERVICES;
+let paymentMethods = DEFAULT_PAYMENT_METHODS;
+let gallery = DEFAULT_GALLERY;
+let meta = { ...DEFAULT_META };
+let activeCategory = "all";
+let searchQuery = "";
+let cart = {}; // { [serviceId]: count }
+let quickFiles = [];
+let modalFiles = [];
+let selectedActivePayId = "bkash";
+let selectedCartPayId = "bkash";
+let currentModalService = null;
+
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+function copyNumber(num, label){
+  navigator.clipboard.writeText(num).then(()=>{
+    toast(`✅ ${label} কপি হয়েছে: ${num}`);
+  }).catch(()=>{
+    toast(`নম্বর: ${num}`);
+  });
+}
+
+function toggleTheme(){
+  const html = document.documentElement;
+  const current = html.getAttribute("data-theme") || "light";
+  const next = current === "light" ? "dark" : "light";
+  html.setAttribute("data-theme", next);
+  localStorage.setItem("sc_theme", next);
+  document.getElementById("themeBtn").innerHTML = next === "dark" ? "☀️ লাইট মোড" : "🌙 ডার্ক মোড";
+}
+
+/* ========================================================
+   2. CLOUDINARY DIRECT UPLOADER
+   ======================================================== */
+async function uploadToCloudinary(file, onProgress) {
+  const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+    if (xhr.upload && onProgress) {
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          onProgress(percent);
+        }
+      };
+    }
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        try {
+          const res = JSON.parse(xhr.responseText);
+          resolve({
+            url: res.secure_url || res.url,
+            original_filename: res.original_filename || file.name,
+            bytes: res.bytes || file.size
+          });
+        } catch(err) {
+          reject(err);
+        }
+      } else {
+        try {
+          const errRes = JSON.parse(xhr.responseText);
+          reject(new Error(errRes.error?.message || `Upload failed (${xhr.status})`));
+        } catch(e) {
+          reject(new Error(`Upload failed (${xhr.status})`));
+        }
+      }
+    };
+    xhr.onerror = () => reject(new Error("Network error during Cloudinary upload"));
+    xhr.send(formData);
+  });
+}
+
+/* ========================================================
+   3. DATA SYNCHRONIZATION (FIRESTORE + LOCALSTORAGE)
+   ======================================================== */
+async function initAppData(){
+  const savedTheme = localStorage.getItem("sc_theme") || "light";
+  document.documentElement.setAttribute("data-theme", savedTheme);
+  document.getElementById("themeBtn").innerHTML = savedTheme === "dark" ? "☀️ লাইট মোড" : "🌙 ডার্ক মোড";
+
+  // Load from Firestore Realtime Listeners
+  if (db) {
+    try {
+      // 1. Categories
+      db.collection("categories").onSnapshot(snap => {
+        if (!snap.empty) {
+          const remoteCats = [];
+          snap.forEach(d => remoteCats.push({ id: d.id, ...d.data() }));
+          if (remoteCats.length) {
+            categories = remoteCats.sort((a,b) => (a.order || 0) - (b.order || 0));
+            localStorage.setItem("sc_categories", JSON.stringify(categories));
+            renderCategoryTabs();
+            renderServices();
+          }
+        }
+      });
+
+      // 2. Services
+      db.collection("services").onSnapshot(snap => {
+        if (!snap.empty) {
+          const remoteServices = [];
+          snap.forEach(d => remoteServices.push({ id: d.id, ...d.data() }));
+          if (remoteServices.length) {
+            services = remoteServices.sort((a,b) => (a.order || 0) - (b.order || 0));
+            localStorage.setItem("sc_services", JSON.stringify(services));
+            renderServices();
+          }
+        }
+      });
+
+      // 3. Payment Methods
+      db.collection("paymentMethods").onSnapshot(snap => {
+        if (!snap.empty) {
+          const remotePay = [];
+          snap.forEach(d => remotePay.push({ id: d.id, ...d.data() }));
+          if (remotePay.length) {
+            paymentMethods = remotePay;
+            localStorage.setItem("sc_payment_methods", JSON.stringify(paymentMethods));
+            renderPaymentMethods();
+          }
+        }
+      });
+
+      // 4. Gallery
+      db.collection("gallery").onSnapshot(snap => {
+        if (!snap.empty) {
+          const remoteGal = [];
+          snap.forEach(d => remoteGal.push({ id: d.id, ...d.data() }));
+          if (remoteGal.length) {
+            gallery = remoteGal;
+            localStorage.setItem("sc_gallery", JSON.stringify(gallery));
+            renderGallery();
+          }
+        }
+      });
+
+      // 5. Settings / Meta
+      db.collection("settings").doc("global").onSnapshot(doc => {
+        if (doc.exists) {
+          meta = { ...DEFAULT_META, ...doc.data() };
+          localStorage.setItem("sc_meta", JSON.stringify(meta));
+          applyMeta();
+        }
+      });
+    } catch(err) {
+      console.warn("Firestore listeners error:", err);
+    }
+  }
+
+  // Local storage fallbacks
+  try {
+    const locCat = localStorage.getItem("sc_categories");
+    if(locCat) categories = JSON.parse(locCat);
+  } catch(e){}
+
+  try {
+    const locS = localStorage.getItem("sc_services");
+    if(locS) services = JSON.parse(locS);
+  } catch(e){}
+
+  try {
+    const locP = localStorage.getItem("sc_payment_methods");
+    if(locP) paymentMethods = JSON.parse(locP);
+  } catch(e){}
+
+  try {
+    const locG = localStorage.getItem("sc_gallery");
+    if(locG) gallery = JSON.parse(locG);
+  } catch(e){}
+
+  try {
+    const locM = localStorage.getItem("sc_meta");
+    if(locM) meta = { ...DEFAULT_META, ...JSON.parse(locM) };
+  } catch(e){}
+
+  applyMeta();
+  renderCategoryTabs();
+  renderServices();
+  renderPaymentMethods();
+  renderGallery();
+  calcQuickPrintPrice();
+}
+
+function applyMeta(){
+  // Title & Subtitle
+  document.getElementById("heroTitle").textContent = meta.heroTitle || DEFAULT_META.heroTitle;
+  document.getElementById("heroSub").textContent = meta.heroSub || DEFAULT_META.heroSub;
+  document.getElementById("printShopTitle").textContent = (meta.heroTitle || DEFAULT_META.heroTitle) + " — সেবা ও মূল্য তালিকা";
+  document.getElementById("printShopSub").textContent = `${meta.address || DEFAULT_META.address} · মোবাইল: ${meta.phone || DEFAULT_META.phone}`;
+
+  // Logo
+  if(meta.logoUrl){
+    document.getElementById("heroLogoImg").src = meta.logoUrl;
+    document.getElementById("heroLogoBox").style.display = "inline-flex";
+  }
+
+  // Notice Bar
+  if(meta.showNotice !== false && meta.notice && meta.notice.trim().length > 0){
+    document.getElementById("noticeBar").style.display = "flex";
+    document.getElementById("noticeText").textContent = meta.notice;
+  } else {
+    document.getElementById("noticeBar").style.display = "none";
+  }
+
+  // Shop Open / Closed Status
+  const statusPill = document.getElementById("shopStatusPill");
+  const statusText = document.getElementById("shopStatusText");
+  if(meta.shopStatus === "closed"){
+    statusText.textContent = "দোকান এখন বন্ধ আছে";
+    statusPill.style.borderColor = "#ef4444";
+  } else if(meta.shopStatus === "break"){
+    statusText.textContent = "সাময়িক বিরতি (" + (meta.businessHours || '') + ")";
+  } else {
+    statusText.textContent = "দোকান খোলা আছে · " + (meta.businessHours || "সকাল ৮টা - রাত ৯:৩০");
+  }
+
+  // Contact buttons
+  const phone = meta.phone || DEFAULT_META.phone;
+  const wa = meta.whatsappPhone || DEFAULT_META.whatsappPhone;
+  document.getElementById("heroCallBtn").href = `tel:${phone}`;
+  document.getElementById("heroWhatsAppBtn").href = `https://wa.me/${wa}?text=${encodeURIComponent(`আসসালামু আলাইকুম, আমি ${meta.heroTitle || 'সবুজ কম্পিউটার্স'} থেকে সেবা নিতে চাই`)}`;
+
+  // Map & Footer
+  if(meta.address) {
+    document.getElementById("mapAddressText").textContent = `${meta.heroTitle || 'সবুজ কম্পিউটার্স'}, ${meta.address}`;
+    document.getElementById("footerAddress").textContent = meta.address;
+  }
+  if(meta.proprietorName) {
+    document.getElementById("footerProprietor").textContent = meta.proprietorName;
+  }
+  if(meta.phone) {
+    document.getElementById("footerPhone").textContent = meta.phone;
+  }
+  if(meta.heroTitle) {
+    document.getElementById("footerShopTitle").textContent = meta.heroTitle;
+  }
+  if(meta.mapEmbedUrl) {
+    document.getElementById("mapIframe").src = meta.mapEmbedUrl;
+  }
+  if(meta.mapDirectionsUrl) {
+    document.getElementById("mapDirectionsLink").href = meta.mapDirectionsUrl;
+  }
+}
+
+/* ========================================================
+   4. RENDER TABS & SERVICES
+   ======================================================== */
+function renderCategoryTabs(){
+  const container = document.getElementById("categoryTabsContainer");
+  let html = `<button class="tab-pill ${activeCategory==='all'?'active':''}" onclick="setCategoryTab('all')">✨ সকল সেবা</button>`;
+  categories.forEach(c => {
+    html += `<button class="tab-pill ${activeCategory===c.key?'active':''}" onclick="setCategoryTab('${c.key}')">${c.label}</button>`;
+  });
+  container.innerHTML = html;
+}
+
+function setCategoryTab(k){
+  activeCategory = k;
+  renderCategoryTabs();
+  renderServices();
+}
+
+function handleSearch(q){
+  searchQuery = q.trim().toLowerCase();
+  document.getElementById("searchClearBtn").style.display = searchQuery ? "block" : "none";
+  renderServices();
+}
+
+function clearSearch(){
+  document.getElementById("searchInput").value = "";
+  handleSearch("");
+}
+
+function renderServices(){
+  const container = document.getElementById("servicesSectionContainer");
+  container.innerHTML = "";
+
+  const activeServices = services.filter(s => s.active !== false);
+
+  categories.forEach((cat, catIdx) => {
+    if(activeCategory !== "all" && activeCategory !== cat.key) return;
+
+    let items = activeServices.filter(s => s.category === cat.key);
+    if(searchQuery){
+      items = items.filter(s =>
+        (s.name && s.name.toLowerCase().includes(searchQuery)) ||
+        (s.desc && s.desc.toLowerCase().includes(searchQuery))
+      );
+    }
+
+    if(!items.length) return;
+
+    const secDiv = document.createElement("div");
+    secDiv.className = "fade-in";
+    secDiv.style.animationDelay = `${catIdx * 0.05}s`;
+    secDiv.innerHTML = `
+      <div class="sec-heading">
+        <h2>${cat.label}</h2>
+        <span>${items.length}টি সেবা</span>
+      </div>
+      <div class="services-grid" id="grid_${cat.key}"></div>
+    `;
+    container.appendChild(secDiv);
+
+    const grid = secDiv.querySelector(`#grid_${cat.key}`);
+    items.forEach((s, sIdx) => {
+      const card = document.createElement("div");
+      card.className = "srv-card fade-in";
+      card.style.animationDelay = `${sIdx * 0.04}s`;
+      const isInCart = cart[s.id] > 0;
+
+      let badgeHtml = "";
+      if(s.badge === "hot") badgeHtml = `<span class="srv-badge badge-hot">🔥 হট অফার</span>`;
+      else if(s.badge === "pop") badgeHtml = `<span class="srv-badge badge-pop">⭐ জনপ্রিয়</span>`;
+      else if(s.badge === "new") badgeHtml = `<span class="srv-badge badge-new">🆕 নতুন</span>`;
+      else if(s.badge === "sale") badgeHtml = `<span class="srv-badge badge-sale">💥 বিশেষ ছাড়</span>`;
+      else if(s.badge) badgeHtml = `<span class="srv-badge badge-pop">${s.badge}</span>`;
+
+      const imgSrc = s.image || "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=600&auto=format&fit=crop&q=80";
+
+      card.innerHTML = `
+        <div class="srv-thumb-wrap" onclick="openServiceDetailsModal('${s.id}')">
+          <img src="${imgSrc}" class="srv-thumb" alt="${s.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=600&auto=format&fit=crop&q=80'">
+          ${badgeHtml}
+          <span class="srv-cat-tag">${cat.label.split(" ")[1] || cat.label}</span>
+          <div class="srv-emoji-icon">${s.emoji || "✨"}</div>
+        </div>
+        <div class="srv-body">
+          <h3 class="srv-title" onclick="openServiceDetailsModal('${s.id}')">${s.name}</h3>
+          <p class="srv-desc" onclick="openServiceDetailsModal('${s.id}')">${s.desc || ""}</p>
+          <div class="srv-footer">
+            <div class="srv-price-box" onclick="openServiceDetailsModal('${s.id}')">
+              ${s.regularPrice ? `<span class="srv-old-price">${s.regularPrice}</span>` : ""}
+              <span class="srv-price">${s.price || "সুলভ মূল্যে"}</span>
+            </div>
+            <div class="srv-action-btns">
+              <button class="btn-cart-add ${isInCart?'in-cart':''}" onclick="toggleCartItem('${s.id}', event)">
+                ${isInCart ? `✓ কার্টে (${cart[s.id]})` : `🛒 কার্টে নিন`}
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  });
+
+  if(!container.innerHTML){
+    container.innerHTML = `
+      <div style="text-align:center;padding:48px 16px;color:var(--ink-soft);">
+        <p style="font-size:36px;margin:0 0 10px;">🔍</p>
+        <p style="font-size:16px;font-weight:700;">'${searchQuery}' সম্পর্কিত কোনো সেবা পাওয়া যায়নি।</p>
+        <button class="btn btn-gold" onclick="clearSearch()" style="margin-top:12px;">সকল সেবা দেখুন</button>
+      </div>
+    `;
+  }
+}
+
+/* ========================================================
+   5. SERVICE DETAILS MODAL (FULL CLICKABLE DETAILS)
+   ======================================================== */
+function openServiceDetailsModal(serviceId){
+  const s = services.find(item => item.id === serviceId);
+  if(!s) return;
+  currentModalService = s;
+
+  document.getElementById("detailModalTitle").textContent = s.name;
+  document.getElementById("detailModalImg").src = s.image || "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=600&auto=format&fit=crop&q=80";
+  document.getElementById("detailModalEmoji").textContent = s.emoji || "✨";
+  
+  const cat = categories.find(c => c.key === s.category);
+  document.getElementById("detailModalCat").textContent = cat ? cat.label : s.category;
+
+  const badgeEl = document.getElementById("detailModalBadge");
+  if(s.badge){
+    badgeEl.style.display = "block";
+    badgeEl.textContent = s.badge === "hot" ? "🔥 হট অফার" : (s.badge === "pop" ? "⭐ জনপ্রিয়" : s.badge);
+  } else {
+    badgeEl.style.display = "none";
+  }
+
+  const oldPriceEl = document.getElementById("detailModalOldPrice");
+  if(s.regularPrice){
+    oldPriceEl.style.display = "block";
+    oldPriceEl.textContent = s.regularPrice;
+  } else {
+    oldPriceEl.style.display = "none";
+  }
+  document.getElementById("detailModalPrice").textContent = s.price || "সুলভ মূল্যে";
+  document.getElementById("detailModalDesc").textContent = s.desc || "সবুজ কম্পিউটার্স এ যত্নসহকারে এবং দ্রুততম সময়ে এই সেবাটি সম্পন্ন করে দেওয়া হয়।";
+
+  const featBox = document.getElementById("detailModalFeaturesBox");
+  const featList = document.getElementById("detailModalFeaturesList");
+  if(s.features && s.features.trim().length > 0){
+    featBox.style.display = "block";
+    featList.innerHTML = s.features.split("\n").filter(f=>f.trim()).map(f=>`<div>${f}</div>`).join("");
+  } else {
+    featBox.style.display = "none";
+  }
+
+  const isInCart = cart[s.id] > 0;
+  document.getElementById("detailModalAddCartBtn").innerHTML = isInCart ? `✓ কার্টে যোগ হয়েছে (${cart[s.id]})` : `🛒 কার্টে যোগ করুন`;
+
+  const waNumber = meta.whatsappPhone || "8801724084350";
+  const waMsg = `আসসালামু আলাইকুম, আমি সবুজ কম্পিউটার্স থেকে '${s.name}' (${s.price || ''}) সেবাটি নিতে আগ্রহী।`;
+  document.getElementById("detailModalWhatsAppBtn").href = `https://wa.me/${waNumber}?text=${encodeURIComponent(waMsg)}`;
+
+  document.getElementById("serviceDetailsModal").classList.add("show");
+}
+
+function addDetailItemToCart(){
+  if(!currentModalService) return;
+  toggleCartItem(currentModalService.id);
+  const isInCart = cart[currentModalService.id] > 0;
+  document.getElementById("detailModalAddCartBtn").innerHTML = isInCart ? `✓ কার্টে যোগ হয়েছে (${cart[currentModalService.id]})` : `🛒 কার্টে যোগ করুন`;
+}
+
+/* ========================================================
+   6. SHOP PHOTO GALLERY RENDER & LIGHTBOX
+   ======================================================== */
+function renderGallery(){
+  const grid = document.getElementById("shopGalleryGrid");
+  if(!grid) return;
+  grid.innerHTML = "";
+
+  gallery.forEach(g => {
+    const item = document.createElement("div");
+    item.className = "gallery-item fade-in";
+    item.onclick = () => openGalleryLightbox(g.image, g.title);
+    item.innerHTML = `
+      <img src="${g.image}" class="gallery-img" alt="${g.title}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=600&auto=format&fit=crop&q=80'">
+      <div class="gallery-caption">${g.title || "সবুজ কম্পিউটার্স"}</div>
+    `;
+    grid.appendChild(item);
+  });
+}
+
+function openGalleryLightbox(imgUrl, caption){
+  document.getElementById("galleryModalImg").src = imgUrl;
+  document.getElementById("galleryModalCaption").textContent = caption || "সবুজ কম্পিউটার্স গ্যালারি";
+  document.getElementById("galleryModal").classList.add("show");
+}
+
+/* ========================================================
+   7. PAYMENT GATEWAYS & BANGLA QR LOGIC
+   ======================================================== */
+function renderPaymentMethods(){
+  const chipsGrid = document.getElementById("paymentChipsGrid");
+  if(!chipsGrid) return;
+  chipsGrid.innerHTML = "";
+
+  const activeMethods = paymentMethods.filter(p => p.active !== false);
+
+  activeMethods.forEach((p) => {
+    const chip = document.createElement("div");
+    chip.className = `pay-card-chip ${selectedActivePayId === p.id ? 'active' : ''}`;
+    chip.onclick = () => selectActivePayment(p.id);
+    chip.innerHTML = `
+      <div style="display:flex;align-items:center;gap:6px;">
+        <img src="${p.logo}" class="pay-logo-img" alt="${p.name}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2489/2489756.png'">
+        <b style="font-size:12px;">${p.name.split(' ')[0]}</b>
+      </div>
+      <span style="font-size:11px;color:var(--ink-soft);">${p.type}</span>
+    `;
+    chipsGrid.appendChild(chip);
+  });
+
+  updateActivePaymentDisplay();
+}
+
+function selectActivePayment(id){
+  selectedActivePayId = id;
+  renderPaymentMethods();
+}
+
+function updateActivePaymentDisplay(){
+  const p = paymentMethods.find(item => item.id === selectedActivePayId);
+  if(!p) return;
+
+  const isQr = p.id === "bangla_qr" || !!p.qrImage || (p.type && p.type.toLowerCase().includes("qr"));
+
+  document.getElementById("activePayName").textContent = `${p.name} (${p.type})`;
+  document.getElementById("activePayNumber").textContent = p.number || p.accountNumber || (isQr ? (meta.heroTitle || "সবুজ কম্পিউটার্স") : "কাউন্টার ক্যাশ");
+
+  const qrBox = document.getElementById("banglaQrBox");
+  if(qrBox){
+    if(isQr){
+      qrBox.style.display = "block";
+      const qrImgSrc = p.qrImage || meta.banglaQrImage || "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80";
+      document.getElementById("banglaQrImg").src = qrImgSrc;
+    } else {
+      qrBox.style.display = "none";
+    }
+  }
+}
+
+function copyActivePayNumber(){
+  const p = paymentMethods.find(item => item.id === selectedActivePayId);
+  if(p && p.number){
+    copyNumber(p.number, p.name);
+  } else {
+    toast("✅ তথ্য কপি করা হয়েছে");
+  }
+}
+
+/* ========================================================
+   8. FILE UPLOADS (CLOUDINARY INTEGRATED)
+   ======================================================== */
+async function handleFileUpload(e, targetSection){
+  const files = Array.from(e.target.files);
+  if(!files.length) return;
+
+  const targetList = targetSection === "quick" ? quickFiles : modalFiles;
+  const listContainer = document.getElementById(targetSection === "quick" ? "quickFileList" : "modalFileList");
+
+  for(const file of files){
+    const fileId = "f_" + Math.random().toString(36).substr(2, 9);
+    const chip = document.createElement("div");
+    chip.id = `chip_${fileId}`;
+    chip.className = "file-chip fade-in";
+    chip.innerHTML = `
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;justify-content:space-between;">
+          <b style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">📄 ${file.name}</b>
+          <span class="mono" id="stat_${fileId}" style="font-size:11px;color:var(--ink-soft);">আপলোড হচ্ছে...</span>
+        </div>
+        <div class="file-prog-bar"><div class="file-prog-fill" id="bar_${fileId}"></div></div>
+      </div>
+    `;
+    listContainer.appendChild(chip);
+
+    try {
+      const res = await uploadToCloudinary(file, (percent) => {
+        const bar = document.getElementById(`bar_${fileId}`);
+        const stat = document.getElementById(`stat_${fileId}`);
+        if(bar) bar.style.width = `${percent}%`;
+        if(stat) stat.textContent = `${percent}%`;
+      });
+
+      const stat = document.getElementById(`stat_${fileId}`);
+      if(stat) {
+        stat.textContent = "✓ সম্পন্ন";
+        stat.style.color = "#16a34a";
+        stat.style.fontWeight = "bold";
+      }
+
+      targetList.push({
+        id: fileId,
+        name: file.name,
+        url: res.url,
+        size: file.size
+      });
+      toast(`✅ ${file.name} আপলোড সম্পন্ন!`);
+    } catch(err){
+      const stat = document.getElementById(`stat_${fileId}`);
+      if(stat) {
+        stat.textContent = "✕ ব্যর্থ";
+        stat.style.color = "#dc2626";
+      }
+      toast(`⚠️ ${file.name} আপলোডে সমস্যা হয়েছে`);
+    }
+  }
+
+  e.target.value = "";
+}
+
+/* ========================================================
+   9. SAFE WHATSAPP URL GENERATOR & MODAL DISPATCHER
+   ======================================================== */
+window.lastGeneratedOrderMessage = "";
+
+function cleanPhoneForWhatsApp(rawPhone){
+  if(!rawPhone) return "8801724084350";
+  // Strip all non-digit characters
+  let digits = String(rawPhone).replace(/\D/g, "");
+  if(digits.startsWith("880")) return digits;
+  if(digits.startsWith("0")) return "88" + digits;
+  if(digits.startsWith("1")) return "880" + digits;
+  return digits.length >= 10 ? ("88" + digits) : "8801724084350";
+}
+
+function buildSafeWhatsAppUrl(messageText, phoneOverride){
+  const targetPhone = cleanPhoneForWhatsApp(phoneOverride || meta.whatsappPhone || meta.phone || "8801724084350");
+  const encodedText = encodeURIComponent(messageText);
+  return `https://wa.me/${targetPhone}?text=${encodedText}`;
+}
+
+async function dispatchOrderWithWhatsAppModal({ orderId, title, subText, summaryText, waMsg, dbPayload, onCloseCallback }){
+  window.lastGeneratedOrderMessage = waMsg;
+
+  // 1. Save order to Firestore
+  if(db && dbPayload){
+    try {
+      await db.collection("orders").doc(orderId).set(dbPayload);
+    } catch(e){
+      console.warn("Firestore save error:", e);
+    }
+  }
+
+  // 2. Generate clean WhatsApp URL
+  const waUrl = buildSafeWhatsAppUrl(waMsg);
+
+  // 3. Populate and show Order Success Modal
+  if(title) document.getElementById("orderSuccessTitle").textContent = title;
+  if(subText) document.getElementById("orderSuccessSub").textContent = subText;
+  document.getElementById("orderSuccessSummaryBox").textContent = summaryText || waMsg;
+  
+  const waLinkBtn = document.getElementById("orderSuccessWhatsAppLink");
+  waLinkBtn.href = waUrl;
+  waLinkBtn.onclick = () => {
+    toast("💬 WhatsApp চালু হচ্ছে...");
+  };
+
+  if(typeof onCloseCallback === "function"){
+    onCloseCallback();
+  }
+
+  document.getElementById("orderSuccessModal").classList.add("show");
+
+  // 4. Also attempt direct popup trigger
+  try {
+    const win = window.open(waUrl, "_blank");
+    if(win){
+      toast("✅ অর্ডার তৈরি হয়েছে ও WhatsApp খোলা হচ্ছে!");
+    } else {
+      toast("✅ অর্ডার তৈরি হয়েছে! নিচের সবুজ বাটনে চাপ দিন।");
+    }
+  } catch(e){
+    toast("✅ অর্ডার তৈরি হয়েছে! WhatsApp বাটনে চাপ দিন।");
+  }
+}
+
+function copyOrderSuccessText(){
+  if(!window.lastGeneratedOrderMessage){
+    toast("কপি করার মতো মেসেজ পাওয়া যায়নি");
+    return;
+  }
+  navigator.clipboard.writeText(window.lastGeneratedOrderMessage).then(() => {
+    toast("📋 সম্পূর্ণ অর্ডার মেসেজ কপি করা হয়েছে!");
+  }).catch(() => {
+    toast("📋 মেসেজ টেক্সট কপি হয়েছে");
+  });
+}
+
+/* ========================================================
+   10. QUICK PRINT PRICE CALCULATION & ORDER
+   ======================================================== */
+function calcQuickPrintPrice(){
+  const printType = document.getElementById("quickPrintType").value;
+  const pages = Math.max(1, parseInt(document.getElementById("quickPages").value) || 1);
+  const copies = Math.max(1, parseInt(document.getElementById("quickCopies").value) || 1);
+
+  const rates = meta.printRates || { bw: 2, color: 10, photo: 20, laminate: 30, job: 50 };
+  let rate = rates.bw || 2;
+
+  if(printType === "color") rate = rates.color || 10;
+  else if(printType === "photo") rate = rates.photo || 20;
+  else if(printType === "laminate") rate = rates.laminate || 30;
+  else if(printType === "job") rate = rates.job || 50;
+
+  const total = rate * pages * copies;
+  document.getElementById("quickTotalDisplay").textContent = `৳ ${total.toLocaleString('bn-BD')}`;
+  return total;
+}
+
+async function sendQuickPrintOrder(){
+  const printTypeSelect = document.getElementById("quickPrintType");
+  const printTypeName = printTypeSelect.options[printTypeSelect.selectedIndex].text;
+  const printSide = document.getElementById("quickPrintSide").value;
+  const pages = document.getElementById("quickPages").value || 1;
+  const copies = document.getElementById("quickCopies").value || 1;
+  const custName = document.getElementById("quickName").value.trim() || "সম্মানিত গ্রাহক";
+  const custTime = document.getElementById("quickTime").value.trim() || "যত দ্রুত সম্ভব";
+  const payMethod = document.getElementById("quickPaymentMethod").value;
+  const note = document.getElementById("quickNote").value.trim();
+  const totalPrice = calcQuickPrintPrice();
+
+  let fileLinksText = "কোনো ফাইল এটাচ করা হয়নি (দোকানে পেনড্রাইভে দেওয়া হবে)";
+  const fileUrls = [];
+  if(quickFiles.length > 0){
+    fileLinksText = quickFiles.map((f, i) => `[${i+1}] ${f.name}\n🔗 লিঙ্ক: ${f.url}`).join("\n");
+    quickFiles.forEach(f => fileUrls.push(f.url));
+  }
+
+  const orderId = "PR-" + Math.floor(1000 + Math.random() * 9000);
+
+  const dbPayload = {
+    orderId: orderId,
+    type: "quick_print",
+    customerName: custName,
+    pickupTime: custTime,
+    paymentMethod: payMethod,
+    printDetails: {
+      type: printTypeName,
+      side: printSide,
+      pages: pages,
+      copies: copies,
+      note: note
+    },
+    fileUrls: fileUrls,
+    totalAmount: totalPrice,
+    status: "pending",
+    createdAt: new Date().toISOString()
+  };
+
+  const waMsg = `*📄 নতুন প্রিন্ট অর্ডার (${orderId}) — সবুজ কম্পিউটার্স*\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `👤 গ্রাহক: ${custName}\n` +
+    `🖨️ প্রিন্ট ধরন: ${printTypeName}\n` +
+    `📄 সাইড ও কাগজ: ${printSide}\n` +
+    `🔢 পাতা: ${pages}টি | কপি: ${copies}টি\n` +
+    `💰 আনুমানিক মোট মূল্য: ৳ ${totalPrice}\n` +
+    `💳 পেমেন্ট মাধ্যম: ${payMethod}\n` +
+    `⏰ সংগ্রহের সময়: ${custTime}\n` +
+    (note ? `📝 নোট: ${note}\n` : '') +
+    `\n📂 আপলোডকৃত ফাইলসমূহ:\n${fileLinksText}\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `দয়া করে প্রিন্টটি প্রস্তুত রাখবেন। ধন্যবাদ!`;
+
+  await dispatchOrderWithWhatsAppModal({
+    orderId,
+    title: `প্রিন্ট অর্ডার গ্রহণ করা হয়েছে (${orderId})`,
+    subText: "প্রিন্টের ফাইল ও বিবরণসহ সরাসরি WhatsApp-এ পাঠাতে নিচের বাটনে ক্লিক করুন:",
+    summaryText: waMsg,
+    waMsg,
+    dbPayload
+  });
+}
+
+/* ========================================================
+   11. MODAL FILE ORDER (TOP BANNER BUTTON)
+   ======================================================== */
+function openPrintModal(){
+  document.getElementById("printModal").classList.add("show");
+}
+
+async function submitModalPrintOrder(){
+  const printType = document.getElementById("modalPrintType").value;
+  const copies = document.getElementById("modalPrintCopies").value || "১ কপি";
+  const time = document.getElementById("modalPrintTime").value || "দ্রুততম সময়ে";
+  const note = document.getElementById("modalPrintNote").value.trim();
+
+  let fileLinks = "কোনো ফাইল এটাচ করা হয়নি";
+  const fileUrls = [];
+  if(modalFiles.length > 0){
+    fileLinks = modalFiles.map((f, i) => `[${i+1}] ${f.name}\n🔗 লিঙ্ক: ${f.url}`).join("\n");
+    modalFiles.forEach(f => fileUrls.push(f.url));
+  }
+
+  const orderId = "DOC-" + Math.floor(1000 + Math.random() * 9000);
+
+  const dbPayload = {
+    orderId: orderId,
+    type: "modal_doc_print",
+    printDetails: { type: printType, copies: copies, time: time, note: note },
+    fileUrls: fileUrls,
+    status: "pending",
+    createdAt: new Date().toISOString()
+  };
+
+  const waMsg = `*📄 ফাইল প্রিন্ট রিকোয়েস্ট (${orderId}) — সবুজ কম্পিউটার্স*\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `🖨️ প্রিন্ট ধরন: ${printType}\n` +
+    `🔢 কপির সংখ্যা: ${copies}\n` +
+    `⏰ সংগ্রহের সময়: ${time}\n` +
+    (note ? `📝 বিশেষ নোট: ${note}\n` : '') +
+    `\n📂 এটাচকৃত ফাইলসমূহ:\n${fileLinks}\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `দয়া করে কাজটি দ্রুত প্রস্তুত করে রাখবেন।`;
+
+  await dispatchOrderWithWhatsAppModal({
+    orderId,
+    title: `ফাইল প্রিন্ট রিকোয়েস্ট (${orderId})`,
+    subText: "নিচের বাটনে ক্লিক করে ফাইলসমূহ সরাসরি দোকানে পাঠিয়ে দিন:",
+    summaryText: waMsg,
+    waMsg,
+    dbPayload,
+    onCloseCallback: () => closeModal("printModal")
+  });
+}
+
+/* ========================================================
+   12. COURSE ADMISSION INQUIRY
+   ======================================================== */
+function openCourseModal(){
+  document.getElementById("courseModal").classList.add("show");
+}
+
+async function submitCourseInquiry(){
+  const name = document.getElementById("studentName").value.trim();
+  const phone = document.getElementById("studentPhone").value.trim();
+  const course = document.getElementById("courseSelect").value;
+  const shift = document.getElementById("courseShift").value;
+
+  if(!name || !phone){
+    toast("⚠️ অনুগ্রহ করে আপনার নাম ও মোবাইল নম্বর লিখুন");
+    return;
+  }
+
+  const orderId = "CRS-" + Math.floor(1000 + Math.random() * 9000);
+
+  const dbPayload = {
+    orderId: orderId,
+    type: "course_admission",
+    studentName: name,
+    studentPhone: phone,
+    courseName: course,
+    preferredShift: shift,
+    status: "pending",
+    createdAt: new Date().toISOString()
+  };
+
+  const waMsg = `*🎓 কম্পিউটার কোর্স ভর্তি আবেদন (${orderId}) — সবুজ কম্পিউটার্স*\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `👤 শিক্ষার্থীর নাম: ${name}\n` +
+    `📞 যোগাযোগ নম্বর: ${phone}\n` +
+    `📚 নির্বাচিত কোর্স: ${course}\n` +
+    `🕒 পছন্দের শিফট: ${shift}\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `আমি সবুজ কম্পিউটার্স প্রশিক্ষণ কেন্দ্রে ভর্তি হতে আগ্রহী। ক্লাসের বিস্তারিত নিয়ম ও ফি সম্পর্কে জানতে চাই।`;
+
+  await dispatchOrderWithWhatsAppModal({
+    orderId,
+    title: `ভর্তি আবেদন সাবমিট হয়েছে (${orderId})`,
+    subText: "আপনার আবেদনটি সরাসরি সবুজ কম্পিউটার্স সেন্টারে পাঠাতে WhatsApp বাটন চাপুন:",
+    summaryText: waMsg,
+    waMsg,
+    dbPayload,
+    onCloseCallback: () => closeModal("courseModal")
+  });
+}
+
+/* ========================================================
+   13. SHOPPING CART & MULTI-PAYMENT CHECKOUT
+   ======================================================== */
+function toggleCartItem(serviceId, event){
+  if(event) event.stopPropagation();
+  if(!cart[serviceId]) cart[serviceId] = 1;
+  else cart[serviceId] += 1;
+  updateCartUI();
+  renderServices();
+  toast("🛒 কার্টে যোগ হয়েছে!");
+}
+
+function updateCartQty(serviceId, delta){
+  if(!cart[serviceId]) return;
+  cart[serviceId] += delta;
+  if(cart[serviceId] <= 0) delete cart[serviceId];
+  updateCartUI();
+  renderCartModalContent();
+  renderServices();
+}
+
+function clearCart(){
+  cart = {};
+  updateCartUI();
+  closeModal("cartModal");
+  renderServices();
+  toast("🗑️ কার্ট খালি করা হয়েছে");
+}
+
+function updateCartUI(){
+  const cartIds = Object.keys(cart);
+  let totalCount = 0;
+  let totalPrice = 0;
+
+  cartIds.forEach(id => {
+    const s = services.find(item => item.id === id);
+    const qty = cart[id];
+    totalCount += qty;
+    const unitP = (s && s.unitPrice) ? s.unitPrice : 0;
+    totalPrice += unitP * qty;
+  });
+
+  const floatBar = document.getElementById("floatingCart");
+  if(totalCount > 0){
+    floatBar.style.display = "flex";
+    document.getElementById("cartCountTag").textContent = totalCount;
+    document.getElementById("cartTotalTag").textContent = `৳ ${totalPrice.toLocaleString('bn-BD')}`;
+  } else {
+    floatBar.style.display = "none";
+  }
+}
+
+function openCartModal(){
+  renderCartModalContent();
+  renderCartPaymentMethods();
+  document.getElementById("cartModal").classList.add("show");
+}
+
+function renderCartModalContent(){
+  const container = document.getElementById("cartItemsList");
+  container.innerHTML = "";
+  const cartIds = Object.keys(cart);
+
+  document.getElementById("cartHeaderCount").textContent = `${cartIds.length}টি`;
+
+  if(!cartIds.length){
+    container.innerHTML = `<p style="text-align:center;padding:24px;color:var(--ink-soft);">আপনার কার্টে কোনো সেবা নেই। সেবা তালিকা থেকে কার্টে যোগ করুন।</p>`;
+    document.getElementById("cartSubtotalVal").textContent = "৳ ০";
+    document.getElementById("cartTotalVal").textContent = "৳ ০";
+    return;
+  }
+
+  let subtotal = 0;
+
+  cartIds.forEach(id => {
+    const s = services.find(item => item.id === id);
+    if(!s) return;
+    const qty = cart[id];
+    const unitPrice = s.unitPrice || 0;
+    const itemTotal = unitPrice * qty;
+    subtotal += itemTotal;
+
+    const row = document.createElement("div");
+    row.className = "cart-item-card";
+    row.innerHTML = `
+      <div style="flex:1;">
+        <b style="font-size:13.5px;color:var(--ink);">${s.emoji || '✨'} ${s.name}</b>
+        <div style="font-size:11.5px;color:var(--ink-soft);">একক মূল্য: ${s.price || (unitPrice + '৳')}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <button class="qty-ctrl-btn" onclick="updateCartQty('${s.id}', -1)">-</button>
+        <span class="mono" style="font-weight:700;font-size:13px;width:18px;text-align:center;">${qty}</span>
+        <button class="qty-ctrl-btn" onclick="updateCartQty('${s.id}', 1)">+</button>
+      </div>
+      <div class="mono" style="font-weight:700;font-size:13.5px;color:var(--forest);min-width:55px;text-align:right;">
+        ৳ ${itemTotal.toLocaleString('bn-BD')}
+      </div>
+    `;
+    container.appendChild(row);
+  });
+
+  document.getElementById("cartSubtotalVal").textContent = `৳ ${subtotal.toLocaleString('bn-BD')}`;
+  document.getElementById("cartTotalVal").textContent = `৳ ${subtotal.toLocaleString('bn-BD')}`;
+}
+
+function renderCartPaymentMethods(){
+  const container = document.getElementById("cartPaymentMethodsContainer");
+  if(!container) return;
+  container.innerHTML = "";
+
+  const activeMethods = paymentMethods.filter(p => p.active !== false);
+
+  activeMethods.forEach(p => {
+    const card = document.createElement("div");
+    card.className = `checkout-pay-card ${selectedCartPayId === p.id ? 'selected' : ''}`;
+    card.onclick = () => selectCartPayment(p.id);
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;">
+        <img src="${p.logo}" style="width:24px;height:24px;object-fit:contain;border-radius:4px;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2489/2489756.png'">
+        <b style="font-size:13px;">${p.name}</b>
+      </div>
+      <span style="font-size:11px;color:var(--ink-soft);">${p.type}</span>
+    `;
+    container.appendChild(card);
+  });
+
+  updateCartPaymentDetails();
+}
+
+function selectCartPayment(id){
+  selectedCartPayId = id;
+  renderCartPaymentMethods();
+}
+
+function updateCartPaymentDetails(){
+  const p = paymentMethods.find(item => item.id === selectedCartPayId);
+  if(!p) return;
+
+  const isQr = p.id === "bangla_qr" || !!p.qrImage || (p.type && p.type.toLowerCase().includes("qr"));
+  const copyBtn = document.getElementById("cartCopyNumBtn");
+  const qrDisplayBox = document.getElementById("cartQrDisplayBox");
+
+  document.getElementById("cartPayTitle").textContent = p.name;
+  document.getElementById("cartPayNumber").textContent = p.number || p.accountNumber || (isQr ? (meta.heroTitle || "সবুজ কম্পিউটার্স") : "দোকানে ক্যাশ পরিশোধ");
+  document.getElementById("cartPayInstruction").textContent = p.instructions || (isQr ? "বাংলা কিউআর স্ক্যান করে পেমেন্ট করুন" : "টাকা পাঠিয়ে সেন্ডার নম্বর প্রদান করুন");
+
+  if(copyBtn){
+    copyBtn.style.display = p.number ? "inline-flex" : "none";
+  }
+
+  if(qrDisplayBox){
+    if(isQr){
+      qrDisplayBox.style.display = "block";
+      const qrImgSrc = p.qrImage || meta.banglaQrImage || "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80";
+      document.getElementById("cartQrImage").src = qrImgSrc;
+    } else {
+      qrDisplayBox.style.display = "none";
+    }
+  }
+}
+
+function copyCartSelectedNumber(){
+  const p = paymentMethods.find(item => item.id === selectedCartPayId);
+  if(p && p.number){
+    copyNumber(p.number, p.name);
+  } else {
+    toast("✅ তথ্য কপি হয়েছে");
+  }
+}
+
+async function sendCartOrderWhatsApp(){
+  const cartIds = Object.keys(cart);
+  if(!cartIds.length){
+    toast("⚠️ আপনার কার্টে কোনো আইটেম নেই");
+    return;
+  }
+
+  const custName = document.getElementById("cartCustName").value.trim() || "সম্মানিত গ্রাহক";
+  const custPhone = document.getElementById("cartCustPhone").value.trim() || "—";
+  const senderNum = document.getElementById("cartSenderNum").value.trim();
+  const trxId = document.getElementById("cartTrxId").value.trim();
+  const note = document.getElementById("cartOrderNote").value.trim();
+
+  const selectedPay = paymentMethods.find(p => p.id === selectedCartPayId);
+  const payName = selectedPay ? selectedPay.name : "ক্যাশ";
+
+  let itemsText = "";
+  let totalCalc = 0;
+  const orderItemsData = [];
+
+  cartIds.forEach((id, idx) => {
+    const s = services.find(item => item.id === id);
+    const qty = cart[id];
+    const unit = s ? (s.unitPrice || 0) : 0;
+    const rowTotal = unit * qty;
+    totalCalc += rowTotal;
+
+    const sName = s ? s.name : "সেবা";
+    itemsText += `[${idx+1}] ${sName}\n   পরিমাণ: ${qty}টি | দর: ৳${unit} | মোট: ৳${rowTotal}\n`;
+    orderItemsData.push({ id: s ? s.id : id, name: sName, qty: qty, unitPrice: unit, totalPrice: rowTotal });
+  });
+
+  const orderId = "SC-" + Math.floor(1000 + Math.random() * 9000);
+
+  const dbPayload = {
+    orderId: orderId,
+    type: "cart_order",
+    customerName: custName,
+    customerPhone: custPhone,
+    senderNumber: senderNum,
+    trxId: trxId,
+    paymentMethod: payName,
+    items: orderItemsData,
+    totalAmount: totalCalc,
+    note: note,
+    status: "pending",
+    createdAt: new Date().toISOString()
+  };
+
+  const waMsg = `*🛒 নতুন সেবা অর্ডার (${orderId}) — সবুজ কম্পিউটার্স*\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `👤 গ্রাহকের নাম: ${custName}\n` +
+    `📞 যোগাযোগ নম্বর: ${custPhone}\n` +
+    `\n📋 অর্ডারের বিস্তারিত আইটেম:\n${itemsText}\n` +
+    `💰 সর্বমোট প্রদেয় মূল্য: ৳ ${totalCalc}\n` +
+    `💳 পেমেন্ট পদ্ধতি: ${payName}\n` +
+    (senderNum ? `📱 সেন্ডার মোবাইল: ${senderNum}\n` : '') +
+    (trxId ? `🔖 TrxID: ${trxId}\n` : '') +
+    (note ? `📝 গ্রাহকের নোট: ${note}\n` : '') +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `অর্ডারটি গ্রহণ করে দ্রুত সেবা নিশ্চিত করার অনুরোধ রইল। ধন্যবাদ!`;
+
+  await dispatchOrderWithWhatsAppModal({
+    orderId,
+    title: `অর্ডার নিশ্চিত হয়েছে (${orderId})`,
+    subText: "সবগুলো সেবাসহ অর্ডারটি সবুজ কম্পিউটার্স এ পাঠাতে নিচের WhatsApp বাটনে চাপ দিন:",
+    summaryText: waMsg,
+    waMsg,
+    dbPayload,
+    onCloseCallback: () => {
+      clearCart();
+    }
+  });
+}
+
+/* ========================================================
+   14. BANGLA QR DEDICATED MODAL & DOWNLOAD LOGIC
+   ======================================================== */
+function openBanglaQrModal(){
+  const banglaQr = paymentMethods.find(p => p.id === "bangla_qr") || {
+    qrImage: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80",
+    name: "সবুজ কম্পিউটার্স (Sabuj Computers)"
+  };
+
+  const qrImgSrc = meta.banglaQrImage || banglaQr.qrImage || "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80";
+  document.getElementById("modalBanglaQrImg").src = qrImgSrc;
+  document.getElementById("banglaQrMerchantName").textContent = meta.heroTitle || "সবুজ কম্পিউটার্স";
+
+  const waMsg = `আসসালামু আলাইকুম, আমি সবুজ কম্পিউটার্স এ বাংলা কিউআর (Bangla QR) এর মাধ্যমে পেমেন্ট করেছি।`;
+  document.getElementById("banglaQrWhatsAppProofBtn").href = buildSafeWhatsAppUrl(waMsg);
+
+  document.getElementById("banglaQrModal").classList.add("show");
+}
+
+function downloadBanglaQr(){
+  const imgSrc = document.getElementById("modalBanglaQrImg").src;
+  if(!imgSrc){
+    toast("কিউআর কোড পাওয়া যায়নি");
+    return;
+  }
+  const link = document.createElement("a");
+  link.href = imgSrc;
+  link.download = `Bangla-QR-${(meta.heroTitle || 'Sabuj-Computers').replace(/\s+/g, '-')}.png`;
+  link.target = "_blank";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  toast("📥 বাংলা কিউআর কোড ডাউনলোড হচ্ছে...");
+}
+
+/* ========================================================
+   15. MODAL HELPERS & INITIALIZATION
+   ======================================================== */
+function closeModal(id){
+  const modal = document.getElementById(id);
+  if(modal) modal.classList.remove("show");
+}
+
+function handleBackdropClick(e, id){
+  if(e.target.id === id) closeModal(id);
+}
+
+// Global Initialization
+document.addEventListener("DOMContentLoaded", () => {
+  initAppData();
+});
+</script>
+</body>
+</html>
