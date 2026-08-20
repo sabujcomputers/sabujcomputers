@@ -25,7 +25,10 @@
     deleteDoc, 
     onSnapshot, 
     query, 
-    orderBy 
+    orderBy,
+    limit,
+    where,
+    writeBatch
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const FIREBASE_CONFIG = {
@@ -43,9 +46,11 @@
     const firestoreInstance = getFirestore(app, FIREBASE_CONFIG.firestoreDatabaseId);
 
     function createDocWrapper(colName, docId) {
-      const dRef = doc(firestoreInstance, colName, docId);
+      const dRef = typeof colName === 'object' && colName ? colName : doc(firestoreInstance, colName, docId);
       return {
-        id: docId,
+        _dRef: dRef,
+        _colName: typeof colName === 'string' ? colName : '',
+        id: docId || dRef.id,
         async get() {
           const snap = await getDoc(dRef);
           return {
@@ -75,14 +80,22 @@
       };
     }
 
-    function createColWrapper(colName) {
-      const cRef = collection(firestoreInstance, colName);
+    function createQueryWrapper(baseRef, constraints = []) {
       return {
-        doc(docId) {
-          return createDocWrapper(colName, docId);
+        _ref: baseRef,
+        _constraints: constraints,
+        orderBy(field, dir = "asc") {
+          return createQueryWrapper(baseRef, [...constraints, orderBy(field, dir)]);
+        },
+        limit(num) {
+          return createQueryWrapper(baseRef, [...constraints, limit(num)]);
+        },
+        where(field, op, val) {
+          return createQueryWrapper(baseRef, [...constraints, where(field, op, val)]);
         },
         async get() {
-          const snap = await getDocs(cRef);
+          const q = constraints.length ? query(baseRef, ...constraints) : baseRef;
+          const snap = await getDocs(q);
           const docs = snap.docs.map(d => ({
             id: d.id,
             exists: d.exists(),
@@ -95,47 +108,9 @@
             forEach(fn) { docs.forEach(fn); }
           };
         },
-        async add(data) {
-          const newDocRef = doc(cRef);
-          await setDoc(newDocRef, data);
-          return { id: newDocRef.id };
-        },
-        orderBy(field, dir = "asc") {
-          const q = query(cRef, orderBy(field, dir));
-          return {
-            onSnapshot(cb, errCb) {
-              return onSnapshot(q, (snap) => {
-                const docs = snap.docs.map(d => ({
-                  id: d.id,
-                  exists: d.exists(),
-                  data: () => d.data()
-                }));
-                cb({
-                  empty: snap.empty,
-                  size: snap.size,
-                  docs: docs,
-                  forEach(fn) { docs.forEach(fn); }
-                });
-              }, errCb);
-            },
-            async get() {
-              const snap = await getDocs(q);
-              const docs = snap.docs.map(d => ({
-                id: d.id,
-                exists: d.exists(),
-                data: () => d.data()
-              }));
-              return {
-                empty: snap.empty,
-                size: snap.size,
-                docs: docs,
-                forEach(fn) { docs.forEach(fn); }
-              };
-            }
-          };
-        },
         onSnapshot(cb, errCb) {
-          return onSnapshot(cRef, (snap) => {
+          const q = constraints.length ? query(baseRef, ...constraints) : baseRef;
+          return onSnapshot(q, (snap) => {
             const docs = snap.docs.map(d => ({
               id: d.id,
               exists: d.exists(),
@@ -152,9 +127,57 @@
       };
     }
 
+    function createColWrapper(colName) {
+      const cRef = collection(firestoreInstance, colName);
+      const queryWrap = createQueryWrapper(cRef, []);
+      return {
+        ...queryWrap,
+        doc(docId) {
+          return createDocWrapper(colName, docId);
+        },
+        async add(data) {
+          const newDocRef = doc(cRef);
+          await setDoc(newDocRef, data);
+          return { id: newDocRef.id };
+        }
+      };
+    }
+
     window.db = {
       collection(cName) {
         return createColWrapper(cName);
+      },
+      doc(colOrPath, docId) {
+        if(arguments.length === 1 && typeof colOrPath === "string") {
+          const parts = colOrPath.split("/").filter(Boolean);
+          if(parts.length === 2) {
+            return createDocWrapper(parts[0], parts[1]);
+          }
+        }
+        return createDocWrapper(colOrPath, docId);
+      },
+      batch() {
+        const wb = writeBatch(firestoreInstance);
+        return {
+          set(docWrapperOrRef, data, opts) {
+            const rawRef = docWrapperOrRef._dRef || (docWrapperOrRef.id && docWrapperOrRef._colName ? doc(firestoreInstance, docWrapperOrRef._colName, docWrapperOrRef.id) : docWrapperOrRef);
+            wb.set(rawRef, data, opts || {});
+            return this;
+          },
+          update(docWrapperOrRef, data) {
+            const rawRef = docWrapperOrRef._dRef || (docWrapperOrRef.id && docWrapperOrRef._colName ? doc(firestoreInstance, docWrapperOrRef._colName, docWrapperOrRef.id) : docWrapperOrRef);
+            wb.update(rawRef, data);
+            return this;
+          },
+          delete(docWrapperOrRef) {
+            const rawRef = docWrapperOrRef._dRef || (docWrapperOrRef.id && docWrapperOrRef._colName ? doc(firestoreInstance, docWrapperOrRef._colName, docWrapperOrRef.id) : docWrapperOrRef);
+            wb.delete(rawRef);
+            return this;
+          },
+          async commit() {
+            return await wb.commit();
+          }
+        };
       }
     };
     window.dispatchEvent(new Event("firestore-ready"));
@@ -271,19 +294,70 @@
     margin-bottom:6px;
   }
 
-  /* Admin Navigation Tabs */
+  /* Admin Navigation Tabs Container & Scroll Controls */
+  .admin-tabs-wrapper{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-bottom:18px;
+    background:var(--paper-card);
+    padding:6px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    box-shadow:0 2px 8px rgba(0,0,0,.04);
+  }
+  .tabs-scroll-btn{
+    flex-shrink:0;
+    width:32px;
+    height:36px;
+    background:var(--paper-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    color:var(--forest);
+    font-size:14px;
+    font-weight:900;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:all .15s ease;
+    user-select:none;
+  }
+  .tabs-scroll-btn:hover{
+    background:var(--forest);
+    color:#fff;
+    border-color:var(--forest);
+    transform:scale(1.06);
+  }
+  .tabs-scroll-btn:active{
+    transform:scale(0.95);
+  }
   .admin-tabs{
+    flex:1;
     display:flex;
     gap:8px;
     overflow-x:auto;
-    padding-bottom:8px;
-    margin-bottom:18px;
-    border-bottom:1px solid var(--line);
-    scrollbar-width:none;
+    scroll-behavior:smooth;
+    padding:4px 2px;
+    scrollbar-width:thin;
+    scrollbar-color:rgba(15,61,36,.25) transparent;
   }
-  .admin-tabs::-webkit-scrollbar{display:none;}
+  .admin-tabs::-webkit-scrollbar{
+    height:6px;
+  }
+  .admin-tabs::-webkit-scrollbar-track{
+    background:rgba(0,0,0,.03);
+    border-radius:4px;
+  }
+  .admin-tabs::-webkit-scrollbar-thumb{
+    background:rgba(15,61,36,.25);
+    border-radius:4px;
+  }
+  .admin-tabs::-webkit-scrollbar-thumb:hover{
+    background:var(--leaf);
+  }
   .tab-item{
-    background:var(--paper-card);
+    background:var(--paper);
     border:1px solid var(--line);
     border-radius:10px;
     padding:8px 15px;
@@ -296,8 +370,9 @@
     display:inline-flex;
     align-items:center;
     gap:6px;
+    flex-shrink:0;
   }
-  .tab-item:hover{border-color:var(--leaf);color:var(--ink);}
+  .tab-item:hover{border-color:var(--leaf);color:var(--ink);background:var(--paper-2);}
   .tab-item.active{
     background:var(--forest);
     color:#fff;
@@ -643,17 +718,21 @@
   <div id="adminDashboard" style="display:none;">
 
     <!-- Navigation Tabs -->
-    <div class="admin-tabs">
-      <button class="tab-item active" onclick="switchAdminTab('services')">🛠️ সেবাসমূহ (Services)</button>
-      <button class="tab-item" onclick="switchAdminTab('categories')">📁 ক্যাটাগরি (Categories)</button>
-      <button class="tab-item" onclick="switchAdminTab('rates')">🏷️ মূল্য তালিকা ও রেট কার্ড</button>
-      <button class="tab-item" onclick="switchAdminTab('payments')">💳 পেমেন্ট ও বাংলা কিউআর</button>
-      <button class="tab-item" onclick="switchAdminTab('poster')">🖨️ কিউআর ও পোস্টার</button>
-      <button class="tab-item" onclick="switchAdminTab('gallery')">📸 ফটো গ্যালারি</button>
-      <button class="tab-item" onclick="switchAdminTab('faqs')">❓ প্রশ্নোত্তর ও রিভিউ</button>
-      <button class="tab-item" onclick="switchAdminTab('orders')">📦 রিয়েলটাইম অর্ডারস</button>
-      <button class="tab-item" onclick="switchAdminTab('settings')">⚙️ সাইট সেটিংস ও ব্র্যান্ডিং</button>
-      <button class="tab-item" onclick="switchAdminTab('backup')">💾 ব্যাকআপ ও রিস্টোর</button>
+    <div class="admin-tabs-wrapper">
+      <button class="tabs-scroll-btn" onclick="scrollAdminTabs(-250)" title="বামে স্ক্রল করুন" aria-label="Scroll Left">◀</button>
+      <div class="admin-tabs" id="adminTabsNav">
+        <button class="tab-item active" data-tab="services" onclick="switchAdminTab('services')">🛠️ সেবাসমূহ (Services)</button>
+        <button class="tab-item" data-tab="categories" onclick="switchAdminTab('categories')">📁 ক্যাটাগরি (Categories)</button>
+        <button class="tab-item" data-tab="rates" onclick="switchAdminTab('rates')">🏷️ মূল্য তালিকা ও রেট কার্ড</button>
+        <button class="tab-item" data-tab="payments" onclick="switchAdminTab('payments')">💳 পেমেন্ট ও বাংলা কিউআর</button>
+        <button class="tab-item" data-tab="poster" onclick="switchAdminTab('poster')">🖨️ কিউআর ও পোস্টার</button>
+        <button class="tab-item" data-tab="gallery" onclick="switchAdminTab('gallery')">📸 ফটো গ্যালারি</button>
+        <button class="tab-item" data-tab="faqs" onclick="switchAdminTab('faqs')">❓ প্রশ্নোত্তর ও রিভিউ</button>
+        <button class="tab-item" data-tab="orders" onclick="switchAdminTab('orders')">📦 রিয়েলটাইম অর্ডারস</button>
+        <button class="tab-item" data-tab="settings" onclick="switchAdminTab('settings')">⚙️ সাইট সেটিংস ও ব্র্যান্ডিং</button>
+        <button class="tab-item" data-tab="backup" onclick="switchAdminTab('backup')">💾 ব্যাকআপ ও রিস্টোর</button>
+      </div>
+      <button class="tabs-scroll-btn" onclick="scrollAdminTabs(250)" title="ডানে স্ক্রল করুন" aria-label="Scroll Right">▶</button>
     </div>
 
     <!-- TAB 1: SERVICES MANAGEMENT -->
@@ -1843,6 +1922,7 @@ function checkAuth(){
     document.getElementById("loginSection").style.display = "none";
     document.getElementById("adminDashboard").style.display = "block";
     document.getElementById("logoutBtn").style.display = "inline-flex";
+    initTabsHorizontalScroll();
     loadAllAdminData();
   } else {
     document.getElementById("loginSection").style.display = "block";
@@ -2153,13 +2233,58 @@ function updatePreview(inpId, imgId){
 }
 
 /* ========================================================
-   5. TAB SWITCHING
+   5. TAB SWITCHING & SCROLL CONTROLS
    ======================================================== */
-function switchAdminTab(tabName){
+function scrollAdminTabs(amount){
+  const container = document.getElementById("adminTabsNav");
+  if(container){
+    container.scrollBy({ left: amount, behavior: "smooth" });
+  }
+}
+
+function initTabsHorizontalScroll(){
+  const container = document.getElementById("adminTabsNav");
+  if(!container) return;
+
+  // Mouse wheel horizontal scroll on desktop
+  container.addEventListener("wheel", (evt) => {
+    if(evt.deltaY !== 0 && container.scrollWidth > container.clientWidth){
+      evt.preventDefault();
+      container.scrollLeft += evt.deltaY;
+    }
+  }, { passive: false });
+
+  // Drag-to-scroll support for desktop mouse
+  let isDown = false;
+  let startX = 0;
+  let scrollLeft = 0;
+
+  container.addEventListener("mousedown", (e) => {
+    if(e.target.tagName === 'BUTTON') return; // Allow button clicks
+    isDown = true;
+    startX = e.pageX - container.offsetLeft;
+    scrollLeft = container.scrollLeft;
+  });
+  window.addEventListener("mouseup", () => { isDown = false; });
+  container.addEventListener("mousemove", (e) => {
+    if(!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - container.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    container.scrollLeft = scrollLeft - walk;
+  });
+}
+
+function switchAdminTab(tabName, clickedBtn = null){
   document.querySelectorAll(".tab-item").forEach(b => b.classList.remove("active"));
   document.querySelectorAll(".tab-content").forEach(c => c.style.display = "none");
 
-  event.currentTarget.classList.add("active");
+  const btn = clickedBtn || (window.event && window.event.currentTarget) || document.querySelector(`.tab-item[data-tab="${tabName}"]`);
+  if(btn && btn.classList){
+    btn.classList.add("active");
+    btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }
+
   const target = document.getElementById(`tab_${tabName}`);
   if(target) target.style.display = "block";
 
@@ -3488,7 +3613,10 @@ setInterval(updateAdminLiveClock, 1000);
 updateAdminLiveClock();
 
 // Init
-document.addEventListener("DOMContentLoaded", checkAuth);
+document.addEventListener("DOMContentLoaded", () => {
+  checkAuth();
+  initTabsHorizontalScroll();
+});
 </script>
 </body>
 </html>

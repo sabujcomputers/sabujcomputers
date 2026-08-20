@@ -24,7 +24,10 @@
     deleteDoc, 
     onSnapshot, 
     query, 
-    orderBy 
+    orderBy,
+    limit,
+    where,
+    writeBatch
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const FIREBASE_CONFIG = {
@@ -42,9 +45,11 @@
     const firestoreInstance = getFirestore(app, FIREBASE_CONFIG.firestoreDatabaseId);
 
     function createDocWrapper(colName, docId) {
-      const dRef = doc(firestoreInstance, colName, docId);
+      const dRef = typeof colName === 'object' && colName ? colName : doc(firestoreInstance, colName, docId);
       return {
-        id: docId,
+        _dRef: dRef,
+        _colName: typeof colName === 'string' ? colName : '',
+        id: docId || dRef.id,
         async get() {
           const snap = await getDoc(dRef);
           return {
@@ -74,14 +79,22 @@
       };
     }
 
-    function createColWrapper(colName) {
-      const cRef = collection(firestoreInstance, colName);
+    function createQueryWrapper(baseRef, constraints = []) {
       return {
-        doc(docId) {
-          return createDocWrapper(colName, docId);
+        _ref: baseRef,
+        _constraints: constraints,
+        orderBy(field, dir = "asc") {
+          return createQueryWrapper(baseRef, [...constraints, orderBy(field, dir)]);
+        },
+        limit(num) {
+          return createQueryWrapper(baseRef, [...constraints, limit(num)]);
+        },
+        where(field, op, val) {
+          return createQueryWrapper(baseRef, [...constraints, where(field, op, val)]);
         },
         async get() {
-          const snap = await getDocs(cRef);
+          const q = constraints.length ? query(baseRef, ...constraints) : baseRef;
+          const snap = await getDocs(q);
           const docs = snap.docs.map(d => ({
             id: d.id,
             exists: d.exists(),
@@ -94,47 +107,9 @@
             forEach(fn) { docs.forEach(fn); }
           };
         },
-        async add(data) {
-          const newDocRef = doc(cRef);
-          await setDoc(newDocRef, data);
-          return { id: newDocRef.id };
-        },
-        orderBy(field, dir = "asc") {
-          const q = query(cRef, orderBy(field, dir));
-          return {
-            onSnapshot(cb, errCb) {
-              return onSnapshot(q, (snap) => {
-                const docs = snap.docs.map(d => ({
-                  id: d.id,
-                  exists: d.exists(),
-                  data: () => d.data()
-                }));
-                cb({
-                  empty: snap.empty,
-                  size: snap.size,
-                  docs: docs,
-                  forEach(fn) { docs.forEach(fn); }
-                });
-              }, errCb);
-            },
-            async get() {
-              const snap = await getDocs(q);
-              const docs = snap.docs.map(d => ({
-                id: d.id,
-                exists: d.exists(),
-                data: () => d.data()
-              }));
-              return {
-                empty: snap.empty,
-                size: snap.size,
-                docs: docs,
-                forEach(fn) { docs.forEach(fn); }
-              };
-            }
-          };
-        },
         onSnapshot(cb, errCb) {
-          return onSnapshot(cRef, (snap) => {
+          const q = constraints.length ? query(baseRef, ...constraints) : baseRef;
+          return onSnapshot(q, (snap) => {
             const docs = snap.docs.map(d => ({
               id: d.id,
               exists: d.exists(),
@@ -151,9 +126,57 @@
       };
     }
 
+    function createColWrapper(colName) {
+      const cRef = collection(firestoreInstance, colName);
+      const queryWrap = createQueryWrapper(cRef, []);
+      return {
+        ...queryWrap,
+        doc(docId) {
+          return createDocWrapper(colName, docId);
+        },
+        async add(data) {
+          const newDocRef = doc(cRef);
+          await setDoc(newDocRef, data);
+          return { id: newDocRef.id };
+        }
+      };
+    }
+
     window.db = {
       collection(cName) {
         return createColWrapper(cName);
+      },
+      doc(colOrPath, docId) {
+        if(arguments.length === 1 && typeof colOrPath === "string") {
+          const parts = colOrPath.split("/").filter(Boolean);
+          if(parts.length === 2) {
+            return createDocWrapper(parts[0], parts[1]);
+          }
+        }
+        return createDocWrapper(colOrPath, docId);
+      },
+      batch() {
+        const wb = writeBatch(firestoreInstance);
+        return {
+          set(docWrapperOrRef, data, opts) {
+            const rawRef = docWrapperOrRef._dRef || (docWrapperOrRef.id && docWrapperOrRef._colName ? doc(firestoreInstance, docWrapperOrRef._colName, docWrapperOrRef.id) : docWrapperOrRef);
+            wb.set(rawRef, data, opts || {});
+            return this;
+          },
+          update(docWrapperOrRef, data) {
+            const rawRef = docWrapperOrRef._dRef || (docWrapperOrRef.id && docWrapperOrRef._colName ? doc(firestoreInstance, docWrapperOrRef._colName, docWrapperOrRef.id) : docWrapperOrRef);
+            wb.update(rawRef, data);
+            return this;
+          },
+          delete(docWrapperOrRef) {
+            const rawRef = docWrapperOrRef._dRef || (docWrapperOrRef.id && docWrapperOrRef._colName ? doc(firestoreInstance, docWrapperOrRef._colName, docWrapperOrRef.id) : docWrapperOrRef);
+            wb.delete(rawRef);
+            return this;
+          },
+          async commit() {
+            return await wb.commit();
+          }
+        };
       }
     };
     window.dispatchEvent(new Event("firestore-ready"));
@@ -713,12 +736,27 @@
     display: flex;
     gap: 8px;
     overflow-x: auto;
+    scroll-behavior: smooth;
     padding: 10px 16px;
     max-width: 1080px;
     margin: 0 auto;
-    scrollbar-width: none;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(15,61,36,.25) transparent;
   }
-  .tabs-scroll::-webkit-scrollbar { display: none; }
+  .tabs-scroll::-webkit-scrollbar {
+    height: 5px;
+  }
+  .tabs-scroll::-webkit-scrollbar-track {
+    background: rgba(0,0,0,.03);
+    border-radius: 4px;
+  }
+  .tabs-scroll::-webkit-scrollbar-thumb {
+    background: rgba(15,61,36,.25);
+    border-radius: 4px;
+  }
+  .tabs-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--leaf);
+  }
   .tab-pill {
     flex: 0 0 auto;
     font-family: 'Hind Siliguri', sans-serif;
@@ -3535,9 +3573,21 @@ function handleBackdropClick(e, id){
   if(e.target.id === id) closeModal(id);
 }
 
+function initCategoryTabsScroll(){
+  const container = document.getElementById("categoryTabsContainer");
+  if(!container) return;
+  container.addEventListener("wheel", (evt) => {
+    if(evt.deltaY !== 0 && container.scrollWidth > container.clientWidth){
+      evt.preventDefault();
+      container.scrollLeft += evt.deltaY;
+    }
+  }, { passive: false });
+}
+
 // Global Initialization
 document.addEventListener("DOMContentLoaded", () => {
   initAppData();
+  initCategoryTabsScroll();
 });
 </script>
 </body>
