@@ -2157,6 +2157,45 @@ const DEFAULT_REVIEWS = [
   }
 ];
 
+const DEFAULT_COURSES = [
+  {
+    id: "course_foundation",
+    type: "Foundation",
+    name: "ফাউন্ডেশন কম্পিউটার কোর্স (বেসিক ও অফিস অ্যাপ্লিকেশন)",
+    tagline: "কম্পিউটার ফান্ডামেন্টাল, টাইপিং, MS Word, Excel, PowerPoint ও ইন্টারনেট ব্রাউজিং",
+    duration: "৩ মাস",
+    regularPrice: "২,৫০০৳",
+    price: "১,৮০০৳",
+    certificate: "বাংলাদেশ কম্পিউটার সোসাইটি / ফাউন্ডেশন সনদ",
+    badge: "⭐ জনপ্রিয় কোর্স",
+    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&auto=format&fit=crop&q=80",
+    features: "• কম্পিউটার ফান্ডামেন্টাল ও উইন্ডোজ বেসিক\n• দ্রুত বাংলা ও ইংরেজি টাইপিং স্পেশাল টেকনিক\n• MS Word, MS Excel, MS PowerPoint ও ইন্টারনেট\n• ১ জন শিক্ষার্থীর জন্য ১টি কম্পিউটার ল্যাব প্র্যাকটিস",
+    active: true
+  },
+  {
+    id: "course_bteb",
+    type: "BTEB",
+    name: "BTEB সরকারি কারিগরি সার্টিফিকেট কোর্স (৩৬০ ঘণ্টা)",
+    tagline: "বাংলাদেশ কারিগরি শিক্ষা বোর্ড (BTEB) অনুমোদিত ৩/৬ মাস মেয়াদী জাতীয় সনদ কোর্স",
+    duration: "৩ / ৬ মাস (৩৬০ ঘণ্টা)",
+    regularPrice: "৪,৫০০৳",
+    price: "৩,২০০৳",
+    certificate: "বাংলাদেশ কারিগরি শিক্ষা বোর্ড (BTEB) জাতীয় গ্রেড সনদ",
+    badge: "🏛️ সরকারি সনদ",
+    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80",
+    features: "• BTEB অনুমোদিত কারিকুলাম ও ফাইনাল বোর্ড পরীক্ষা\n• সরকারি ও বেসরকারি সকল চাকরির জন্য শতভাগ গ্রহণযোগ্য\n• অফিস অ্যাপ্লিকেশন, ডাটাবেজ ও অ্যাডভান্সড আইটি স্কিলস\n• কোর্স শেষে গণপ্রজাতন্ত্রী বাংলাদেশ সরকারের গ্রেড সার্টিফিকেট",
+    active: true
+  }
+];
+
+const DEFAULT_SHIFTS = [
+  { id: "sh_1", name: "সকাল শিফট (সকাল ৯:০০ – ১১:০০)", active: true },
+  { id: "sh_2", name: "দুপুর শিফট (দুপুর ১১:০০ – ১:০০)", active: true },
+  { id: "sh_3", name: "বিকেল শিফট (বিকেল ৪:০০ – ৬:০০)", active: true },
+  { id: "sh_4", name: "সন্ধ্যা শিফট (সন্ধ্যা ৬:০০ – ৮:০০)", active: true },
+  { id: "sh_5", name: "শুক্রবার স্পেশাল ব্যাচ (সকাল ৯টা – ১২টা)", active: true }
+];
+
 const DEFAULT_META = {
   heroTitle: "সবুজ কম্পিউটার্স",
   heroSub: "বুক ক্যাম্পাস, ফটোস্ট্যাট ও কম্পিউটার প্রশিক্ষণ কেন্দ্র। যা লাগবে, ঘরে বসেই অর্ডার করুন বা ফাইল পাঠিয়ে প্রিন্ট রেডি রাখুন।",
@@ -2182,6 +2221,8 @@ const DEFAULT_META = {
 // Global App State
 let categories = DEFAULT_CATEGORIES;
 let services = DEFAULT_SERVICES;
+let courses = DEFAULT_COURSES;
+let shifts = DEFAULT_SHIFTS;
 let paymentMethods = DEFAULT_PAYMENT_METHODS;
 let gallery = DEFAULT_GALLERY;
 let rates = DEFAULT_RATES;
@@ -2370,7 +2411,33 @@ async function initAppData(){
         }
       });
 
-      // 8. Settings / Meta
+      // 8. Courses & Training (Foundation & BTEB)
+      db.collection("courses").onSnapshot(snap => {
+        if (!snap.empty) {
+          const remoteCourses = [];
+          snap.forEach(d => remoteCourses.push({ id: d.id, ...d.data() }));
+          if (remoteCourses.length) {
+            courses = remoteCourses;
+            localStorage.setItem("sc_courses", JSON.stringify(courses));
+            renderCourseModalOptions();
+          }
+        }
+      });
+
+      // 9. Shifts & Batches
+      db.collection("shifts").onSnapshot(snap => {
+        if (!snap.empty) {
+          const remoteShifts = [];
+          snap.forEach(d => remoteShifts.push({ id: d.id, ...d.data() }));
+          if (remoteShifts.length) {
+            shifts = remoteShifts;
+            localStorage.setItem("sc_shifts", JSON.stringify(shifts));
+            renderCourseModalOptions();
+          }
+        }
+      });
+
+      // 10. Settings / Meta
       db.collection("settings").doc("global").onSnapshot(doc => {
         if (doc.exists) {
           meta = { ...DEFAULT_META, ...doc.data() };
@@ -2420,6 +2487,16 @@ async function initAppData(){
   } catch(e){}
 
   try {
+    const locCourses = localStorage.getItem("sc_courses");
+    if(locCourses) courses = JSON.parse(locCourses);
+  } catch(e){}
+
+  try {
+    const locShifts = localStorage.getItem("sc_shifts");
+    if(locShifts) shifts = JSON.parse(locShifts);
+  } catch(e){}
+
+  try {
     const locM = localStorage.getItem("sc_meta");
     if(locM) meta = { ...DEFAULT_META, ...JSON.parse(locM) };
   } catch(e){}
@@ -2432,6 +2509,7 @@ async function initAppData(){
   renderFaqs();
   renderPaymentMethods();
   renderGallery();
+  renderCourseModalOptions();
   calcQuickPrintPrice();
 }
 
@@ -2785,9 +2863,18 @@ function renderServices(){
               <span class="srv-price">${s.price || "সুলভ মূল্যে"}</span>
             </div>
             <div class="srv-action-btns">
-              <button class="btn-cart-add ${isInCart?'in-cart':''}" onclick="toggleCartItem('${s.id}', event)">
-                ${isInCart ? `✓ কার্টে (${cart[s.id]})` : `🛒 কার্টে নিন`}
-              </button>
+              ${s.category === 'training' ? `
+                <button class="btn-cart-add" style="background:var(--sky-soft);color:var(--sky-dark);border-color:var(--sky-dark);font-weight:700;" onclick="event.stopPropagation();openCourseModal('${s.id.replace('srv_','')}');">
+                  🎓 ভর্তি আবেদন
+                </button>
+                <button class="btn-cart-add ${isInCart?'in-cart':''}" title="কার্টে যোগ" onclick="toggleCartItem('${s.id}', event)">
+                  ${isInCart ? `✓ (${cart[s.id]})` : `🛒`}
+                </button>
+              ` : `
+                <button class="btn-cart-add ${isInCart?'in-cart':''}" onclick="toggleCartItem('${s.id}', event)">
+                  ${isInCart ? `✓ কার্টে (${cart[s.id]})` : `🛒 কার্টে নিন`}
+                </button>
+              `}
             </div>
           </div>
         </div>
@@ -3231,22 +3318,84 @@ async function submitModalPrintOrder(){
 }
 
 /* ========================================================
-   12. COURSE ADMISSION INQUIRY
+   12. COURSE ADMISSION INQUIRY (FOUNDATION & BTEB DYNAMIC)
    ======================================================== */
-function openCourseModal(){
+function renderCourseModalOptions(preferredCourseId = null){
+  const courseSel = document.getElementById("courseSelect");
+  const shiftSel = document.getElementById("courseShift");
+  if(!courseSel || !shiftSel) return;
+
+  // Active Courses
+  const activeCourses = courses.filter(c => c.active !== false);
+  const foundationCourses = activeCourses.filter(c => c.type === "Foundation" || !c.type);
+  const btebCourses = activeCourses.filter(c => c.type === "BTEB");
+  const otherCourses = activeCourses.filter(c => c.type !== "Foundation" && c.type !== "BTEB" && c.type);
+
+  let cHtml = "";
+  if(foundationCourses.length > 0){
+    cHtml += `<optgroup label="⭐ ফাউন্ডেশন কম্পিউটার কোর্স (Foundation)">`;
+    foundationCourses.forEach(c => {
+      cHtml += `<option value="${c.id}" ${preferredCourseId === c.id ? 'selected' : ''}>${c.name} [${c.duration || '৩ মাস'} - ফি: ${c.price || '১,৮০০৳'}]</option>`;
+    });
+    cHtml += `</optgroup>`;
+  }
+
+  if(btebCourses.length > 0){
+    cHtml += `<optgroup label="🏛️ বাংলাদেশ কারিগরি শিক্ষা বোর্ড (BTEB)">`;
+    btebCourses.forEach(c => {
+      cHtml += `<option value="${c.id}" ${preferredCourseId === c.id ? 'selected' : ''}>${c.name} [${c.duration || '৩৬০ ঘণ্টা'} - ফি: ${c.price || '৩,২০০৳'}]</option>`;
+    });
+    cHtml += `</optgroup>`;
+  }
+
+  if(otherCourses.length > 0){
+    cHtml += `<optgroup label="✨ অন্যান্য প্রশিক্ষণ">`;
+    otherCourses.forEach(c => {
+      cHtml += `<option value="${c.id}" ${preferredCourseId === c.id ? 'selected' : ''}>${c.name} [${c.duration || ''} - ফি: ${c.price || ''}]</option>`;
+    });
+    cHtml += `</optgroup>`;
+  }
+
+  if(!activeCourses.length){
+    cHtml = `<option value="ফাউন্ডেশন কম্পিউটার কোর্স">ফাউন্ডেশন কম্পিউটার কোর্স (৩ মাস)</option><option value="BTEB সরকারি কারিগরি সার্টিফিকেট কোর্স">BTEB সরকারি কারিগরি সার্টিফিকেট কোর্স (৩৬০ ঘণ্টা)</option>`;
+  }
+
+  courseSel.innerHTML = cHtml;
+
+  // Active Shifts
+  const activeShifts = shifts.filter(s => s.active !== false);
+  let sHtml = "";
+  activeShifts.forEach(sh => {
+    sHtml += `<option value="${sh.name}">${sh.name}</option>`;
+  });
+  if(!activeShifts.length){
+    sHtml = `<option value="সকাল শিফট (৯টা–১১টা)">সকাল শিফট (সকাল ৯:০০ – ১১:০০)</option><option value="বিকেল শিফট (৪টা–৬টা)">বিকেল শিফট (বিকেল ৪:০০ – ৬:০০)</option><option value="সন্ধ্যা শিফট (৬টা–৮টা)">সন্ধ্যা শিফট (সন্ধ্যা ৬:০০ – ৮:০০)</option>`;
+  }
+  shiftSel.innerHTML = sHtml;
+}
+
+function openCourseModal(preferredCourseId = null){
+  renderCourseModalOptions(preferredCourseId);
   document.getElementById("courseModal").classList.add("show");
 }
 
 async function submitCourseInquiry(){
   const name = document.getElementById("studentName").value.trim();
   const phone = document.getElementById("studentPhone").value.trim();
-  const course = document.getElementById("courseSelect").value;
+  const courseIdOrVal = document.getElementById("courseSelect").value;
   const shift = document.getElementById("courseShift").value;
 
   if(!name || !phone){
     toast("⚠️ অনুগ্রহ করে আপনার নাম ও মোবাইল নম্বর লিখুন");
     return;
   }
+
+  const selectedCourseObj = courses.find(c => c.id === courseIdOrVal || c.name === courseIdOrVal);
+  const courseTitle = selectedCourseObj ? selectedCourseObj.name : courseIdOrVal;
+  const courseType = selectedCourseObj ? (selectedCourseObj.type === "BTEB" ? "🏛️ BTEB কারিগরি সনদ" : "⭐ Foundation কোর্স") : "কম্পিউটার কোর্স";
+  const courseDuration = selectedCourseObj ? selectedCourseObj.duration : "৩ মাস";
+  const coursePrice = selectedCourseObj ? selectedCourseObj.price : "সুলভ মূল্যে";
+  const certificateInfo = selectedCourseObj ? selectedCourseObj.certificate : "প্রতিষ্ঠান সনদ";
 
   const orderId = "CRS-" + Math.floor(1000 + Math.random() * 9000);
 
@@ -3255,20 +3404,28 @@ async function submitCourseInquiry(){
     type: "course_admission",
     studentName: name,
     studentPhone: phone,
-    courseName: course,
+    courseId: selectedCourseObj ? selectedCourseObj.id : "",
+    courseName: courseTitle,
+    courseType: courseType,
+    courseDuration: courseDuration,
+    courseFee: coursePrice,
+    certificate: certificateInfo,
     preferredShift: shift,
     status: "pending",
     createdAt: new Date().toISOString()
   };
 
-  const waMsg = `*🎓 কম্পিউটার কোর্স ভর্তি আবেদন (${orderId}) — সবুজ কম্পিউটার্স*\n` +
+  const waMsg = `*🎓 কম্পিউটার কোর্স ভর্তি আবেদন (${orderId}) — ${meta.heroTitle || 'সবুজ কম্পিউটার্স'}*\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
     `👤 শিক্ষার্থীর নাম: ${name}\n` +
     `📞 যোগাযোগ নম্বর: ${phone}\n` +
-    `📚 নির্বাচিত কোর্স: ${course}\n` +
+    `📚 কোর্স: ${courseTitle}\n` +
+    `🏷️ কোর্সের ধরন: ${courseType}\n` +
+    `⏳ মেয়াদ: ${courseDuration}  |  ফি: ${coursePrice}\n` +
+    `📜 সার্টিফিকেট: ${certificateInfo}\n` +
     `🕒 পছন্দের শিফট: ${shift}\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
-    `আমি সবুজ কম্পিউটার্স প্রশিক্ষণ কেন্দ্রে ভর্তি হতে আগ্রহী। ক্লাসের বিস্তারিত নিয়ম ও ফি সম্পর্কে জানতে চাই।`;
+    `আমি সবুজ কম্পিউটার্স প্রশিক্ষণ কেন্দ্রে ভর্তি হতে আগ্রহী। ভর্তির নিয়মাবলী ও ক্লাস শুরুর তারিখ জানতে চাই।`;
 
   await dispatchOrderWithWhatsAppModal({
     orderId,

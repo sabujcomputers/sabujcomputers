@@ -722,6 +722,7 @@
       <button class="tabs-scroll-btn" onclick="scrollAdminTabs(-250)" title="বামে স্ক্রল করুন" aria-label="Scroll Left">◀</button>
       <div class="admin-tabs" id="adminTabsNav">
         <button class="tab-item active" data-tab="services" onclick="switchAdminTab('services')">🛠️ সেবাসমূহ (Services)</button>
+        <button class="tab-item" data-tab="courses" onclick="switchAdminTab('courses')">🎓 প্রশিক্ষণ ও কোর্স (Foundation & BTEB)</button>
         <button class="tab-item" data-tab="categories" onclick="switchAdminTab('categories')">📁 ক্যাটাগরি (Categories)</button>
         <button class="tab-item" data-tab="rates" onclick="switchAdminTab('rates')">🏷️ মূল্য তালিকা ও রেট কার্ড</button>
         <button class="tab-item" data-tab="payments" onclick="switchAdminTab('payments')">💳 পেমেন্ট ও বাংলা কিউআর</button>
@@ -772,6 +773,78 @@
               </tr>
             </thead>
             <tbody id="servicesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: COURSES & TRAINING MANAGEMENT (FOUNDATION & BTEB) -->
+    <div id="tab_courses" class="tab-content" style="display:none;">
+      <!-- 1. Courses List Card -->
+      <div class="panel-card">
+        <div class="panel-head">
+          <div>
+            <h2>🎓 প্রশিক্ষণ ও কম্পিউটার কোর্স তালিকা (<span id="coursesCount">0</span>)</h2>
+            <p style="font-size:12px;color:var(--ink-soft);margin:2px 0 0;">ফাউন্ডেশন কোর্স (Foundation) এবং বাংলাদেশ কারিগরি শিক্ষা বোর্ড (BTEB) কোর্সসমূহ এডিট, যোগ বা রিমুভ করুন</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-gold" onclick="resetCoursesToDefaults()">🔄 ডিফল্ট ২ কোর্স লোড</button>
+            <button class="btn btn-green" onclick="openCourseModal()">+ নতুন কোর্স যোগ করুন</button>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:14px;">
+          <input type="text" class="inp" id="courseSearchInput" placeholder="🔍 কোর্সের নাম, ধরন বা মেয়াদ দিয়ে খুঁজুন..." oninput="filterCoursesTable()" style="margin-bottom:0;">
+          <select class="inp" id="courseTypeFilter" onchange="filterCoursesTable()" style="margin-bottom:0;width:auto;font-weight:700;">
+            <option value="all">🎓 সকল কোর্স ধরন</option>
+            <option value="Foundation">⭐ Foundation (ফাউন্ডেশন কোর্স)</option>
+            <option value="BTEB">🏛️ BTEB (কারিগরি শিক্ষা বোর্ড)</option>
+            <option value="Custom">✨ অন্যান্য কোর্স</option>
+          </select>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ছবি</th>
+                <th>কোর্সের নাম</th>
+                <th>ধরন (Type)</th>
+                <th>মেয়াদ</th>
+                <th>রেগুলার ফি</th>
+                <th>বর্তমান ফি</th>
+                <th>সার্টিফিকেট বোর্ড</th>
+                <th>ব্যাজ</th>
+                <th>স্ট্যাটাস</th>
+                <th style="text-align:right;">অ্যাকশন</th>
+              </tr>
+            </thead>
+            <tbody id="coursesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 2. Batches and Shifts Management Card -->
+      <div class="panel-card" style="margin-top:20px;">
+        <div class="panel-head">
+          <div>
+            <h2>🕒 ব্যাচ ও শিফটসমূহ (Class Shifts & Batches)</h2>
+            <p style="font-size:12px;color:var(--ink-soft);margin:2px 0 0;">গ্রাহকরা কোর্স ভর্তির সময় যেসকল শিফট থেকে সিলেক্ট করতে পারবেন (সকাল, বিকেল, সন্ধ্যা ইত্যাদি)</p>
+          </div>
+          <button class="btn btn-green" onclick="openShiftModal()">+ নতুন শিফট যোগ</button>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>শিফট / ব্যাচের নাম ও সময়সূচি</th>
+                <th>স্ট্যাটাস</th>
+                <th style="text-align:right;">অ্যাকশন</th>
+              </tr>
+            </thead>
+            <tbody id="shiftsTableBody"></tbody>
           </table>
         </div>
       </div>
@@ -1366,6 +1439,112 @@
   </div>
 </div>
 
+<!-- Course Modal (Foundation & BTEB) -->
+<div class="modal-backdrop" id="courseModalAdmin">
+  <div class="modal-container" style="max-width:560px;">
+    <div class="panel-head">
+      <h2 id="courseModalTitle">প্রশিক্ষণ কোর্স যোগ / এডিট</h2>
+      <button style="background:none;border:none;font-size:18px;cursor:pointer;" onclick="closeModal('courseModalAdmin')">✕</button>
+    </div>
+    <input type="hidden" id="courseEditId">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div>
+        <label class="field-label">কোর্সের ধরন (Category):</label>
+        <select class="inp" id="courseType" style="font-weight:700;">
+          <option value="Foundation">⭐ Foundation (ফাউন্ডেশন কোর্স)</option>
+          <option value="BTEB">🏛️ BTEB (বাংলাদেশ কারিগরি শিক্ষা বোর্ড)</option>
+          <option value="Custom">✨ অন্যান্য / স্পেশাল কোর্স</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label">কোর্সের মেয়াদ:</label>
+        <input type="text" class="inp" id="courseDuration" placeholder="উদাঃ ৩ মাস / ৬ মাস (৩৬০ ঘন্টা)">
+      </div>
+    </div>
+
+    <label class="field-label">কোর্সের পূর্ণ নাম:</label>
+    <input type="text" class="inp" id="courseName" placeholder="উদাঃ বিটিইবি কারিগরি কম্পিউটার কোর্স (৩৬০ ঘন্টা)">
+
+    <label class="field-label">সংক্ষিপ্ত সাবটাইটেল / বিবরণ:</label>
+    <input type="text" class="inp" id="courseTagline" placeholder="উদাঃ বাংলাদেশ কারিগরি শিক্ষা বোর্ড অনুমোদিত সরকারি সার্টিফিকেট কোর্স">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div>
+        <label class="field-label">নিয়মিত ফি (মূল্য):</label>
+        <input type="text" class="inp" id="courseRegularPrice" placeholder="উদাঃ ৪,৫০০৳">
+      </div>
+      <div>
+        <label class="field-label">বর্তমান অফার / ভর্তি ফি:</label>
+        <input type="text" class="inp" id="coursePrice" placeholder="উদাঃ ৩,৫০০৳">
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div>
+        <label class="field-label">সার্টিফিকেট কর্তৃপক্ষ:</label>
+        <input type="text" class="inp" id="courseCertificate" placeholder="উদাঃ বাংলাদেশ কারিগরি শিক্ষা বোর্ড (BTEB) সরকারি সনদপত্র">
+      </div>
+      <div>
+        <label class="field-label">ব্যাজ / রিবন (ঐচ্ছিক):</label>
+        <input type="text" class="inp" id="courseBadge" placeholder="উদাঃ 🏛️ BTEB অনুমোদিত বা ⭐ জনপ্রিয়">
+      </div>
+    </div>
+
+    <!-- Course Image Upload -->
+    <label class="field-label">কোর্সের ছবি (Cloudinary আপলোড বা URL):</label>
+    <div class="upload-box" onclick="document.getElementById('courseImgFile').click()">
+      <input type="file" id="courseImgFile" accept="image/*" style="display:none;" onchange="uploadSingleImage(event, 'courseImage', 'courseImagePreview')">
+      <div>📤 কোর্সের ব্যানার বা ল্যাব ছবি আপলোড করুন</div>
+    </div>
+    <input type="text" class="inp" id="courseImage" placeholder="https://..." oninput="updatePreview('courseImage', 'courseImagePreview')">
+    <img id="courseImagePreview" class="upload-preview" src="">
+
+    <label class="field-label">কোর্সের সিলেবাস ও বৈশিষ্ট্যসমূহ (প্রতি লাইনে ১টি):</label>
+    <textarea class="inp" id="courseFeatures" rows="4" placeholder="• কম্পিউটার পরিচিতি ও উইন্ডোজ অপারেটিং সিস্টেম&#10;• MS Word, MS Excel, MS PowerPoint&#10;• দ্রুত বাংলা ও ইংরেজি টাইপিং&#10;• ১ জন শিক্ষার্থীর জন্য ১টি কম্পিউটার"></textarea>
+
+    <div style="display:grid;grid-template-columns:1fr;gap:8px;">
+      <div>
+        <label class="field-label">স্ট্যাটাস:</label>
+        <select class="inp" id="courseActive">
+          <option value="true">🟢 চালু (Active)</option>
+          <option value="false">🔴 বন্ধ (Inactive)</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn btn-outline" style="flex:1;justify-content:center;" onclick="closeModal('courseModalAdmin')">বাতিল</button>
+      <button class="btn btn-green" style="flex:1;justify-content:center;" onclick="saveCourseItem()">সংরক্ষণ করুন</button>
+    </div>
+  </div>
+</div>
+
+<!-- Shift Modal -->
+<div class="modal-backdrop" id="shiftModalAdmin">
+  <div class="modal-container" style="max-width:440px;">
+    <div class="panel-head">
+      <h2 id="shiftModalTitle">শিফট / ব্যাচ যোগ বা এডিট</h2>
+      <button style="background:none;border:none;font-size:18px;cursor:pointer;" onclick="closeModal('shiftModalAdmin')">✕</button>
+    </div>
+    <input type="hidden" id="shiftEditId">
+    
+    <label class="field-label">শিফটের নাম ও সময়সূচি:</label>
+    <input type="text" class="inp" id="shiftName" placeholder="উদাঃ সকাল শিফট (সকাল ৯:০০ – ১১:০০)">
+
+    <label class="field-label">স্ট্যাটাস:</label>
+    <select class="inp" id="shiftActive">
+      <option value="true">🟢 চালু (Active)</option>
+      <option value="false">🔴 বন্ধ (Inactive)</option>
+    </select>
+
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn btn-outline" style="flex:1;justify-content:center;" onclick="closeModal('shiftModalAdmin')">বাতিল</button>
+      <button class="btn btn-green" style="flex:1;justify-content:center;" onclick="saveShiftItem()">সংরক্ষণ</button>
+    </div>
+  </div>
+</div>
+
 <!-- 2. Category Modal -->
 <div class="modal-backdrop" id="catModal">
   <div class="modal-container" style="max-width:440px;">
@@ -1872,6 +2051,44 @@ const DEFAULT_REVIEWS = [
   }
 ];
 
+const DEFAULT_COURSES = [
+  {
+    id: "course_foundation",
+    type: "Foundation",
+    name: "ফাউন্ডেশন কম্পিউটার প্রশিক্ষণ (Basic & Office)",
+    tagline: "বেসিক কম্পিউটার, অফিস অ্যাপ্লিকেশন ও টাইপিং কোর্স",
+    duration: "৩ মাস",
+    regularPrice: "২,৫০০৳",
+    price: "১,৮০০৳",
+    certificate: "বাংলাদেশ কম্পিউটার সোসাইটি / ফাউন্ডেশন সনদ",
+    badge: "⭐ জনপ্রিয় কোর্স",
+    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&auto=format&fit=crop&q=80",
+    features: "• কম্পিউটার পরিচিতি ও উইন্ডোজ অপারেটিং সিস্টেম\n• MS Word, MS Excel, MS PowerPoint\n• দ্রুত বাংলা (Avro/Bijoy) ও ইংরেজি টাইপিং\n• ইন্টারনেট ব্রাউজিং, ইমেইল ও চাকরির আবেদন\n• ১ জন শিক্ষার্থীর জন্য ১টি কম্পিউটার ল্যাব",
+    active: true
+  },
+  {
+    id: "course_bteb",
+    type: "BTEB",
+    name: "বিটিইবি কারিগরি কম্পিউটার কোর্স (৩৬০ ঘন্টা)",
+    tagline: "বাংলাদেশ কারিগরি শিক্ষা বোর্ড অনুমোদিত সরকারি সার্টিফিকেট কোর্স",
+    duration: "৩/৬ মাস (৩৬০ ঘন্টা)",
+    regularPrice: "৪,৫০০৳",
+    price: "৩,৫০০৳",
+    certificate: "বাংলাদেশ কারিগরি শিক্ষা বোর্ড (BTEB) সরকারি সনদপত্র",
+    badge: "🏛️ BTEB অনুমোদিত",
+    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80",
+    features: "• BTEB কারিকুলাম অনুযায়ী ৩/৬ মাস অফিস অ্যাপ্লিকেশন কোর্স\n• কম্পিউটার অফিস অ্যাপ্লিকেশন (৩৬০ ঘন্টা জাতীয় সনদ)\n• সরকারি ও আধা-সরকারি চাকরির জন্য শতভাগ গ্রহণযোগ্য\n• চূড়ান্ত বোর্ড পরীক্ষা ও সরাসরি সরকারি সার্টিফিকেট প্রদান\n• ১ জন শিক্ষার্থীর জন্য ১টি নির্দিষ্ট কম্পিউটার",
+    active: true
+  }
+];
+
+const DEFAULT_SHIFTS = [
+  { id: "sh1", name: "সকাল শিফট (সকাল ৯:০০ – ১১:০০)", active: true },
+  { id: "sh2", name: "বিকেল শিফট (বিকেল ৪:০০ – ৬:০০)", active: true },
+  { id: "sh3", name: "সন্ধ্যা শিফট (সন্ধ্যা ৬:০০ – ৮:০০)", active: true },
+  { id: "sh4", name: "শুক্রবার স্পেশাল ব্যাচ (সকাল ৯:০০ – ১২:০০)", active: true }
+];
+
 const DEFAULT_META = {
   heroTitle: "সবুজ কম্পিউটার্স",
   heroSub: "বুক ক্যাম্পাস, ফটোস্ট্যাট ও কম্পিউটার প্রশিক্ষণ কেন্দ্র। যা লাগবে, ঘরে বসেই অর্ডার করুন বা ফাইল পাঠিয়ে প্রিন্ট রেডি রাখুন।",
@@ -1888,6 +2105,9 @@ const DEFAULT_META = {
   businessHours: "সকাল ৮:০০ - রাত ৯:৩০ (প্রতিদিন খোলা)",
   showNotice: true,
   notice: "নতুন কম্পিউটার প্রশিক্ষণ ব্যাচে ভর্তি চলছে! স্বল্প খরচে সার্টিফিকেটসহ কোর্স করুন · জরুরি ফটোকপি ও চাকরির আবেদন দ্রুত করে দেওয়া হয়।",
+  heroBtn1Text: "📄 ফাইল পাঠিয়ে প্রিন্ট অর্ডার",
+  heroBtn2Text: "📱 বাংলা কিউআর পেমেন্ট",
+  heroBtn3Text: "🎓 কম্পিউটার কোর্স ভর্তি",
   printRates: { bw: 2, color: 10, photo: 20, laminate: 30, job: 50 },
   mapEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3697.3716089901327!2d88.93670279999999!3d24.31764609999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39fc05f19d6bd581%3A0x8fb76cba31eaa6d5!2sSabuj%20Computer%2C%20Tomaltola%20Bazar!5e1!3m2!1sen!2sbd!4v1787055740183!5m2!1sen!2sbd",
   mapDirectionsUrl: "https://maps.google.com/?cid=10355745129654167253&q=Sabuj+Computer+Tomaltola+Bazar",
@@ -1897,6 +2117,8 @@ const DEFAULT_META = {
 // State
 let categories = [];
 let services = [];
+let courses = [];
+let shifts = [];
 let paymentMethods = [];
 let gallery = [];
 let rates = [];
@@ -1981,6 +2203,8 @@ async function loadAllAdminData(){
   // Load from local storage first
   try { categories = JSON.parse(localStorage.getItem("sc_categories")) || []; }catch(e){}
   try { services = JSON.parse(localStorage.getItem("sc_services")) || []; }catch(e){}
+  try { courses = JSON.parse(localStorage.getItem("sc_courses")) || []; }catch(e){}
+  try { shifts = JSON.parse(localStorage.getItem("sc_shifts")) || []; }catch(e){}
   try { paymentMethods = JSON.parse(localStorage.getItem("sc_payment_methods")) || []; }catch(e){}
   try { gallery = JSON.parse(localStorage.getItem("sc_gallery")) || []; }catch(e){}
   try { rates = JSON.parse(localStorage.getItem("sc_rates")) || []; }catch(e){}
@@ -2006,42 +2230,56 @@ async function loadAllAdminData(){
         services.sort((a,b)=>(a.order||0)-(b.order||0));
       }
 
-      // 3. Payments
+      // 3. Courses (Foundation & BTEB)
+      const crsSnap = await db.collection("courses").get();
+      if(!crsSnap.empty){
+        courses = [];
+        crsSnap.forEach(d => courses.push({ id: d.id, ...d.data() }));
+      }
+
+      // 4. Shifts / Batches
+      const shfSnap = await db.collection("shifts").get();
+      if(!shfSnap.empty){
+        shifts = [];
+        shfSnap.forEach(d => shifts.push({ id: d.id, ...d.data() }));
+      }
+
+      // 5. Payments
       const paySnap = await db.collection("paymentMethods").get();
       if(!paySnap.empty){
         paymentMethods = [];
         paySnap.forEach(d => paymentMethods.push({ id: d.id, ...d.data() }));
       }
 
-      // 4. Gallery
+      // 6. Gallery
       const galSnap = await db.collection("gallery").get();
       if(!galSnap.empty){
         gallery = [];
         galSnap.forEach(d => gallery.push({ id: d.id, ...d.data() }));
       }
 
-      // 5. Rates
+      // 7. Rates
       const rateSnap = await db.collection("rates").get();
       if(!rateSnap.empty){
         rates = [];
         rateSnap.forEach(d => rates.push({ id: d.id, ...d.data() }));
       }
 
-      // 6. FAQs
+      // 8. FAQs
       const faqSnap = await db.collection("faqs").get();
       if(!faqSnap.empty){
         faqs = [];
         faqSnap.forEach(d => faqs.push({ id: d.id, ...d.data() }));
       }
 
-      // 7. Reviews
+      // 9. Reviews
       const revSnap = await db.collection("reviews").get();
       if(!revSnap.empty){
         reviews = [];
         revSnap.forEach(d => reviews.push({ id: d.id, ...d.data() }));
       }
 
-      // 8. Settings
+      // 10. Settings
       const setDoc = await db.collection("settings").doc("global").get();
       if(setDoc.exists){
         meta = setDoc.data();
@@ -2054,6 +2292,8 @@ async function loadAllAdminData(){
   // Fallback to rich default seeds if lists are empty (Ensures 100% full customizability out-of-the-box)
   if(!categories || !categories.length) categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
   if(!services || !services.length) services = JSON.parse(JSON.stringify(DEFAULT_SERVICES));
+  if(!courses || !courses.length) courses = JSON.parse(JSON.stringify(DEFAULT_COURSES));
+  if(!shifts || !shifts.length) shifts = JSON.parse(JSON.stringify(DEFAULT_SHIFTS));
   if(!paymentMethods || !paymentMethods.length) paymentMethods = JSON.parse(JSON.stringify(DEFAULT_PAYMENT_METHODS));
   if(!gallery || !gallery.length) gallery = JSON.parse(JSON.stringify(DEFAULT_GALLERY));
   if(!rates || !rates.length) rates = JSON.parse(JSON.stringify(DEFAULT_RATES));
@@ -2064,6 +2304,8 @@ async function loadAllAdminData(){
   // Sync to local storage
   localStorage.setItem("sc_categories", JSON.stringify(categories));
   localStorage.setItem("sc_services", JSON.stringify(services));
+  localStorage.setItem("sc_courses", JSON.stringify(courses));
+  localStorage.setItem("sc_shifts", JSON.stringify(shifts));
   localStorage.setItem("sc_payment_methods", JSON.stringify(paymentMethods));
   localStorage.setItem("sc_gallery", JSON.stringify(gallery));
   localStorage.setItem("sc_rates", JSON.stringify(rates));
@@ -2073,6 +2315,8 @@ async function loadAllAdminData(){
 
   // Render everything
   renderServicesTable();
+  renderCoursesTable();
+  renderShiftsTable();
   renderCategoriesTable();
   renderRatesTable();
   renderPaymentsTable();
@@ -2090,6 +2334,8 @@ async function resetToFactoryDefaults(saveToCloud = false){
 
   categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
   services = JSON.parse(JSON.stringify(DEFAULT_SERVICES));
+  courses = JSON.parse(JSON.stringify(DEFAULT_COURSES));
+  shifts = JSON.parse(JSON.stringify(DEFAULT_SHIFTS));
   paymentMethods = JSON.parse(JSON.stringify(DEFAULT_PAYMENT_METHODS));
   gallery = JSON.parse(JSON.stringify(DEFAULT_GALLERY));
   rates = JSON.parse(JSON.stringify(DEFAULT_RATES));
@@ -2099,6 +2345,8 @@ async function resetToFactoryDefaults(saveToCloud = false){
 
   localStorage.setItem("sc_categories", JSON.stringify(categories));
   localStorage.setItem("sc_services", JSON.stringify(services));
+  localStorage.setItem("sc_courses", JSON.stringify(courses));
+  localStorage.setItem("sc_shifts", JSON.stringify(shifts));
   localStorage.setItem("sc_payment_methods", JSON.stringify(paymentMethods));
   localStorage.setItem("sc_gallery", JSON.stringify(gallery));
   localStorage.setItem("sc_rates", JSON.stringify(rates));
@@ -2107,6 +2355,8 @@ async function resetToFactoryDefaults(saveToCloud = false){
   localStorage.setItem("sc_meta", JSON.stringify(meta));
 
   renderServicesTable();
+  renderCoursesTable();
+  renderShiftsTable();
   renderCategoriesTable();
   renderRatesTable();
   renderPaymentsTable();
@@ -2138,6 +2388,18 @@ async function saveAllToFirestore(){
     services.forEach(s => {
       const ref = db.collection("services").doc(s.id);
       batch.set(ref, s);
+    });
+
+    // Courses
+    courses.forEach(c => {
+      const ref = db.collection("courses").doc(c.id);
+      batch.set(ref, c);
+    });
+
+    // Shifts
+    shifts.forEach(sh => {
+      const ref = db.collection("shifts").doc(sh.id);
+      batch.set(ref, sh);
     });
 
     // Categories
@@ -2180,7 +2442,7 @@ async function saveAllToFirestore(){
     batch.set(db.collection("settings").doc("global"), meta);
 
     await batch.commit();
-    toast("✅ সকল সেবা, রেট ও সেটিংস ফায়ারবেস ক্লাউডে সফলভাবে সংরক্ষিত হয়েছে!");
+    toast("✅ সকল সেবা, কোর্স, রেট ও সেটিংস ফায়ারবেস ক্লাউডে সফলভাবে সংরক্ষিত হয়েছে!");
   } catch(err){
     toast("⚠️ সংরক্ষণ করতে ত্রুটি: " + err.message);
   }
@@ -2511,6 +2773,334 @@ async function deleteServiceItem(id){
     } catch(e){}
   }
   toast("🗑️ সেবা মুছে ফেলা হয়েছে");
+}
+
+/* ========================================================
+   6.1. COURSES & TRAINING CRUD (Foundation & BTEB)
+   ======================================================== */
+function filterCoursesTable(){
+  renderCoursesTable();
+}
+
+function renderCoursesTable(){
+  const tbody = document.getElementById("coursesTableBody");
+  if(!tbody) return;
+  tbody.innerHTML = "";
+
+  const searchVal = (document.getElementById("courseSearchInput")?.value || "").toLowerCase().trim();
+  const typeFilter = document.getElementById("courseTypeFilter")?.value || "all";
+
+  let filtered = courses.filter(c => {
+    const matchType = (typeFilter === "all" || c.type === typeFilter);
+    const matchSearch = (!searchVal ||
+      (c.name && c.name.toLowerCase().includes(searchVal)) ||
+      (c.tagline && c.tagline.toLowerCase().includes(searchVal)) ||
+      (c.duration && c.duration.toLowerCase().includes(searchVal)) ||
+      (c.certificate && c.certificate.toLowerCase().includes(searchVal))
+    );
+    return matchType && matchSearch;
+  });
+
+  const countEl = document.getElementById("coursesCount");
+  if(countEl) countEl.textContent = `${filtered.length} / ${courses.length}`;
+
+  if(filtered.length === 0){
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--ink-soft);">কোনো কোর্স খুঁজে পাওয়া যায়নি। <button class="btn btn-outline" style="font-size:11px;margin-left:8px;" onclick="document.getElementById('courseSearchInput').value='';document.getElementById('courseTypeFilter').value='all';renderCoursesTable();">ফিল্টার রিসেট</button></td></tr>`;
+    return;
+  }
+
+  filtered.forEach(c => {
+    const tr = document.createElement("tr");
+    const typeBadge = c.type === "BTEB" 
+      ? `<span style="background:#fef3c7;color:#92400e;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;">🏛️ BTEB কারিগরি</span>`
+      : (c.type === "Foundation" 
+        ? `<span style="background:#e0f2fe;color:#0369a1;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;">⭐ Foundation</span>`
+        : `<span style="background:#f3f4f6;color:#374151;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;">${c.type || 'Custom'}</span>`);
+
+    tr.innerHTML = `
+      <td>
+        <img src="${c.image || ''}" class="table-thumb" onerror="this.src='https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&auto=format&fit=crop&q=80'">
+      </td>
+      <td>
+        <b>${c.name}</b>
+        <div style="font-size:11.5px;color:var(--ink-soft);max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.tagline || ''}</div>
+      </td>
+      <td>${typeBadge}</td>
+      <td><span style="background:var(--paper-2);padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;">${c.duration || '—'}</span></td>
+      <td><span class="mono" style="color:var(--ink-soft);text-decoration:line-through;">${c.regularPrice || '—'}</span></td>
+      <td><b class="mono" style="color:var(--forest);">${c.price || '—'}</b></td>
+      <td><span style="font-size:11px;color:var(--ink-soft);max-width:180px;display:inline-block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.certificate || '—'}</span></td>
+      <td><span style="font-size:11px;font-weight:700;">${c.badge || '—'}</span></td>
+      <td>
+        <button class="btn" style="padding:2px 8px;font-size:11px;background:${c.active !== false ? '#dcfce7' : '#fee2e2'};color:${c.active !== false ? '#166534' : '#991b1b'};font-weight:bold;border:none;" onclick="toggleCourseActive('${c.id}')">
+          ${c.active !== false ? '● চালু' : '○ বন্ধ'}
+        </button>
+      </td>
+      <td>
+        <div style="display:flex;gap:4px;justify-content:flex-end;">
+          <button class="btn btn-outline" style="padding:4px 8px;font-size:11px;" onclick="openCourseModal('${c.id}')">✏️ এডিট</button>
+          <button class="btn btn-red" style="padding:4px 8px;font-size:11px;" onclick="deleteCourseItem('${c.id}')">🗑️</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function openCourseModal(id = null){
+  document.getElementById("courseEditId").value = id || "";
+  if(!id){
+    document.getElementById("courseModalTitle").textContent = "নতুন প্রশিক্ষণ কোর্স যোগ করুন";
+    document.getElementById("courseType").value = "Foundation";
+    document.getElementById("courseName").value = "";
+    document.getElementById("courseTagline").value = "";
+    document.getElementById("courseDuration").value = "৩ মাস";
+    document.getElementById("courseRegularPrice").value = "২,৫০০৳";
+    document.getElementById("coursePrice").value = "১,৮০০৳";
+    document.getElementById("courseCertificate").value = "বাংলাদেশ কম্পিউটার সোসাইটি / ফাউন্ডেশন সনদ";
+    document.getElementById("courseBadge").value = "⭐ জনপ্রিয় কোর্স";
+    document.getElementById("courseImage").value = "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&auto=format&fit=crop&q=80";
+    document.getElementById("courseFeatures").value = "• কম্পিউটার পরিচিতি ও উইন্ডোজ অপারেটিং সিস্টেম\n• MS Word, MS Excel, MS PowerPoint\n• দ্রুত বাংলা ও ইংরেজি টাইপিং\n• ১ জন শিক্ষার্থীর জন্য ১টি কম্পিউটার";
+    document.getElementById("courseActive").value = "true";
+    updatePreview("courseImage", "courseImagePreview");
+  } else {
+    const c = courses.find(item => item.id === id);
+    if(!c) return;
+    document.getElementById("courseModalTitle").textContent = "প্রশিক্ষণ কোর্স এডিট করুন";
+    document.getElementById("courseType").value = c.type || "Foundation";
+    document.getElementById("courseName").value = c.name || "";
+    document.getElementById("courseTagline").value = c.tagline || "";
+    document.getElementById("courseDuration").value = c.duration || "";
+    document.getElementById("courseRegularPrice").value = c.regularPrice || "";
+    document.getElementById("coursePrice").value = c.price || "";
+    document.getElementById("courseCertificate").value = c.certificate || "";
+    document.getElementById("courseBadge").value = c.badge || "";
+    document.getElementById("courseImage").value = c.image || "";
+    document.getElementById("courseFeatures").value = c.features || "";
+    document.getElementById("courseActive").value = c.active !== false ? "true" : "false";
+    updatePreview("courseImage", "courseImagePreview");
+  }
+  document.getElementById("courseModalAdmin").classList.add("show");
+}
+
+async function saveCourseItem(){
+  const name = document.getElementById("courseName").value.trim();
+  if(!name){ toast("⚠️ কোর্সের নাম আবশ্যক"); return; }
+
+  const editId = document.getElementById("courseEditId").value;
+  const id = editId || ("course_" + Date.now());
+
+  const courseData = {
+    id: id,
+    type: document.getElementById("courseType").value,
+    name: name,
+    tagline: document.getElementById("courseTagline").value.trim(),
+    duration: document.getElementById("courseDuration").value.trim(),
+    regularPrice: document.getElementById("courseRegularPrice").value.trim(),
+    price: document.getElementById("coursePrice").value.trim(),
+    certificate: document.getElementById("courseCertificate").value.trim(),
+    badge: document.getElementById("courseBadge").value.trim(),
+    image: document.getElementById("courseImage").value.trim() || "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&auto=format&fit=crop&q=80",
+    features: document.getElementById("courseFeatures").value.trim(),
+    active: document.getElementById("courseActive").value === "true"
+  };
+
+  const idx = courses.findIndex(c => c.id === id);
+  if(idx >= 0){
+    courses[idx] = courseData;
+  } else {
+    courses.push(courseData);
+  }
+
+  // Also sync to services list under category 'training' so training is updated in both places
+  const existingService = services.find(s => s.id === "srv_" + id || s.name === name);
+  if(existingService){
+    existingService.name = courseData.name;
+    existingService.desc = courseData.tagline;
+    existingService.price = courseData.price;
+    existingService.regularPrice = courseData.regularPrice;
+    existingService.image = courseData.image;
+    existingService.features = courseData.features;
+    existingService.badge = courseData.badge || (courseData.type === "BTEB" ? "🏛️ BTEB" : "⭐ Foundation");
+    existingService.active = courseData.active;
+  } else {
+    services.push({
+      id: "srv_" + id,
+      category: "training",
+      emoji: "🎓",
+      badge: courseData.badge || (courseData.type === "BTEB" ? "🏛️ BTEB অনুমোদিত" : "⭐ Foundation"),
+      image: courseData.image,
+      name: courseData.name,
+      desc: courseData.tagline,
+      regularPrice: courseData.regularPrice,
+      price: courseData.price,
+      unitPrice: parseInt(courseData.price.replace(/[^\d]/g, '')) || 2500,
+      active: courseData.active,
+      actionBtn: "ভর্তি আবেদন",
+      features: courseData.features
+    });
+  }
+
+  localStorage.setItem("sc_courses", JSON.stringify(courses));
+  localStorage.setItem("sc_services", JSON.stringify(services));
+  renderCoursesTable();
+  renderServicesTable();
+  closeModal('courseModalAdmin');
+
+  if(db){
+    try {
+      await db.collection("courses").doc(id).set(courseData);
+      toast("✅ কোর্স ফায়ারবেস ক্লাউডে সফলভাবে সংরক্ষিত হয়েছে!");
+    } catch(err){
+      toast("✅ লোকালি সংরক্ষিত হয়েছে");
+    }
+  } else {
+    toast("✅ লোকালি সংরক্ষিত হয়েছে");
+  }
+}
+
+async function deleteCourseItem(id){
+  if(!confirm("আপনি কি নিশ্চিতভাবে এই কোর্সটি মুছে ফেলতে চান?")) return;
+  courses = courses.filter(c => c.id !== id);
+  localStorage.setItem("sc_courses", JSON.stringify(courses));
+  renderCoursesTable();
+  if(db){
+    try {
+      await db.collection("courses").doc(id).delete();
+    } catch(e){}
+  }
+  toast("🗑️ কোর্স মুছে ফেলা হয়েছে");
+}
+
+async function toggleCourseActive(id){
+  const c = courses.find(item => item.id === id);
+  if(!c) return;
+  c.active = (c.active === false);
+  localStorage.setItem("sc_courses", JSON.stringify(courses));
+  renderCoursesTable();
+  if(db){
+    try { await db.collection("courses").doc(id).update({ active: c.active }); }catch(e){}
+  }
+  toast(`কোর্স স্ট্যাটাস: ${c.active ? 'চালু' : 'বন্ধ'}`);
+}
+
+async function resetCoursesToDefaults(){
+  if(!confirm("আপনি কি ডিফল্ট ২ কোর্স (Foundation ও BTEB) রিস্টোর করতে চান?")) return;
+  courses = JSON.parse(JSON.stringify(DEFAULT_COURSES));
+  localStorage.setItem("sc_courses", JSON.stringify(courses));
+  renderCoursesTable();
+  if(db){
+    const batch = db.batch();
+    courses.forEach(c => {
+      const ref = db.collection("courses").doc(c.id);
+      batch.set(ref, c);
+    });
+    await batch.commit();
+  }
+  toast("✅ ডিফল্ট Foundation ও BTEB কোর্স লোড ও সিঙ্ক হয়েছে!");
+}
+
+/* ========================================================
+   6.2. SHIFTS / BATCHES CRUD
+   ======================================================== */
+function renderShiftsTable(){
+  const tbody = document.getElementById("shiftsTableBody");
+  if(!tbody) return;
+  tbody.innerHTML = "";
+
+  shifts.forEach(sh => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><b>${sh.name}</b></td>
+      <td>
+        <button class="btn" style="padding:2px 8px;font-size:11px;background:${sh.active !== false ? '#dcfce7' : '#fee2e2'};color:${sh.active !== false ? '#166534' : '#991b1b'};font-weight:bold;border:none;" onclick="toggleShiftActive('${sh.id}')">
+          ${sh.active !== false ? '● চালু' : '○ বন্ধ'}
+        </button>
+      </td>
+      <td>
+        <div style="display:flex;gap:4px;justify-content:flex-end;">
+          <button class="btn btn-outline" style="padding:4px 8px;font-size:11px;" onclick="openShiftModal('${sh.id}')">✏️</button>
+          <button class="btn btn-red" style="padding:4px 8px;font-size:11px;" onclick="deleteShiftItem('${sh.id}')">🗑️</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function openShiftModal(id = null){
+  document.getElementById("shiftEditId").value = id || "";
+  if(!id){
+    document.getElementById("shiftModalTitle").textContent = "নতুন শিফট যোগ করুন";
+    document.getElementById("shiftName").value = "";
+    document.getElementById("shiftActive").value = "true";
+  } else {
+    const sh = shifts.find(item => item.id === id);
+    if(!sh) return;
+    document.getElementById("shiftModalTitle").textContent = "শিফট এডিট করুন";
+    document.getElementById("shiftName").value = sh.name || "";
+    document.getElementById("shiftActive").value = sh.active !== false ? "true" : "false";
+  }
+  document.getElementById("shiftModalAdmin").classList.add("show");
+}
+
+async function saveShiftItem(){
+  const name = document.getElementById("shiftName").value.trim();
+  if(!name){ toast("⚠️ শিফটের নাম ও সময়সূচি দিন"); return; }
+
+  const editId = document.getElementById("shiftEditId").value;
+  const id = editId || ("sh_" + Date.now());
+
+  const shiftData = {
+    id: id,
+    name: name,
+    active: document.getElementById("shiftActive").value === "true"
+  };
+
+  const idx = shifts.findIndex(s => s.id === id);
+  if(idx >= 0){
+    shifts[idx] = shiftData;
+  } else {
+    shifts.push(shiftData);
+  }
+
+  localStorage.setItem("sc_shifts", JSON.stringify(shifts));
+  renderShiftsTable();
+  closeModal('shiftModalAdmin');
+
+  if(db){
+    try {
+      await db.collection("shifts").doc(id).set(shiftData);
+      toast("✅ শিফট ক্লাউডে সংরক্ষিত হয়েছে!");
+    } catch(err){
+      toast("✅ শিফট লোকালি সংরক্ষিত হয়েছে");
+    }
+  } else {
+    toast("✅ শিফট লোকালি সংরক্ষিত হয়েছে");
+  }
+}
+
+async function deleteShiftItem(id){
+  if(!confirm("আপনি কি নিশ্চিতভাবে এই শিফটটি মুছে ফেলতে চান?")) return;
+  shifts = shifts.filter(s => s.id !== id);
+  localStorage.setItem("sc_shifts", JSON.stringify(shifts));
+  renderShiftsTable();
+  if(db){
+    try { await db.collection("shifts").doc(id).delete(); }catch(e){}
+  }
+  toast("🗑️ শিফট মুছে ফেলা হয়েছে");
+}
+
+async function toggleShiftActive(id){
+  const sh = shifts.find(item => item.id === id);
+  if(!sh) return;
+  sh.active = (sh.active === false);
+  localStorage.setItem("sc_shifts", JSON.stringify(shifts));
+  renderShiftsTable();
+  if(db){
+    try { await db.collection("shifts").doc(id).update({ active: sh.active }); }catch(e){}
+  }
+  toast(`শিফট স্ট্যাটাস: ${sh.active ? 'চালু' : 'বন্ধ'}`);
 }
 
 /* ========================================================

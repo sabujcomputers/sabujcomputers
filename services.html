@@ -713,12 +713,13 @@
     display: flex;
     flex-direction: column;
     cursor: pointer;
-    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    transition: transform 0.28s cubic-bezier(0.34, 1.3, 0.64, 1), box-shadow 0.28s ease, border-color 0.28s ease;
+    will-change: transform, box-shadow;
   }
   .srv-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow);
-    border-color: var(--leaf);
+    transform: translateY(-5px) scale(1.02);
+    border-color: rgba(34, 197, 94, 0.7);
+    box-shadow: 0 14px 28px -4px rgba(15, 61, 36, 0.15), 0 0 0 1.5px rgba(34, 197, 94, 0.35), 0 4px 12px rgba(34, 197, 94, 0.12);
   }
   .srv-thumb-wrap {
     position: relative;
@@ -1126,7 +1127,7 @@
 <!-- Print-Only Header -->
 <div class="print-only-banner">
   <h1 id="printShopTitle" style="margin:0;font-family:'Baloo Da 2',sans-serif;font-size:24px;">সবুজ কম্পিউটার্স — সেবা ও মূল্য তালিকা</h1>
-  <p id="printShopSub" style="margin:4px 0;font-size:13px;">তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর · মোবাইল: ০১৭১৪-০৮৪৩৫০ · ওয়েব: sabujcomputers.pro.bd</p>
+  <p id="printShopSub" style="margin:4px 0;font-size:13px;">তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর · মোবাইল: ০১৭২৪-০৮৪৩৫০ · ওয়েব: sabujcomputers.pro.bd</p>
 </div>
 
 <!-- Hero Banner / Signboard -->
@@ -1174,7 +1175,7 @@
     <!-- Quick Direct Contact Strip -->
     <div class="hero-quick-strip">
       <a class="hero-quick-pill" id="heroWhatsAppBtn" href="https://wa.me/8801724084350" target="_blank" rel="noopener">
-        <span>💬 WhatsApp: ০১৭১৪-০৮৪৩৫০</span>
+        <span>💬 WhatsApp: ০১৭২৪-০৮৪৩৫০</span>
       </a>
       <a class="hero-quick-pill" id="heroCallBtn" href="tel:01724084350">
         <span>📞 সরাসরি কল: ০১৭২৪-০৮৪৩৫০</span>
@@ -1374,7 +1375,7 @@
 <!-- Footer -->
 <footer style="text-align:center;padding:32px 16px 20px;color:var(--ink-soft);font-size:13px;line-height:1.8;">
   সব স্বত্ব সংরক্ষিত © <span id="footerShopTitle">সবুজ কম্পিউটার্স</span>, <span id="footerAddress">বাগাতিপাড়া, নাটোর</span><br>
-  প্রোপ্রাইটর: <span id="footerProprietor">মোঃ সবুজ আলী</span> · মোবাইল: <span id="footerPhone">০১৭১৪-০৮৪৩৫০</span><br>
+  প্রোপ্রাইটর: <span id="footerProprietor">মোঃ সবুজ আলী</span> · মোবাইল: <span id="footerPhone">০১৭২৪-০৮৪৩৫০</span><br>
   ওয়েবসাইট: <a href="https://sabujcomputers.pro.bd/" target="_blank" rel="noopener" style="color:var(--forest);font-weight:700;">sabujcomputers.pro.bd</a> · <a href="admin.html" style="color:inherit;text-decoration:none;opacity:0.35;font-size:11px;" title="অ্যাডমিন">অ্যাডমিন</a>
 </footer>
 
