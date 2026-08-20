@@ -602,16 +602,21 @@
 <header class="admin-header">
   <div class="header-wrap">
     <div class="admin-brand">
-      <img id="headerLogoImg" src="https://cdn-icons-png.flaticon.com/512/3067/3067443.png" class="header-logo-thumb" alt="সবুজ কম্পিউটার্স লোগো">
+      <img id="headerLogoImg" src="https://cdn-icons-png.flaticon.com/512/3067/3067443.png" class="header-logo-thumb" alt="লোগো">
       <div>
-        <h1 id="headerShopTitle">সবুজ কম্পিউটার্স অ্যাডমিন প্যানেল</h1>
-        <p id="headerShopSub">সেবা তালিকা, লোগো, বাংলা কিউআর ও পোস্টার জেনারেটর</p>
+        <h1 id="headerShopTitle">সবুজ কম্পিউটার্স কন্ট্রোল প্যানেল</h1>
+        <p id="headerShopSub">সবকিছু কাস্টমাইজেশন ও সম্পূর্ণ ওয়েবসাইট নিয়ন্ত্রণ</p>
       </div>
     </div>
     <div class="header-actions">
-      <a href="services.html" target="_blank" class="nav-btn">🌐 মূল ওয়েবসাইট ভিউ</a>
-      <button class="nav-btn" onclick="saveAllToFirestore()">💾 ক্লাউড ডাটাবেজ সিঙ্ক</button>
-      <button class="nav-btn" id="logoutBtn" style="display:none;background:rgba(220,38,38,.4);" onclick="adminLogout()">🚪 লগআউট</button>
+      <div id="adminBstClock" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.12);padding:6px 14px;border-radius:999px;font-size:12.5px;font-weight:700;color:#fff;border:1px solid rgba(255,255,255,0.2);">
+        <span>🕒 বাংলাদেশ সময়:</span>
+        <span id="adminLiveClock">--:--:--</span>
+      </div>
+      <a href="index.html" target="_blank" class="nav-btn">🌐 মূল ওয়েবসাইট</a>
+      <button class="nav-btn" style="background:#15803d;" onclick="resetToFactoryDefaults(true)">🔄 ডিফল্ট ডাটা লোড</button>
+      <button class="nav-btn" style="background:#0284c7;" onclick="saveAllToFirestore()">💾 ক্লাউড সিঙ্ক</button>
+      <button class="nav-btn" id="logoutBtn" style="display:none;background:rgba(220,38,38,.7);" onclick="adminLogout()">🚪 লগআউট</button>
     </div>
   </div>
 </header>
@@ -641,32 +646,50 @@
     <div class="admin-tabs">
       <button class="tab-item active" onclick="switchAdminTab('services')">🛠️ সেবাসমূহ (Services)</button>
       <button class="tab-item" onclick="switchAdminTab('categories')">📁 ক্যাটাগরি (Categories)</button>
+      <button class="tab-item" onclick="switchAdminTab('rates')">🏷️ মূল্য তালিকা ও রেট কার্ড</button>
       <button class="tab-item" onclick="switchAdminTab('payments')">💳 পেমেন্ট ও বাংলা কিউআর</button>
-      <button class="tab-item" onclick="switchAdminTab('poster')">🖨️ কিউআর ও পোস্টার জেনারেটর</button>
+      <button class="tab-item" onclick="switchAdminTab('poster')">🖨️ কিউআর ও পোস্টার</button>
       <button class="tab-item" onclick="switchAdminTab('gallery')">📸 ফটো গ্যালারি</button>
+      <button class="tab-item" onclick="switchAdminTab('faqs')">❓ প্রশ্নোত্তর ও রিভিউ</button>
       <button class="tab-item" onclick="switchAdminTab('orders')">📦 রিয়েলটাইম অর্ডারস</button>
-      <button class="tab-item" onclick="switchAdminTab('settings')">⚙️ সাইট সেটিংস ও পাসওয়ার্ড</button>
+      <button class="tab-item" onclick="switchAdminTab('settings')">⚙️ সাইট সেটিংস ও ব্র্যান্ডিং</button>
+      <button class="tab-item" onclick="switchAdminTab('backup')">💾 ব্যাকআপ ও রিস্টোর</button>
     </div>
 
     <!-- TAB 1: SERVICES MANAGEMENT -->
     <div id="tab_services" class="tab-content">
       <div class="panel-card">
         <div class="panel-head">
-          <h2>🛠️ সকল সেবা ও আইটেম তালিকা (<span id="servicesCount">0</span>)</h2>
-          <button class="btn btn-green" onclick="openServiceModal()">+ নতুন সেবা যোগ করুন</button>
+          <div>
+            <h2>🛠️ সকল সেবা ও আইটেম তালিকা (<span id="servicesCount">0</span>)</h2>
+            <p style="font-size:12px;color:var(--ink-soft);margin:2px 0 0;">যেকোনো সেবার তথ্য, মূল্য, ছবি, বিবরণ এডিট বা চালু/বন্ধ করুন</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-gold" onclick="resetToFactoryDefaults(false)">🔄 ডিফল্ট সেবা আনুন</button>
+            <button class="btn btn-green" onclick="openServiceModal()">+ নতুন সেবা যোগ করুন</button>
+          </div>
+        </div>
+
+        <!-- Search & Filter Bar -->
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:14px;">
+          <input type="text" class="inp" id="serviceSearchInput" placeholder="🔍 সেবার নাম বা বিবরণ দিয়ে খুঁজুন..." oninput="filterServicesTable()" style="margin-bottom:0;">
+          <select class="inp" id="serviceCatFilter" onchange="filterServicesTable()" style="margin-bottom:0;width:auto;">
+            <option value="all">📁 সকল ক্যাটাগরি</option>
+          </select>
         </div>
 
         <div style="overflow-x:auto;">
           <table class="data-table">
             <thead>
               <tr>
-                <th>ছবি ও আইকন</th>
+                <th>ছবি</th>
                 <th>সেবার নাম</th>
                 <th>ক্যাটাগরি</th>
-                <th>মূল্য</th>
+                <th>প্রদর্শন মূল্য</th>
+                <th>কার্ট রেট</th>
                 <th>ব্যাজ</th>
                 <th>স্ট্যাটাস</th>
-                <th>অ্যাকশন</th>
+                <th style="text-align:right;">অ্যাকশন</th>
               </tr>
             </thead>
             <tbody id="servicesTableBody"></tbody>
@@ -694,6 +717,35 @@
               </tr>
             </thead>
             <tbody id="categoriesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: RATE CARD & PRICE TABLE -->
+    <div id="tab_rates" class="tab-content" style="display:none;">
+      <div class="panel-card">
+        <div class="panel-head">
+          <div>
+            <h2>🏷️ মূল্য তালিকা ও রেট কার্ড কনফিগারেশন</h2>
+            <p style="font-size:12px;color:var(--ink-soft);margin:2px 0 0;">ফটোকপি, প্রিন্ট, ছবি ও সকল সেবার নির্দিষ্ট একক রেট নির্ধারণ করুন</p>
+          </div>
+          <button class="btn btn-green" onclick="openRateModal()">+ নতুন রেট আইটেম যোগ করুন</button>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>আইকন</th>
+                <th>সেবার রেট শিরোনাম</th>
+                <th>ধরন / সাইজ</th>
+                <th>নির্ধারিত মূল্য</th>
+                <th>স্ট্যাটাস</th>
+                <th>অ্যাকশন</th>
+              </tr>
+            </thead>
+            <tbody id="ratesTableBody"></tbody>
           </table>
         </div>
       </div>
@@ -772,7 +824,7 @@
             </div>
             <div>
               <label class="field-label">হটলাইন ফোন নম্বর:</label>
-              <input type="text" class="inp" id="posterCtrlPhone" value="০১৭১৪-০৮৪৩৫০" oninput="updatePosterLivePreview()">
+              <input type="text" class="inp" id="posterCtrlPhone" value="০১৭২৪-০৮৪৩৫০" oninput="updatePosterLivePreview()">
             </div>
           </div>
         </div>
@@ -811,7 +863,7 @@
 
           <div class="poster-footer">
             <b id="posterAddress">তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর</b><br>
-            📞 হটলাইন: <span id="posterPhone" class="mono">০১৭১৪-০৮৪৩৫০</span> · প্রোপ্রাইটর: <span id="posterProprietor">মোঃ সবুজ আলী</span>
+            📞 হটলাইন: <span id="posterPhone" class="mono">০১৭২৪-০৮৪৩৫০</span> · প্রোপ্রাইটর: <span id="posterProprietor">মোঃ সবুজ আলী</span>
           </div>
         </div>
       </div>
@@ -835,6 +887,56 @@
               </tr>
             </thead>
             <tbody id="galleryTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: FAQS & TESTIMONIALS -->
+    <div id="tab_faqs" class="tab-content" style="display:none;">
+      <!-- FAQs Section -->
+      <div class="panel-card" style="margin-bottom:16px;">
+        <div class="panel-head">
+          <div>
+            <h2>❓ সাধারণ প্রশ্নোত্তর (FAQs Management)</h2>
+            <p style="font-size:12px;color:var(--ink-soft);margin:2px 0 0;">গ্রাহকরা ওয়েবসাইটে যেসব জরুরি প্রশ্নের উত্তর দেখতে পাবেন</p>
+          </div>
+          <button class="btn btn-green" onclick="openFaqModal()">+ নতুন প্রশ্ন যোগ করুন</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>প্রশ্ন</th>
+                <th>উত্তর</th>
+                <th>অ্যাকশন</th>
+              </tr>
+            </thead>
+            <tbody id="faqsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Testimonials / Reviews Section -->
+      <div class="panel-card">
+        <div class="panel-head">
+          <div>
+            <h2>⭐ কাস্টমার রিভিউ ও মতামত (Testimonials)</h2>
+            <p style="font-size:12px;color:var(--ink-soft);margin:2px 0 0;">গ্রাহকদের সন্তুষ্টির রিভিউ প্রদর্শন করুন</p>
+          </div>
+          <button class="btn btn-green" onclick="openReviewModal()">+ নতুন রিভিউ যোগ করুন</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>নাম ও পরিচয়</th>
+                <th>রেটিং</th>
+                <th>মন্তব্য</th>
+                <th>অ্যাকশন</th>
+              </tr>
+            </thead>
+            <tbody id="reviewsTableBody"></tbody>
           </table>
         </div>
       </div>
@@ -914,7 +1016,7 @@
 
         <!-- 2. Status & Contact -->
         <div class="setting-group-box">
-          <div class="setting-group-title">📞 ২. যোগাযোগ ও খোলার সময়সূচি (Contact & Business Hours)</div>
+          <div class="setting-group-title">📞 ২. যোগাযোগ ও রিয়েল-টাইম খোলার সময়সূচি (Contact & Smart Business Hours)</div>
           
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
             <div>
@@ -927,22 +1029,37 @@
             </div>
           </div>
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-            <div>
-              <label class="field-label">দোকানের বর্তমান স্ট্যাটাস:</label>
-              <select class="inp" id="settingShopStatus">
-                <option value="open">🟢 দোকান খোলা আছে (Open)</option>
-                <option value="closed">🔴 দোকান বন্ধ আছে (Closed)</option>
-                <option value="break">🟡 সাময়িক বিরতি (Break)</option>
-              </select>
+          <div style="margin-top:10px;background:var(--paper-2);border:1px solid var(--line);border-radius:10px;padding:12px;">
+            <label class="field-label" style="font-weight:700;color:var(--forest);">দোকান খোলা/বন্ধ মোড (Shop Status Mode):</label>
+            <select class="inp" id="settingShopStatusMode" onchange="toggleScheduleFields()" style="font-weight:700;">
+              <option value="auto">⚡ স্বয়ংক্রিয় স্মার্ট মোড (বাংলাদেশ ঘড়ির সময় অনুযায়ী অটো খোলা ও বন্ধ)</option>
+              <option value="force_open">🟢 ম্যানুয়ালি সবসময় খোলা (Force Open)</option>
+              <option value="force_closed">🔴 ম্যানুয়ালি বন্ধ রাখুন (Force Closed)</option>
+              <option value="break">🟡 সাময়িক বিরতি / নামাজের বিরতি (Temporary Break)</option>
+            </select>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;">
+              <div>
+                <label class="field-label">প্রতিদিন খোলার সময়:</label>
+                <input type="time" class="inp" id="settingOpenTime" value="08:00">
+              </div>
+              <div>
+                <label class="field-label">প্রতিদিন বন্ধের সময়:</label>
+                <input type="time" class="inp" id="settingCloseTime" value="21:30">
+              </div>
+              <div>
+                <label class="field-label">বিরতির কারণ / নোট:</label>
+                <input type="text" class="inp" id="settingBreakNote" placeholder="নামাজের বিরতি (১৫ মিনিট)">
+              </div>
             </div>
-            <div>
-              <label class="field-label">খোলার সময়সূচি টেক্সট:</label>
+
+            <div style="margin-top:8px;">
+              <label class="field-label">ডিসপ্লেতে প্রদর্শিত সময়সূচি টেক্সট:</label>
               <input type="text" class="inp" id="settingBusinessHours" value="সকাল ৮:০০ - রাত ৯:৩০ (প্রতিদিন খোলা)">
             </div>
           </div>
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
             <div>
               <label class="field-label">ইমেইল এড্রেস (ঐচ্ছিক):</label>
               <input type="email" class="inp" id="settingEmail" placeholder="sabuj@example.com">
@@ -1038,6 +1155,50 @@
       </div>
     </div>
 
+    <!-- TAB: BACKUP, RESTORE & EXPORT -->
+    <div id="tab_backup" class="tab-content" style="display:none;">
+      <div class="panel-card" style="max-width:760px;">
+        <div class="panel-head">
+          <div>
+            <h2>💾 ডেটা ব্যাকআপ, রিস্টোর ও এক্সপোর্ট</h2>
+            <p style="font-size:12px;color:var(--ink-soft);margin:2px 0 0;">ওয়েবসাইটের সকল ডেটা এক ক্লিকে ডাউনলোড, আপলোড বা এক্সপোর্ট করুন</p>
+          </div>
+        </div>
+
+        <div class="setting-group-box">
+          <div class="setting-group-title">📥 ১. সম্পূর্ণ ওয়েবসাইট ব্যাকআপ ডাউনলোড (JSON)</div>
+          <p style="font-size:13px;color:var(--ink-soft);margin-bottom:10px;">
+            সকল সেবা, ক্যাটাগরি, মূল্য তালিকা, সেটিংস, ছবি ও পেমেন্ট তথ্যের সম্পূর্ণ ব্যাকআপ ফাইল আপনার কম্পিউটারে ডাউনলোড করে রাখুন:
+          </p>
+          <button class="btn btn-gold" onclick="exportFullSiteBackup()">📥 ব্যাকআপ ডাউনলোড করুন (JSON)</button>
+        </div>
+
+        <div class="setting-group-box">
+          <div class="setting-group-title">📤 ২. ব্যাকআপ ফাইল থেকে রিস্টোর (Restore from JSON)</div>
+          <p style="font-size:13px;color:var(--ink-soft);margin-bottom:10px;">
+            পূর্বে ডাউনলোড করা কোনো JSON ব্যাকআপ ফাইল নির্বাচন করে ওয়েবসাইট ও ক্লাউড ডাটাবেজ রিস্টোর করুন:
+          </p>
+          <input type="file" id="backupFileInput" accept=".json" style="margin-bottom:8px;" onchange="importFullSiteBackup(event)">
+        </div>
+
+        <div class="setting-group-box">
+          <div class="setting-group-title">📊 ৩. সকল কাস্টমার অর্ডার এক্সেল/CSV ফাইলে ডাউনলোড</div>
+          <p style="font-size:13px;color:var(--ink-soft);margin-bottom:10px;">
+            গ্রাহকদের সকল প্রিন্ট ও সার্ভিসের অর্ডার রিপোর্ট এক্সেলে (.csv) সংরক্ষণ করুন:
+          </p>
+          <button class="btn btn-sky" onclick="exportOrdersToCSV()">📊 অর্ডার রিপোর্ট ডাউনলোড (CSV)</button>
+        </div>
+
+        <div class="setting-group-box" style="border-color:#ef4444;">
+          <div class="setting-group-title" style="color:#dc2626;">⚠️ ৪. ডিফল্ট তথ্যে রিসেট করুন (Factory Reset)</div>
+          <p style="font-size:13px;color:var(--ink-soft);margin-bottom:10px;">
+            সবুজ কম্পিউটার্স-এর মূল ৯টি ডিফল্ট সেবা, সকল ক্যাটাগরি ও স্ট্যান্ডার্ড সেটিংস স্বয়ংক্রিয়ভাবে পুনরায় লোড করুন:
+          </p>
+          <button class="btn btn-red" onclick="resetToFactoryDefaults(true)">🔄 সম্পূর্ণ ডিফল্ট ডেটা লোড ও সিঙ্ক করুন</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1100,20 +1261,21 @@
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
       <div>
-        <label class="field-label">স্পেশাল ব্যাজ:</label>
-        <select class="inp" id="srvBadge">
-          <option value="">কোনো ব্যাজ নেই</option>
-          <option value="hot">🔥 হট অফার</option>
-          <option value="pop">⭐ জনপ্রিয়</option>
-          <option value="new">🆕 নতুন</option>
-          <option value="sale">💥 বিশেষ ছাড়</option>
-        </select>
+        <label class="field-label">স্পেশাল ব্যাজ / অফার:</label>
+        <input type="text" class="inp" id="srvBadge" placeholder="উদাঃ 🔥 হট অফার / ⭐ জনপ্রিয়">
       </div>
+      <div>
+        <label class="field-label">অ্যাকশন বাটন টেক্সট:</label>
+        <input type="text" class="inp" id="srvActionBtn" placeholder="উদাঃ অর্ডার করুন / ফাইল পাঠান">
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr;gap:8px;">
       <div>
         <label class="field-label">স্ট্যাটাস:</label>
         <select class="inp" id="srvActive">
-          <option value="true">চালু (Active)</option>
-          <option value="false">বন্ধ (Inactive)</option>
+          <option value="true">🟢 চালু (Active)</option>
+          <option value="false">🔴 বন্ধ (Inactive)</option>
         </select>
       </div>
     </div>
@@ -1136,10 +1298,112 @@
     <label class="field-label">ক্যাটাগরির নাম (লেবেল):</label>
     <input type="text" class="inp" id="catLabel" placeholder="উদাঃ 📚 বই ও স্টেশনারি">
     <label class="field-label">ক্যাটাগরি Key (ইংরেজি কোড):</label>
-    <input type="text" class="inp" id="catKey" placeholder="উদাঃ books">
+    <input type="text" class="inp" id="catKey" placeholder="উদা:: books">
+    <label class="field-label">ইমোজি আইকন:</label>
+    <input type="text" class="inp" id="catEmoji" placeholder="উদাঃ 📚">
     <div style="display:flex;gap:8px;margin-top:12px;">
       <button class="btn btn-outline" style="flex:1;justify-content:center;" onclick="closeModal('catModal')">বাতিল</button>
       <button class="btn btn-green" style="flex:1;justify-content:center;" onclick="saveCategoryItem()">সংরক্ষণ</button>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Rate Card Modal -->
+<div class="modal-backdrop" id="rateModal">
+  <div class="modal-container" style="max-width:460px;">
+    <div class="panel-head">
+      <h2 id="rateModalTitle">রেট আইটেম যোগ / এডিট</h2>
+      <button style="background:none;border:none;font-size:18px;cursor:pointer;" onclick="closeModal('rateModal')">✕</button>
+    </div>
+    <input type="hidden" id="rateEditId">
+    <label class="field-label">রেটের নাম / সেবার শিরোনাম:</label>
+    <input type="text" class="inp" id="rateName" placeholder="উদাঃ সাদাকালো ডিজিটাল ফটোকপি">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div>
+        <label class="field-label">আইকন / ইমোজি:</label>
+        <input type="text" class="inp" id="rateEmoji" placeholder="উদাঃ 📄">
+      </div>
+      <div>
+        <label class="field-label">ধরন / পরিমাপ:</label>
+        <input type="text" class="inp" id="rateType" placeholder="উদাঃ প্রতি পাতা (A4)">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div>
+        <label class="field-label">নির্ধারিত মূল্য (টাকা):</label>
+        <input type="text" class="inp" id="ratePrice" placeholder="উদাঃ ২৳">
+      </div>
+      <div>
+        <label class="field-label">স্ট্যাটাস:</label>
+        <select class="inp" id="rateActive">
+          <option value="true">চালু</option>
+          <option value="false">বন্ধ</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn btn-outline" style="flex:1;justify-content:center;" onclick="closeModal('rateModal')">বাতিল</button>
+      <button class="btn btn-green" style="flex:1;justify-content:center;" onclick="saveRateItem()">সংরক্ষণ</button>
+    </div>
+  </div>
+</div>
+
+<!-- 4. FAQ Modal -->
+<div class="modal-backdrop" id="faqModal">
+  <div class="modal-container" style="max-width:500px;">
+    <div class="panel-head">
+      <h2 id="faqModalTitle">প্রশ্নোত্তর যোগ / এডিট</h2>
+      <button style="background:none;border:none;font-size:18px;cursor:pointer;" onclick="closeModal('faqModal')">✕</button>
+    </div>
+    <input type="hidden" id="faqEditId">
+    <label class="field-label">প্রশ্ন:</label>
+    <input type="text" class="inp" id="faqQuestion" placeholder="উদাঃ দূর থেকে অনলাইনে কীভাবে প্রিন্ট অর্ডার করব?">
+    <label class="field-label">উত্তর:</label>
+    <textarea class="inp" id="faqAnswer" rows="3" placeholder="উদাঃ ফাইল আপলোড করে অথবা WhatsApp এ পাঠিয়ে খুব সহজেই অর্ডার করতে পারবেন..."></textarea>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn btn-outline" style="flex:1;justify-content:center;" onclick="closeModal('faqModal')">বাতিল</button>
+      <button class="btn btn-green" style="flex:1;justify-content:center;" onclick="saveFaqItem()">সংরক্ষণ</button>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Review / Testimonial Modal -->
+<div class="modal-backdrop" id="reviewModal">
+  <div class="modal-container" style="max-width:480px;">
+    <div class="panel-head">
+      <h2 id="reviewModalTitle">রিভিউ যোগ / এডিট</h2>
+      <button style="background:none;border:none;font-size:18px;cursor:pointer;" onclick="closeModal('reviewModal')">✕</button>
+    </div>
+    <input type="hidden" id="reviewEditId">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div>
+        <label class="field-label">গ্রাহকের নাম:</label>
+        <input type="text" class="inp" id="reviewName" placeholder="উদাঃ মোঃ রফিকুল ইসলাম">
+      </div>
+      <div>
+        <label class="field-label">ঠিকানা / পরিচয়:</label>
+        <input type="text" class="inp" id="reviewLocation" placeholder="উদাঃ বাগাতিপাড়া">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div>
+        <label class="field-label">স্টার রেটিং (১-৫):</label>
+        <select class="inp" id="reviewRating">
+          <option value="5">⭐⭐⭐⭐⭐ (৫ স্টার)</option>
+          <option value="4">⭐⭐⭐⭐ (৪ স্টার)</option>
+          <option value="3">⭐⭐⭐ (৩ স্টার)</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label">ইমোজি / ছবি:</label>
+        <input type="text" class="inp" id="reviewAvatar" placeholder="উদাঃ 👨‍🎓">
+      </div>
+    </div>
+    <label class="field-label">গ্রাহকের মন্তব্য:</label>
+    <textarea class="inp" id="reviewComment" rows="2" placeholder="উদাঃ সবুজ ভাইয়ের দোকানের প্রিন্টিং কোয়ালিটি এবং সার্ভিস সত্যিই অতুলনীয়..."></textarea>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn btn-outline" style="flex:1;justify-content:center;" onclick="closeModal('reviewModal')">বাতিল</button>
+      <button class="btn btn-green" style="flex:1;justify-content:center;" onclick="saveReviewItem()">সংরক্ষণ</button>
     </div>
   </div>
 </div>
@@ -1253,11 +1517,312 @@ window.addEventListener("firestore-ready", () => {
   }
 });
 
+// Default Seed Data for 100% customizability
+const DEFAULT_CATEGORIES = [
+  { key: "books", label: "📚 বই ও স্টেশনারি", emoji: "📚" },
+  { key: "photo", label: "🖨️ ফটো ও প্রিন্ট", emoji: "🖨️" },
+  { key: "online", label: "🌐 অনলাইন সেবা", emoji: "🌐" },
+  { key: "training", label: "🎓 প্রশিক্ষণ", emoji: "🎓" }
+];
+
+const DEFAULT_SERVICES = [
+  {
+    id: "s1",
+    category: "books",
+    emoji: "📚",
+    badge: "⭐ জনপ্রিয়",
+    image: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600&auto=format&fit=crop&q=80",
+    name: "সকল প্রকার বই",
+    desc: "স্কুল, কলেজ ও প্রতিযোগিতামূলক পরীক্ষার সকল বই সুলভ মূল্যে পাওয়া যায়।",
+    regularPrice: "৬০৳",
+    price: "৫০৳ থেকে",
+    unitPrice: 50,
+    active: true,
+    actionBtn: "অর্ডার করুন",
+    features: "• স্কুল, কলেজ ও মাদ্রাসার পাঠ্যবই\n• বিসিএস ও চাকরির গাইড বই\n• ইসলামিক ও গল্প-উপন্যাসের বই"
+  },
+  {
+    id: "s2",
+    category: "books",
+    emoji: "✏️",
+    badge: "",
+    image: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=600&auto=format&fit=crop&q=80",
+    name: "খাতা, কলম ও স্টেশনারি",
+    desc: "যাবতীয় শিক্ষা সামগ্রী ও অফিসের স্টেশনারি সুলভ মূল্যে বিক্রয় করা হয়।",
+    price: "২৫৳ থেকে",
+    unitPrice: 25,
+    active: true,
+    actionBtn: "অর্ডার করুন",
+    features: "• প্রিমিয়াম কোয়ালিটি খাতা ও ডায়েরি\n• ব্র্যান্ডেড জেল ও বলপেন কলম\n• জ্যামিতি বক্স, স্কেল ও ড্রয়িং সরঞ্জাম"
+  },
+  {
+    id: "s3",
+    category: "photo",
+    emoji: "📸",
+    badge: "🔥 হট অফার",
+    image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=600&auto=format&fit=crop&q=80",
+    name: "ছবি তোলা (পাসপোর্ট/স্ট্যাম্প)",
+    desc: "পাসপোর্ট, স্ট্যাম্প সাইজ ও যেকোনো সাইজের হাই-কোয়ালিটি ছবি তোলা হয়।",
+    regularPrice: "৩০৳",
+    price: "২০৳ থেকে",
+    unitPrice: 20,
+    active: true,
+    actionBtn: "ছবি প্রিন্ট অর্ডার",
+    features: "• ৫ মিনিটে ইনস্ট্যান্ট ডেলিভারি\n• কালার কারেকশন ও ব্যাকগ্রাউন্ড চেঞ্জ\n• হাই-কোয়ালিটি ল্যাব গ্লসি পেপারে প্রিন্ট"
+  },
+  {
+    id: "s4",
+    category: "photo",
+    emoji: "📄",
+    badge: "💥 বিশেষ ছাড়",
+    image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop&q=80",
+    name: "ফটোকপি (সাদাকালো ও রঙিন)",
+    desc: "যেকোনো কাগজপত্রের দ্রুত, নিখুঁত ও পরিষ্কার ফটোকপি।",
+    regularPrice: "২৳",
+    price: "১৳ / পাতা",
+    unitPrice: 1,
+    active: true,
+    actionBtn: "ফাইল পাঠান",
+    features: "• হাই-স্পিড ডিজিটাল ফটোকপি\n• সিঙ্গেল ও বোথ সাইড প্রিন্ট\n• ৮০ জিএসএম ভারি কাগজের সুবিধা"
+  },
+  {
+    id: "s5",
+    category: "photo",
+    emoji: "🧾",
+    badge: "",
+    image: "https://images.unsplash.com/photo-1607344645866-009c320c5ab8?w=600&auto=format&fit=crop&q=80",
+    name: "লেমিনেটিং",
+    desc: "সার্টিফিকেট, এনআইডি কার্ড ও গুরুত্বপূর্ণ কাগজ টেকসই লেমিনেটিং।",
+    price: "২০৳ থেকে",
+    unitPrice: 20,
+    active: true,
+    actionBtn: "অর্ডার করুন",
+    features: "• ওয়াটারপ্রুফ ও টেকসই কোটিং\n• বাবল-মুক্ত নিখুঁত ফিনিশিং\n• NID ও সার্টিফিকেট স্পেশাল থিকনেস"
+  },
+  {
+    id: "s6",
+    category: "online",
+    emoji: "📝",
+    badge: "🔥 হট অফার",
+    image: "https://images.unsplash.com/photo-1450133064473-71024230f91b?w=600&auto=format&fit=crop&q=80",
+    name: "সকল প্রকার চাকরির ফরম পূরণ",
+    desc: "সরকারি-বেসরকারি চাকরির আবেদন ফরম নির্ভুল ও অভিজ্ঞতার সাথে পূরণ।",
+    price: "৫০৳ থেকে",
+    unitPrice: 50,
+    active: true,
+    actionBtn: "আবেদন করুন",
+    features: "• ছবি ও স্বাক্ষর সঠিক সাইজে রিসাইজ\n• টেলিটক ও অনলাইন পেমেন্ট সুবিধা\n• প্রবেশপত্র ডাউনলোড ও এসএমএস এলার্ট"
+  },
+  {
+    id: "s7",
+    category: "online",
+    emoji: "🔍",
+    badge: "",
+    image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&auto=format&fit=crop&q=80",
+    name: "পরীক্ষার ফলাফল ও এডমিট প্রিন্ট",
+    desc: "পিএসসি, জেএসসি, এসএসসি, এইচএসসি ও বিশ্ববিদ্যালয়ের ফলাফল ও এডমিট কার্ড।",
+    price: "১০৳",
+    unitPrice: 10,
+    active: true,
+    actionBtn: "প্রিন্ট করুন",
+    features: "• দ্রুত গ্রেডশিট ও মার্কশিট প্রিন্ট\n• জাতীয় বিশ্ববিদ্যালয় ও উন্মুক্ত বোর্ড সেবা"
+  },
+  {
+    id: "s8",
+    category: "online",
+    emoji: "🖥️",
+    badge: "",
+    image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600&auto=format&fit=crop&q=80",
+    name: "কম্পিউটার কম্পোজ (বাংলা/ইংরেজি)",
+    desc: "বাংলা, ইংরেজি ও আরবি ভাষায় নিখুঁত টাইপ, প্রশ্নপত্র ও ডকুমেন্ট কম্পোজ।",
+    price: "১৫৳ / পাতা",
+    unitPrice: 15,
+    active: true,
+    actionBtn: "টাইপিং অর্ডার",
+    features: "• দ্রুত ও নির্ভুল টাইপিং\n• সিভি ও বায়োডাটা ডিজাইন"
+  },
+  {
+    id: "s9",
+    category: "training",
+    emoji: "🎓",
+    badge: "🆕 নতুন ব্যাচ",
+    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&auto=format&fit=crop&q=80",
+    name: "কম্পিউটার প্রশিক্ষণ কোর্স (সার্টিফিকেটসহ)",
+    desc: "মনোরম পরিবেশে স্বল্প খরচে প্রফেশনাল কম্পিউটার প্রশিক্ষণ, সরকারি অনুমোদিত সার্টিফিকেট সহ।",
+    regularPrice: "৩,৫০০৳",
+    price: "বিশেষ ছাড় চলছে",
+    unitPrice: 2500,
+    active: true,
+    actionBtn: "ভর্তি আবেদন",
+    features: "• ১ জন শিক্ষার্থীর জন্য ১টি কম্পিউটার\n• প্র্যাকটিক্যাল হ্যান্ডস-অন ক্লাস\n• কোর্স শেষে সরকারি সার্টিফিকেট প্রদান"
+  }
+];
+
+const DEFAULT_PAYMENT_METHODS = [
+  {
+    id: "bkash",
+    name: "বিকাশ (bKash)",
+    type: "Personal (সেন্ড মানি)",
+    number: "01724084350",
+    active: true,
+    logo: "https://freelogopng.com/images/all_img/1656234745bkash-app-logo.png",
+    instructions: "বিকাশ অ্যাপ বা *247# এ গিয়ে 'Send Money' করুন। মোট টাকার পরিমাণ পাঠিয়ে নিচে আপনার বিকাশ নম্বর ও TrxID লিখুন।"
+  },
+  {
+    id: "nagad",
+    name: "নগদ (Nagad)",
+    type: "Personal (সেন্ড মানি)",
+    number: "01724084350",
+    active: true,
+    logo: "https://freelogopng.com/images/all_img/1679248787Nagad-Logo.png",
+    instructions: "নগদ অ্যাপ বা *167# এ গিয়ে 'Send Money' করুন।"
+  },
+  {
+    id: "bangla_qr",
+    name: "বাংলা কিউআর (Bangla QR)",
+    type: "All Bank & MFS QR",
+    number: "সবুজ কম্পিউটার্স (Sabuj Computers)",
+    qrImage: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80",
+    active: true,
+    logo: "https://cdn-icons-png.flaticon.com/512/2489/2489756.png",
+    instructions: "যেকোনো ব্যাংক বা বিকাশ/নগদ অ্যাপ দিয়ে সরাসরি বাংলা কিউআর স্ক্যান করে পেমেন্ট করুন।"
+  },
+  {
+    id: "rocket",
+    name: "রকেট (Rocket)",
+    type: "Personal (সেন্ড মানি)",
+    number: "017240843508",
+    active: true,
+    logo: "https://upload.wikimedia.org/wikipedia/en/thumb/8/87/Dutch-Bangla_Bank_Rocket_logo.svg/640px-Dutch-Bangla_Bank_Rocket_logo.svg.png",
+    instructions: "DBBL রকেট একাউন্ট থেকে Send Money করুন (লাস্টে ১২ সংখ্যার একাউন্ট নম্বর)।"
+  },
+  {
+    id: "cash",
+    name: "দোকানে ক্যাশ পরিশোধ (Cash on Pickup)",
+    type: "দোকান কাউন্টার",
+    number: "তমালতলা বাজার, বাগাতিপাড়া",
+    active: true,
+    logo: "https://cdn-icons-png.flaticon.com/512/2489/2489756.png",
+    instructions: "দোকানে এসে কাজ নেওয়ার সময় কাউন্টারে ক্যাশ টাকা প্রদান করতে পারবেন।"
+  }
+];
+
+const DEFAULT_GALLERY = [
+  {
+    id: "g1",
+    title: "দোকানের সামনের পরিবেশ ও বুক ক্যাম্পাস",
+    image: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=800&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "g2",
+    title: "আধুনিক কম্পিউটার প্রশিক্ষণ ল্যাব",
+    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "g3",
+    title: "উচ্চগতির ডিজিটাল ফটোকপি ও প্রিন্ট জোন",
+    image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "g4",
+    title: "স্টুডিও ফটো ল্যাব ও এডিটিং কর্নার",
+    image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&auto=format&fit=crop&q=80"
+  }
+];
+
+const DEFAULT_RATES = [
+  { id: "r1", name: "ডিজিটাল ফটোকপি (এক পিঠ)", emoji: "📄", type: "প্রতি পাতা (A4)", price: "১.৫০৳", active: true },
+  { id: "r2", name: "ডিজিটাল ফটোকপি (উভয় পিঠ)", emoji: "📑", type: "প্রতি পাতা (A4)", price: "২.০০৳", active: true },
+  { id: "r3", name: "কম্পিউটার সাদাকালো প্রিন্ট", emoji: "🖨️", type: "প্রতি পাতা (A4)", price: "৩.০০৳", active: true },
+  { id: "r4", name: "কম্পিউটার রঙিন কালার প্রিন্ট", emoji: "🎨", type: "প্রতি পাতা (A4)", price: "১০.০০৳", active: true },
+  { id: "r5", name: "পাসপোর্ট সাইজ ছবি (৪ কপি)", emoji: "📸", type: "ল্যাব গ্লসি পেপার", price: "২০.০০৳", active: true },
+  { id: "r6", name: "স্ট্যাম্প সাইজ ছবি (৮ কপি)", emoji: "🖼️", type: "ল্যাব গ্লসি পেপার", price: "২০.০০৳", active: true },
+  { id: "r7", name: "স্মার্ট NID / কার্ড লেমিনেটিং", emoji: "🧾", type: "ওয়াটারপ্রুফ কোটিং", price: "১৫.০০৳", active: true },
+  { id: "r8", name: "সার্টিফিকেট ও A4 লেমিনেটিং", emoji: "📜", type: "হেভি থিকনেস", price: "২৫.০০৳", active: true },
+  { id: "r9", name: "চাকরির অনলাইন আবেদন ফি", emoji: "📝", type: "প্রতি আবেদন চার্জ", price: "৫০.০০৳", active: true },
+  { id: "r10", name: "কম্পিউটার বাংলা/ইংরেজি কম্পোজ", emoji: "🖥️", type: "প্রতি পাতা টাইপ", price: "১৫.০০৳", active: true }
+];
+
+const DEFAULT_FAQS = [
+  {
+    id: "f1",
+    question: "অনলাইনে প্রিন্টিং বা ফটোকপির অর্ডার কীভাবে দেব?",
+    answer: "আমাদের ওয়েবসাইটের 'অনলাইন প্রিন্ট অর্ডার' অপশনে গিয়ে ফাইল আপলোড করুন অথবা সরাসরি WhatsApp নম্বরে পাঠিয়ে দিন। কাজ রেডি হলে আপনাকে মেসেজ দেওয়া হবে।"
+  },
+  {
+    id: "f2",
+    question: "কম্পিউটার প্রশিক্ষণ কোর্সের সময়সূচি ও ভর্তি ফি কেমন?",
+    answer: "সকাল, বিকাল ও সন্ধ্যার ব্যাচে ক্লাস করানো হয়। কোর্স শেষে গণপ্রজাতন্ত্রী বাংলাদেশ সরকার অনুমোদিত সার্টিফিকেট প্রদান করা হয়। সরাসরি দোকানে এসে বা ওয়েবসাইটে ফর্ম পূরণ করে ভর্তি হতে পারবেন।"
+  },
+  {
+    id: "f3",
+    question: "পেমেন্ট কীভাবে পরিশোধ করা যায়?",
+    answer: "বিকাশ, নগদ, রকেট এবং যেকোনো ব্যাংকিং অ্যাপের 'বাংলা কিউআর' স্ক্যান করে পেমেন্ট করতে পারবেন। এছাড়াও দোকানে এসে ক্যাশ পরিশোধের সুবিধাও রয়েছে।"
+  },
+  {
+    id: "f4",
+    question: "চাকরির আবেদনের ছবি ও স্বাক্ষর রিসাইজ করা হয় কি?",
+    answer: "হ্যাঁ, সকল সরকারি ও বেসরকারি নিয়োগ বিজ্ঞপ্তির সুনির্দিষ্ট মাপ (৩০০×৩০০ পিক্সেল ও ৩০০×৮০ পিক্সেল) অনুযায়ী নিখুঁতভাবে রিসাইজ ও ফরম পূরণ করে দেওয়া হয়।"
+  }
+];
+
+const DEFAULT_REVIEWS = [
+  {
+    id: "rv1",
+    name: "মোঃ আল-আমিন",
+    location: "বাগাতিপাড়া ডিগ্রি কলেজ",
+    rating: "5",
+    avatar: "👨‍🎓",
+    comment: "সবুজ ভাইয়ের দোকান থেকে অনার্স ৩য় বর্ষের গাইড বই ও অ্যাসাইনমেন্ট প্রিন্ট করিয়েছি। প্রিন্ট কোয়ালিটি খুবই পরিষ্কার এবং দাম অনেক সাশ্রয়ী।"
+  },
+  {
+    id: "rv2",
+    name: "সুমি আক্তার",
+    location: "তমালতলা, নাটোর",
+    rating: "5",
+    avatar: "👩‍💻",
+    comment: "চাকরির অনলাইন আবেদন করার জন্য এলাকার সবচেয়ে বিশ্বস্ত প্রতিষ্ঠান। খুব যত্নসহকারে এবং নির্ভুলভাবে আবেদন করে দেন।"
+  },
+  {
+    id: "rv3",
+    name: "ইঞ্জিনিয়ার তারেক রহমান",
+    location: "নাটোর সদর",
+    rating: "5",
+    avatar: "👨‍🏫",
+    comment: "কম্পিউটার প্রশিক্ষণ ল্যাবের পরিবেশ চমৎকার। প্রতিটি স্টুডেন্টের জন্য আলাদা কম্পিউটার থাকায় সহজে কাজ শেখা যায়।"
+  }
+];
+
+const DEFAULT_META = {
+  heroTitle: "সবুজ কম্পিউটার্স",
+  heroSub: "বুক ক্যাম্পাস, ফটোস্ট্যাট ও কম্পিউটার প্রশিক্ষণ কেন্দ্র। যা লাগবে, ঘরে বসেই অর্ডার করুন বা ফাইল পাঠিয়ে প্রিন্ট রেডি রাখুন।",
+  proprietorName: "মোঃ সবুজ আলী",
+  address: "তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর",
+  logoUrl: "https://cdn-icons-png.flaticon.com/512/3067/3067443.png",
+  phone: "01724084350",
+  whatsappPhone: "8801724084350",
+  shopStatusMode: "auto", // "auto", "force_open", "force_closed", "break"
+  shopStatus: "open",
+  openTime: "08:00",
+  closeTime: "21:30",
+  breakNote: "নামাজের বিরতি (১৫ মিনিট)",
+  businessHours: "সকাল ৮:০০ - রাত ৯:৩০ (প্রতিদিন খোলা)",
+  showNotice: true,
+  notice: "নতুন কম্পিউটার প্রশিক্ষণ ব্যাচে ভর্তি চলছে! স্বল্প খরচে সার্টিফিকেটসহ কোর্স করুন · জরুরি ফটোকপি ও চাকরির আবেদন দ্রুত করে দেওয়া হয়।",
+  printRates: { bw: 2, color: 10, photo: 20, laminate: 30, job: 50 },
+  mapEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3697.3716089901327!2d88.93670279999999!3d24.31764609999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39fc05f19d6bd581%3A0x8fb76cba31eaa6d5!2sSabuj%20Computer%2C%20Tomaltola%20Bazar!5e1!3m2!1sen!2sbd!4v1787055740183!5m2!1sen!2sbd",
+  mapDirectionsUrl: "https://maps.google.com/?cid=10355745129654167253&q=Sabuj+Computer+Tomaltola+Bazar",
+  banglaQrImage: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80"
+};
+
 // State
 let categories = [];
 let services = [];
 let paymentMethods = [];
 let gallery = [];
+let rates = [];
+let faqs = [];
+let reviews = [];
 let orders = [];
 let meta = {};
 let adminPassword = localStorage.getItem("sc_admin_pw") || "sabuj2026";
@@ -1333,11 +1898,14 @@ async function loadAllAdminData(){
     } catch(e){}
   }
 
-  // Load from local storage first for speed
+  // Load from local storage first
   try { categories = JSON.parse(localStorage.getItem("sc_categories")) || []; }catch(e){}
   try { services = JSON.parse(localStorage.getItem("sc_services")) || []; }catch(e){}
   try { paymentMethods = JSON.parse(localStorage.getItem("sc_payment_methods")) || []; }catch(e){}
   try { gallery = JSON.parse(localStorage.getItem("sc_gallery")) || []; }catch(e){}
+  try { rates = JSON.parse(localStorage.getItem("sc_rates")) || []; }catch(e){}
+  try { faqs = JSON.parse(localStorage.getItem("sc_faqs")) || []; }catch(e){}
+  try { reviews = JSON.parse(localStorage.getItem("sc_reviews")) || []; }catch(e){}
   try { meta = JSON.parse(localStorage.getItem("sc_meta")) || {}; }catch(e){}
 
   if(db){
@@ -1372,7 +1940,28 @@ async function loadAllAdminData(){
         galSnap.forEach(d => gallery.push({ id: d.id, ...d.data() }));
       }
 
-      // 5. Settings
+      // 5. Rates
+      const rateSnap = await db.collection("rates").get();
+      if(!rateSnap.empty){
+        rates = [];
+        rateSnap.forEach(d => rates.push({ id: d.id, ...d.data() }));
+      }
+
+      // 6. FAQs
+      const faqSnap = await db.collection("faqs").get();
+      if(!faqSnap.empty){
+        faqs = [];
+        faqSnap.forEach(d => faqs.push({ id: d.id, ...d.data() }));
+      }
+
+      // 7. Reviews
+      const revSnap = await db.collection("reviews").get();
+      if(!revSnap.empty){
+        reviews = [];
+        revSnap.forEach(d => reviews.push({ id: d.id, ...d.data() }));
+      }
+
+      // 8. Settings
       const setDoc = await db.collection("settings").doc("global").get();
       if(setDoc.exists){
         meta = setDoc.data();
@@ -1382,21 +1971,84 @@ async function loadAllAdminData(){
     }
   }
 
+  // Fallback to rich default seeds if lists are empty (Ensures 100% full customizability out-of-the-box)
+  if(!categories || !categories.length) categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+  if(!services || !services.length) services = JSON.parse(JSON.stringify(DEFAULT_SERVICES));
+  if(!paymentMethods || !paymentMethods.length) paymentMethods = JSON.parse(JSON.stringify(DEFAULT_PAYMENT_METHODS));
+  if(!gallery || !gallery.length) gallery = JSON.parse(JSON.stringify(DEFAULT_GALLERY));
+  if(!rates || !rates.length) rates = JSON.parse(JSON.stringify(DEFAULT_RATES));
+  if(!faqs || !faqs.length) faqs = JSON.parse(JSON.stringify(DEFAULT_FAQS));
+  if(!reviews || !reviews.length) reviews = JSON.parse(JSON.stringify(DEFAULT_REVIEWS));
+  if(!meta || !meta.heroTitle) meta = JSON.parse(JSON.stringify(DEFAULT_META));
+
+  // Sync to local storage
+  localStorage.setItem("sc_categories", JSON.stringify(categories));
+  localStorage.setItem("sc_services", JSON.stringify(services));
+  localStorage.setItem("sc_payment_methods", JSON.stringify(paymentMethods));
+  localStorage.setItem("sc_gallery", JSON.stringify(gallery));
+  localStorage.setItem("sc_rates", JSON.stringify(rates));
+  localStorage.setItem("sc_faqs", JSON.stringify(faqs));
+  localStorage.setItem("sc_reviews", JSON.stringify(reviews));
+  localStorage.setItem("sc_meta", JSON.stringify(meta));
+
   // Render everything
   renderServicesTable();
   renderCategoriesTable();
+  renderRatesTable();
   renderPaymentsTable();
   renderGalleryTable();
+  renderFaqsTable();
+  renderReviewsTable();
   renderSettingsForm();
   updatePosterLivePreview();
   generatePosterQR();
   fetchOrders();
 }
 
+async function resetToFactoryDefaults(saveToCloud = false){
+  if(saveToCloud && !confirm("আপনি কি নিশ্চিতভাবে সকল তথ্য ডিফল্ট অবস্থায় ফিরিয়ে নিতে চান? এতে আপনার বিদ্যমান সব পরিবর্তন ডিফল্ট দিয়ে প্রতিস্থাপিত হবে।")) return;
+
+  categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+  services = JSON.parse(JSON.stringify(DEFAULT_SERVICES));
+  paymentMethods = JSON.parse(JSON.stringify(DEFAULT_PAYMENT_METHODS));
+  gallery = JSON.parse(JSON.stringify(DEFAULT_GALLERY));
+  rates = JSON.parse(JSON.stringify(DEFAULT_RATES));
+  faqs = JSON.parse(JSON.stringify(DEFAULT_FAQS));
+  reviews = JSON.parse(JSON.stringify(DEFAULT_REVIEWS));
+  meta = JSON.parse(JSON.stringify(DEFAULT_META));
+
+  localStorage.setItem("sc_categories", JSON.stringify(categories));
+  localStorage.setItem("sc_services", JSON.stringify(services));
+  localStorage.setItem("sc_payment_methods", JSON.stringify(paymentMethods));
+  localStorage.setItem("sc_gallery", JSON.stringify(gallery));
+  localStorage.setItem("sc_rates", JSON.stringify(rates));
+  localStorage.setItem("sc_faqs", JSON.stringify(faqs));
+  localStorage.setItem("sc_reviews", JSON.stringify(reviews));
+  localStorage.setItem("sc_meta", JSON.stringify(meta));
+
+  renderServicesTable();
+  renderCategoriesTable();
+  renderRatesTable();
+  renderPaymentsTable();
+  renderGalleryTable();
+  renderFaqsTable();
+  renderReviewsTable();
+  renderSettingsForm();
+  updatePosterLivePreview();
+  generatePosterQR();
+
+  if(saveToCloud){
+    await saveAllToFirestore();
+    toast("✅ সম্পূর্ণ সাইটের ডিফল্ট ডাটা সফলভাবে রিস্টোর ও সিঙ্ক হয়েছে!");
+  } else {
+    toast("✅ ডিফল্ট সেবা ও ক্যাটাগরি তালিকা লোড হয়েছে!");
+  }
+}
+
 async function saveAllToFirestore(){
   toast("💾 ক্লাউড ডাটাবেজে সিঙ্ক হচ্ছে...");
   if(!db){
-    toast("⚠️ Firebase অফলাইন মোডে আছে");
+    toast("⚠️ Firebase অফলাইন মোডে আছে (লোকাল সেভ সক্রিয়)");
     return;
   }
   try {
@@ -1412,6 +2064,24 @@ async function saveAllToFirestore(){
     categories.forEach(c => {
       const ref = db.collection("categories").doc(c.key);
       batch.set(ref, c);
+    });
+
+    // Rates
+    rates.forEach(r => {
+      const ref = db.collection("rates").doc(r.id);
+      batch.set(ref, r);
+    });
+
+    // FAQs
+    faqs.forEach(f => {
+      const ref = db.collection("faqs").doc(f.id);
+      batch.set(ref, f);
+    });
+
+    // Reviews
+    reviews.forEach(rv => {
+      const ref = db.collection("reviews").doc(rv.id);
+      batch.set(ref, rv);
     });
 
     // Payments
@@ -1430,7 +2100,7 @@ async function saveAllToFirestore(){
     batch.set(db.collection("settings").doc("global"), meta);
 
     await batch.commit();
-    toast("✅ সকল ডাটা ফায়ারবেস ক্লাউডে সফলভাবে সংরক্ষিত হয়েছে!");
+    toast("✅ সকল সেবা, রেট ও সেটিংস ফায়ারবেস ক্লাউডে সফলভাবে সংরক্ষিত হয়েছে!");
   } catch(err){
     toast("⚠️ সংরক্ষণ করতে ত্রুটি: " + err.message);
   }
@@ -1503,12 +2173,49 @@ function switchAdminTab(tabName){
 /* ========================================================
    6. SERVICES CRUD
    ======================================================== */
+function filterServicesTable(){
+  renderServicesTable();
+}
+
 function renderServicesTable(){
   const tbody = document.getElementById("servicesTableBody");
+  if(!tbody) return;
   tbody.innerHTML = "";
-  document.getElementById("servicesCount").textContent = services.length;
+  
+  // Populate category filter dropdown if present
+  const catFilter = document.getElementById("serviceCategoryFilter");
+  if(catFilter && catFilter.children.length <= 1){
+    catFilter.innerHTML = `<option value="all">📁 সকল ক্যাটাগরি</option>`;
+    categories.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c.key;
+      opt.textContent = c.label;
+      catFilter.appendChild(opt);
+    });
+  }
 
-  services.forEach((s) => {
+  const searchVal = (document.getElementById("serviceSearchInput")?.value || "").toLowerCase().trim();
+  const selectedCat = document.getElementById("serviceCategoryFilter")?.value || "all";
+
+  let filtered = services.filter(s => {
+    const matchCat = (selectedCat === "all" || s.category === selectedCat);
+    const matchSearch = (!searchVal || 
+      (s.name && s.name.toLowerCase().includes(searchVal)) ||
+      (s.desc && s.desc.toLowerCase().includes(searchVal)) ||
+      (s.price && s.price.toLowerCase().includes(searchVal))
+    );
+    return matchCat && matchSearch;
+  });
+
+  const countEl = document.getElementById("servicesCount");
+  if(countEl) countEl.textContent = `${filtered.length} / ${services.length}`;
+
+  if(filtered.length === 0){
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--ink-soft);">কোনো সেবা খুঁজে পাওয়া যায়নি। <button class="btn btn-outline" style="font-size:11px;margin-left:8px;" onclick="document.getElementById('serviceSearchInput').value='';document.getElementById('serviceCategoryFilter').value='all';renderServicesTable();">ফিল্টার রিসেট</button></td></tr>`;
+    return;
+  }
+
+  filtered.forEach((s) => {
     const tr = document.createElement("tr");
     const cat = categories.find(c => c.key === s.category);
     const catName = cat ? cat.label : s.category;
@@ -1528,19 +2235,47 @@ function renderServicesTable(){
       <td><b class="mono" style="color:var(--forest);">${s.price || ''}</b></td>
       <td><span style="font-size:11px;font-weight:700;">${s.badge || '—'}</span></td>
       <td>
-        <span style="color:${s.active !== false ? '#16a34a' : '#dc2626'};font-weight:700;font-size:12px;">
+        <button class="btn" style="padding:2px 8px;font-size:11px;background:${s.active !== false ? '#dcfce7' : '#fee2e2'};color:${s.active !== false ? '#166534' : '#991b1b'};font-weight:bold;border:none;" onclick="toggleServiceActive('${s.id}')">
           ${s.active !== false ? '● চালু' : '○ বন্ধ'}
-        </span>
+        </button>
       </td>
       <td>
         <div style="display:flex;gap:4px;">
           <button class="btn btn-outline" style="padding:4px 8px;font-size:11px;" onclick="editServiceItem('${s.id}')">✏️ এডিট</button>
+          <button class="btn btn-outline" style="padding:4px 8px;font-size:11px;" title="কপি করুন" onclick="duplicateServiceItem('${s.id}')">📋</button>
           <button class="btn btn-red" style="padding:4px 8px;font-size:11px;" onclick="deleteServiceItem('${s.id}')">🗑️</button>
         </div>
       </td>
     `;
     tbody.appendChild(tr);
   });
+}
+
+async function toggleServiceActive(id){
+  const s = services.find(item => item.id === id);
+  if(!s) return;
+  s.active = (s.active === false);
+  localStorage.setItem("sc_services", JSON.stringify(services));
+  renderServicesTable();
+  if(db){
+    try { await db.collection("services").doc(id).update({ active: s.active }); }catch(e){}
+  }
+  toast(`সেবা স্ট্যাটাস: ${s.active ? 'চালু' : 'বন্ধ'}`);
+}
+
+async function duplicateServiceItem(id){
+  const s = services.find(item => item.id === id);
+  if(!s) return;
+  const clone = JSON.parse(JSON.stringify(s));
+  clone.id = "s_" + Date.now();
+  clone.name = s.name + " (কপি)";
+  services.push(clone);
+  localStorage.setItem("sc_services", JSON.stringify(services));
+  renderServicesTable();
+  if(db){
+    try { await db.collection("services").doc(clone.id).set(clone); }catch(e){}
+  }
+  toast("✅ সেবার কপি তৈরি হয়েছে!");
 }
 
 function populateCategorySelect(selectId, selectedVal){
@@ -1850,13 +2585,430 @@ async function deletePaymentItem(id){
 }
 
 /* ========================================================
+   8.5 RATE CARD CRUD (100% CUSTOMIZABLE)
+   ======================================================== */
+function renderRatesTable(){
+  const tbody = document.getElementById("ratesTableBody");
+  if(!tbody) return;
+  tbody.innerHTML = "";
+  const countEl = document.getElementById("ratesCount");
+  if(countEl) countEl.textContent = rates.length;
+
+  if(!rates.length){
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--ink-soft);">কোনো রেট চার্ট পাওয়া যায়নি।</td></tr>`;
+    return;
+  }
+
+  rates.forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="font-size:20px;text-align:center;">${r.emoji || '🏷️'}</td>
+      <td><b>${r.name}</b></td>
+      <td><span style="font-size:12px;color:var(--ink-soft);background:var(--paper-2);padding:2px 8px;border-radius:4px;">${r.type || 'প্রতি ইউনিট'}</span></td>
+      <td><b class="mono" style="color:var(--forest);font-size:15px;">${r.price || '০৳'}</b></td>
+      <td>
+        <button class="btn" style="padding:2px 8px;font-size:11px;background:${r.active !== false ? '#dcfce7' : '#fee2e2'};color:${r.active !== false ? '#166534' : '#991b1b'};font-weight:bold;border:none;" onclick="toggleRateActive('${r.id}')">
+          ${r.active !== false ? '● চালু' : '○ বন্ধ'}
+        </button>
+      </td>
+      <td>
+        <div style="display:flex;gap:4px;">
+          <button class="btn btn-outline" style="padding:4px 8px;font-size:11px;" onclick="editRateItem('${r.id}')">✏️ এডিট</button>
+          <button class="btn btn-red" style="padding:4px 8px;font-size:11px;" onclick="deleteRateItem('${r.id}')">🗑️</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function openRateModal(){
+  document.getElementById("rateModalTitle").textContent = "নতুন রেট কার্ড যোগ করুন";
+  document.getElementById("rateEditId").value = "";
+  document.getElementById("rateName").value = "";
+  document.getElementById("rateEmoji").value = "🏷️";
+  document.getElementById("rateType").value = "প্রতি পাতা";
+  document.getElementById("ratePrice").value = "";
+  document.getElementById("rateActive").value = "true";
+  document.getElementById("rateModal").classList.add("show");
+}
+
+function editRateItem(id){
+  const r = rates.find(item => item.id === id);
+  if(!r) return;
+  document.getElementById("rateModalTitle").textContent = "রেট কার্ড এডিট করুন";
+  document.getElementById("rateEditId").value = r.id;
+  document.getElementById("rateName").value = r.name || "";
+  document.getElementById("rateEmoji").value = r.emoji || "🏷️";
+  document.getElementById("rateType").value = r.type || "";
+  document.getElementById("ratePrice").value = r.price || "";
+  document.getElementById("rateActive").value = r.active !== false ? "true" : "false";
+  document.getElementById("rateModal").classList.add("show");
+}
+
+async function saveRateItem(){
+  const name = document.getElementById("rateName").value.trim();
+  const price = document.getElementById("ratePrice").value.trim();
+  if(!name || !price){ toast("⚠️ সেবার নাম ও মূল্য আবশ্যক"); return; }
+
+  const editId = document.getElementById("rateEditId").value;
+  const id = editId || ("r_" + Date.now());
+
+  const rateData = {
+    id: id,
+    name: name,
+    emoji: document.getElementById("rateEmoji").value.trim() || "🏷️",
+    type: document.getElementById("rateType").value.trim() || "প্রতি ইউনিট",
+    price: price,
+    active: document.getElementById("rateActive").value === "true"
+  };
+
+  if(editId){
+    const idx = rates.findIndex(r => r.id === editId);
+    if(idx !== -1) rates[idx] = rateData;
+  } else {
+    rates.push(rateData);
+  }
+
+  localStorage.setItem("sc_rates", JSON.stringify(rates));
+  renderRatesTable();
+  closeModal("rateModal");
+
+  if(db){
+    try {
+      await db.collection("rates").doc(id).set(rateData);
+      toast("✅ রেট কার্ড সংরক্ষিত ও লাইভ আপডেট হয়েছে!");
+    } catch(e){
+      toast("✅ লোকালি সংরক্ষিত হয়েছে");
+    }
+  }
+}
+
+async function toggleRateActive(id){
+  const r = rates.find(item => item.id === id);
+  if(!r) return;
+  r.active = (r.active === false);
+  localStorage.setItem("sc_rates", JSON.stringify(rates));
+  renderRatesTable();
+  if(db){
+    try { await db.collection("rates").doc(id).update({ active: r.active }); }catch(e){}
+  }
+  toast(`রেট স্ট্যাটাস: ${r.active ? 'চালু' : 'বন্ধ'}`);
+}
+
+async function deleteRateItem(id){
+  if(!confirm("এই রেট আইটেমটি মুছে ফেলতে চান?")) return;
+  rates = rates.filter(r => r.id !== id);
+  localStorage.setItem("sc_rates", JSON.stringify(rates));
+  renderRatesTable();
+  if(db){
+    try { await db.collection("rates").doc(id).delete(); }catch(e){}
+  }
+  toast("🗑️ রেট কার্ড মোছা হয়েছে");
+}
+
+/* ========================================================
+   8.6 FAQS & REVIEWS CRUD (100% CUSTOMIZABLE)
+   ======================================================== */
+function renderFaqsTable(){
+  const tbody = document.getElementById("faqsTableBody");
+  if(!tbody) return;
+  tbody.innerHTML = "";
+  const countEl = document.getElementById("faqsCount");
+  if(countEl) countEl.textContent = faqs.length;
+
+  if(!faqs.length){
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--ink-soft);">কোনো প্রশ্ন পাওয়া যায়নি।</td></tr>`;
+    return;
+  }
+
+  faqs.forEach(f => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><b>${f.question}</b></td>
+      <td style="font-size:12px;color:var(--ink-soft);max-width:300px;">${f.answer}</td>
+      <td>
+        <div style="display:flex;gap:4px;">
+          <button class="btn btn-outline" style="padding:4px 8px;font-size:11px;" onclick="editFaqItem('${f.id}')">✏️</button>
+          <button class="btn btn-red" style="padding:4px 8px;font-size:11px;" onclick="deleteFaqItem('${f.id}')">🗑️</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function openFaqModal(){
+  document.getElementById("faqModalTitle").textContent = "নতুন প্রশ্ন ও উত্তর যোগ করুন";
+  document.getElementById("faqEditId").value = "";
+  document.getElementById("faqQuestion").value = "";
+  document.getElementById("faqAnswer").value = "";
+  document.getElementById("faqModal").classList.add("show");
+}
+
+function editFaqItem(id){
+  const f = faqs.find(item => item.id === id);
+  if(!f) return;
+  document.getElementById("faqModalTitle").textContent = "প্রশ্ন ও উত্তর এডিট করুন";
+  document.getElementById("faqEditId").value = f.id;
+  document.getElementById("faqQuestion").value = f.question || "";
+  document.getElementById("faqAnswer").value = f.answer || "";
+  document.getElementById("faqModal").classList.add("show");
+}
+
+async function saveFaqItem(){
+  const q = document.getElementById("faqQuestion").value.trim();
+  const a = document.getElementById("faqAnswer").value.trim();
+  if(!q || !a){ toast("⚠️ প্রশ্ন ও উত্তর উভয়ই পূরণ করুন"); return; }
+
+  const editId = document.getElementById("faqEditId").value;
+  const id = editId || ("f_" + Date.now());
+
+  const faqData = { id: id, question: q, answer: a };
+
+  if(editId){
+    const idx = faqs.findIndex(f => f.id === editId);
+    if(idx !== -1) faqs[idx] = faqData;
+  } else {
+    faqs.push(faqData);
+  }
+
+  localStorage.setItem("sc_faqs", JSON.stringify(faqs));
+  renderFaqsTable();
+  closeModal("faqModal");
+
+  if(db){
+    try {
+      await db.collection("faqs").doc(id).set(faqData);
+      toast("✅ প্রশ্ন সংরক্ষিত ও লাইভ হয়েছে!");
+    } catch(e){}
+  }
+}
+
+async function deleteFaqItem(id){
+  if(!confirm("এই প্রশ্নটি মুছে ফেলতে চান?")) return;
+  faqs = faqs.filter(f => f.id !== id);
+  localStorage.setItem("sc_faqs", JSON.stringify(faqs));
+  renderFaqsTable();
+  if(db){
+    try { await db.collection("faqs").doc(id).delete(); }catch(e){}
+  }
+  toast("🗑️ FAQ মোছা হয়েছে");
+}
+
+function renderReviewsTable(){
+  const tbody = document.getElementById("reviewsTableBody");
+  if(!tbody) return;
+  tbody.innerHTML = "";
+  const countEl = document.getElementById("reviewsCount");
+  if(countEl) countEl.textContent = reviews.length;
+
+  if(!reviews.length){
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--ink-soft);">কোনো রিভিউ পাওয়া যায়নি।</td></tr>`;
+    return;
+  }
+
+  reviews.forEach(rv => {
+    const tr = document.createElement("tr");
+    const stars = "⭐".repeat(parseInt(rv.rating) || 5);
+    tr.innerHTML = `
+      <td style="font-size:20px;text-align:center;">${rv.avatar || '👤'}</td>
+      <td>
+        <b>${rv.name}</b>
+        <div style="font-size:11px;color:var(--ink-soft);">${rv.location || ''}</div>
+      </td>
+      <td><span style="font-size:12px;">${stars}</span></td>
+      <td style="font-size:12px;color:var(--ink-soft);max-width:280px;">${rv.comment}</td>
+      <td>
+        <div style="display:flex;gap:4px;">
+          <button class="btn btn-outline" style="padding:4px 8px;font-size:11px;" onclick="editReviewItem('${rv.id}')">✏️</button>
+          <button class="btn btn-red" style="padding:4px 8px;font-size:11px;" onclick="deleteReviewItem('${rv.id}')">🗑️</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function openReviewModal(){
+  document.getElementById("reviewModalTitle").textContent = "নতুন কাস্টমার রিভিউ যোগ করুন";
+  document.getElementById("reviewEditId").value = "";
+  document.getElementById("reviewName").value = "";
+  document.getElementById("reviewLocation").value = "তমালতলা, বাগাতিপাড়া";
+  document.getElementById("reviewRating").value = "5";
+  document.getElementById("reviewAvatar").value = "👨‍💼";
+  document.getElementById("reviewComment").value = "";
+  document.getElementById("reviewModal").classList.add("show");
+}
+
+function editReviewItem(id){
+  const rv = reviews.find(item => item.id === id);
+  if(!rv) return;
+  document.getElementById("reviewModalTitle").textContent = "রিভিউ এডিট করুন";
+  document.getElementById("reviewEditId").value = rv.id;
+  document.getElementById("reviewName").value = rv.name || "";
+  document.getElementById("reviewLocation").value = rv.location || "";
+  document.getElementById("reviewRating").value = rv.rating || "5";
+  document.getElementById("reviewAvatar").value = rv.avatar || "👨‍💼";
+  document.getElementById("reviewComment").value = rv.comment || "";
+  document.getElementById("reviewModal").classList.add("show");
+}
+
+async function saveReviewItem(){
+  const name = document.getElementById("reviewName").value.trim();
+  const comment = document.getElementById("reviewComment").value.trim();
+  if(!name || !comment){ toast("⚠️ নাম ও রিভিউ মন্তব্য পূরণ করুন"); return; }
+
+  const editId = document.getElementById("reviewEditId").value;
+  const id = editId || ("rv_" + Date.now());
+
+  const revData = {
+    id: id,
+    name: name,
+    location: document.getElementById("reviewLocation").value.trim(),
+    rating: document.getElementById("reviewRating").value,
+    avatar: document.getElementById("reviewAvatar").value.trim() || "👤",
+    comment: comment
+  };
+
+  if(editId){
+    const idx = reviews.findIndex(r => r.id === editId);
+    if(idx !== -1) reviews[idx] = revData;
+  } else {
+    reviews.push(revData);
+  }
+
+  localStorage.setItem("sc_reviews", JSON.stringify(reviews));
+  renderReviewsTable();
+  closeModal("reviewModal");
+
+  if(db){
+    try {
+      await db.collection("reviews").doc(id).set(revData);
+      toast("✅ রিভিউ সংরক্ষিত ও লাইভ হয়েছে!");
+    } catch(e){}
+  }
+}
+
+async function deleteReviewItem(id){
+  if(!confirm("এই রিভিউটি মুছে ফেলতে চান?")) return;
+  reviews = reviews.filter(r => r.id !== id);
+  localStorage.setItem("sc_reviews", JSON.stringify(reviews));
+  renderReviewsTable();
+  if(db){
+    try { await db.collection("reviews").doc(id).delete(); }catch(e){}
+  }
+  toast("🗑️ রিভিউ মোছা হয়েছে");
+}
+
+/* ========================================================
+   8.7 BACKUP, RESTORE & EXPORTS
+   ======================================================== */
+function exportFullSiteBackup(){
+  const fullBackup = {
+    version: "2.0.0",
+    exportDate: new Date().toISOString(),
+    shopName: meta.heroTitle || "Sabuj Computers",
+    categories: categories,
+    services: services,
+    rates: rates,
+    faqs: faqs,
+    reviews: reviews,
+    paymentMethods: paymentMethods,
+    gallery: gallery,
+    meta: meta
+  };
+
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(fullBackup, null, 2));
+  const downloadAnchor = document.createElement('a');
+  downloadAnchor.setAttribute("href", dataStr);
+  downloadAnchor.setAttribute("download", `sabuj_computers_backup_${new Date().toISOString().slice(0,10)}.json`);
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  downloadAnchor.remove();
+  toast("✅ সম্পূর্ণ সাইট ব্যাকআপ JSON ফাইল ডাউনলোড হয়েছে!");
+}
+
+function importFullSiteBackup(e){
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async function(event){
+    try {
+      const data = JSON.parse(event.target.result);
+      if(!data.services && !data.categories){
+        throw new Error("অকার্যকর ব্যাকআপ ফাইল");
+      }
+
+      if(data.categories) categories = data.categories;
+      if(data.services) services = data.services;
+      if(data.rates) rates = data.rates;
+      if(data.faqs) faqs = data.faqs;
+      if(data.reviews) reviews = data.reviews;
+      if(data.paymentMethods) paymentMethods = data.paymentMethods;
+      if(data.gallery) gallery = data.gallery;
+      if(data.meta) meta = data.meta;
+
+      localStorage.setItem("sc_categories", JSON.stringify(categories));
+      localStorage.setItem("sc_services", JSON.stringify(services));
+      localStorage.setItem("sc_rates", JSON.stringify(rates));
+      localStorage.setItem("sc_faqs", JSON.stringify(faqs));
+      localStorage.setItem("sc_reviews", JSON.stringify(reviews));
+      localStorage.setItem("sc_payment_methods", JSON.stringify(paymentMethods));
+      localStorage.setItem("sc_gallery", JSON.stringify(gallery));
+      localStorage.setItem("sc_meta", JSON.stringify(meta));
+
+      renderServicesTable();
+      renderCategoriesTable();
+      renderRatesTable();
+      renderPaymentsTable();
+      renderGalleryTable();
+      renderFaqsTable();
+      renderReviewsTable();
+      renderSettingsForm();
+
+      await saveAllToFirestore();
+      toast("✅ ব্যাকআপ ফাইল সফলভাবে রিস্টোর ও ক্লাউডে সিঙ্ক হয়েছে!");
+    } catch(err){
+      toast("❌ ব্যাকআপ লোড ব্যর্থ: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+}
+
+function exportOrdersToCSV(){
+  if(!orders.length){
+    toast("⚠️ এক্সপোর্ট করার মতো কোনো অর্ডার নেই");
+    return;
+  }
+  let csv = "Order ID,Date,Customer Name,Phone,Type/Details,Amount (BDT),Payment Method,Sender Number,Status\n";
+  orders.forEach(o => {
+    const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleString() : "";
+    const cleanDetails = (o.type || "").replace(/,/g, ' ');
+    csv += `"${o.orderId || o.id}","${dateStr}","${o.customerName || o.studentName || ''}","${o.customerPhone || o.studentPhone || ''}","${cleanDetails}","${o.totalAmount || 0}","${o.paymentMethod || ''}","${o.senderNumber || ''}","${o.status || 'pending'}"\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `sabuj_orders_${new Date().toISOString().slice(0,10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  toast("✅ সকল অর্ডারের CSV ফাইল ডাউনলোড হয়েছে!");
+}
+
+/* ========================================================
    9. POSTER & HIGH-RES QR GENERATOR
    ======================================================== */
 function updatePosterLivePreview(){
   const title = document.getElementById("posterCtrlTitle").value.trim() || "সবুজ কম্পিউটার্স";
   const sub = document.getElementById("posterCtrlSub").value.trim() || "বুক ক্যাম্পাস, ফটোস্ট্যাট ও কম্পিউটার প্রশিক্ষণ কেন্দ্র";
   const addr = document.getElementById("posterCtrlAddress").value.trim() || "তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর";
-  const phone = document.getElementById("posterCtrlPhone").value.trim() || "০১৭১৪-০৮৪৩৫০";
+  const phone = document.getElementById("posterCtrlPhone").value.trim() || "০১৭২৪-০৮৪৩৫০";
   const proprietor = meta.proprietorName || "মোঃ সবুজ আলী";
   const logoUrl = meta.logoUrl || document.getElementById("settingLogoUrl").value.trim() || "https://cdn-icons-png.flaticon.com/512/3067/3067443.png";
 
@@ -1983,7 +3135,7 @@ function finishCanvasDownload(canvas){
   const ctx = canvas.getContext("2d");
   const url = document.getElementById("posterUrlInput").value.trim();
   const addr = document.getElementById("posterCtrlAddress").value.trim() || "তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর";
-  const phone = document.getElementById("posterCtrlPhone").value.trim() || "০১৭১৪-০৮৪৩৫০";
+  const phone = document.getElementById("posterCtrlPhone").value.trim() || "০১৭২৪-০৮৪৩৫০";
   const proprietor = meta.proprietorName || "মোঃ সবুজ আলী";
 
   ctx.fillStyle = "#0f3d24";
@@ -2187,6 +3339,22 @@ async function updateOrderStatus(orderId, newStatus){
 /* ========================================================
    12. SETTINGS (EACH AND EVERYTHING EDITABLE)
    ======================================================== */
+function toggleScheduleFields(){
+  const mode = document.getElementById("settingShopStatusMode")?.value || "auto";
+  const openInp = document.getElementById("settingOpenTime");
+  const closeInp = document.getElementById("settingCloseTime");
+  const breakInp = document.getElementById("settingBreakNote");
+
+  if(openInp && closeInp){
+    const isAuto = mode === "auto";
+    openInp.parentElement.style.opacity = isAuto ? "1" : "0.5";
+    closeInp.parentElement.style.opacity = isAuto ? "1" : "0.5";
+  }
+  if(breakInp){
+    breakInp.parentElement.style.opacity = mode === "break" ? "1" : "0.6";
+  }
+}
+
 function renderSettingsForm(){
   document.getElementById("settingHeroTitle").value = meta.heroTitle || "সবুজ কম্পিউটার্স";
   document.getElementById("settingHeroSub").value = meta.heroSub || "বুক ক্যাম্পাস, ফটোস্ট্যাট ও কম্পিউটার প্রশিক্ষণ কেন্দ্র। যা লাগবে, ঘরে বসেই অর্ডার করুন বা ফাইল পাঠিয়ে প্রিন্ট রেডি রাখুন।";
@@ -2197,8 +3365,16 @@ function renderSettingsForm(){
 
   document.getElementById("settingPhone").value = meta.phone || "01724084350";
   document.getElementById("settingWhatsApp").value = meta.whatsappPhone || "8801724084350";
-  document.getElementById("settingShopStatus").value = meta.shopStatus || "open";
+  
+  // Smart Status & Schedule
+  const statusMode = meta.shopStatusMode || (meta.shopStatus === "closed" ? "force_closed" : (meta.shopStatus === "break" ? "break" : "auto"));
+  document.getElementById("settingShopStatusMode").value = statusMode;
+  document.getElementById("settingOpenTime").value = meta.openTime || "08:00";
+  document.getElementById("settingCloseTime").value = meta.closeTime || "21:30";
+  document.getElementById("settingBreakNote").value = meta.breakNote || "নামাজের বিরতি (১৫ মিনিট)";
   document.getElementById("settingBusinessHours").value = meta.businessHours || "সকাল ৮:০০ - রাত ৯:৩০ (প্রতিদিন খোলা)";
+  toggleScheduleFields();
+
   document.getElementById("settingEmail").value = meta.email || "";
   document.getElementById("settingFacebook").value = meta.facebookUrl || "";
 
@@ -2237,8 +3413,15 @@ async function saveSiteSettings(){
 
   meta.phone = document.getElementById("settingPhone").value.trim();
   meta.whatsappPhone = document.getElementById("settingWhatsApp").value.trim();
-  meta.shopStatus = document.getElementById("settingShopStatus").value;
+  
+  // Smart Status & Schedule
+  meta.shopStatusMode = document.getElementById("settingShopStatusMode").value;
+  meta.openTime = document.getElementById("settingOpenTime").value.trim() || "08:00";
+  meta.closeTime = document.getElementById("settingCloseTime").value.trim() || "21:30";
+  meta.breakNote = document.getElementById("settingBreakNote").value.trim() || "নামাজের বিরতি (১৫ মিনিট)";
   meta.businessHours = document.getElementById("settingBusinessHours").value.trim();
+  meta.shopStatus = meta.shopStatusMode === "force_closed" ? "closed" : (meta.shopStatusMode === "break" ? "break" : "open");
+
   meta.email = document.getElementById("settingEmail").value.trim();
   meta.facebookUrl = document.getElementById("settingFacebook").value.trim();
 
@@ -2277,7 +3460,7 @@ async function saveSiteSettings(){
   if(db){
     try {
       await db.collection("settings").doc("global").set(meta);
-      toast("✅ সাইট সেটিংস ক্লাউডে সফলভাবে সংরক্ষিত হয়েছে!");
+      toast("✅ সাইট সেটিংস ও সময়সূচি ক্লাউডে সফলভাবে সংরক্ষিত হয়েছে!");
     } catch(e){
       toast("✅ লোকালি সংরক্ষিত হয়েছে");
     }
@@ -2285,6 +3468,24 @@ async function saveSiteSettings(){
 }
 
 function closeModal(id){ document.getElementById(id).classList.remove("show"); }
+
+function updateAdminLiveClock(){
+  const now = new Date();
+  const bstStr = now.toLocaleString("en-US", { timeZone: "Asia/Dhaka" });
+  const bst = new Date(bstStr);
+  const h24 = bst.getHours();
+  const m = bst.getMinutes();
+  const s = bst.getSeconds();
+  const h12 = h24 % 12 || 12;
+  const ampm = h24 >= 12 ? 'PM' : 'AM';
+  const bn = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+  const toBn = num => String(num).padStart(2, '0').replace(/[0-9]/g, d => bn[d]);
+  const formatted = `${toBn(h12)}:${toBn(m)}:${toBn(s)} ${ampm}`;
+  const el = document.getElementById("adminLiveClock");
+  if(el) el.textContent = formatted;
+}
+setInterval(updateAdminLiveClock, 1000);
+updateAdminLiveClock();
 
 // Init
 document.addEventListener("DOMContentLoaded", checkAuth);

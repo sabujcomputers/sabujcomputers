@@ -350,30 +350,96 @@
     line-height: 1.5;
   }
 
+  /* Status Pills & Real-Time Bangladesh Clock */
+  @keyframes pulseGreen {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(34, 197, 94, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+  }
+  @keyframes pulseRed {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(239, 68, 68, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  }
+  @keyframes pulseAmber {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(245, 158, 11, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+  }
+
   .top-ctrls {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 12px;
     gap: 8px;
+    flex-wrap: wrap;
+  }
+  .top-left-status-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
   }
   .status-pill {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: rgba(0,0,0,.35);
-    border: 1px solid rgba(255,255,255,.18);
     padding: 4px 12px;
     border-radius: var(--radius-pill);
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
+    transition: all .2s ease;
+    backdrop-filter: blur(4px);
+  }
+  .status-pill.status-open {
+    background: rgba(6, 78, 59, 0.65);
+    border: 1px solid rgba(74, 222, 128, 0.5);
+    color: #86efac;
+  }
+  .status-pill.status-open .status-dot {
+    background: #22c55e;
+    box-shadow: 0 0 8px #22c55e;
+    animation: pulseGreen 2s infinite;
+  }
+  .status-pill.status-closed {
+    background: rgba(127, 29, 29, 0.65);
+    border: 1px solid rgba(248, 113, 113, 0.5);
+    color: #fca5a5;
+  }
+  .status-pill.status-closed .status-dot {
+    background: #ef4444;
+    box-shadow: 0 0 8px #ef4444;
+    animation: pulseRed 2s infinite;
+  }
+  .status-pill.status-break {
+    background: rgba(120, 53, 15, 0.65);
+    border: 1px solid rgba(251, 191, 36, 0.5);
+    color: #fde047;
+  }
+  .status-pill.status-break .status-dot {
+    background: #f59e0b;
+    box-shadow: 0 0 8px #f59e0b;
+    animation: pulseAmber 2s infinite;
   }
   .status-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #4ade80;
-    box-shadow: 0 0 8px #4ade80;
+  }
+
+  .time-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 11.5px;
+    color: #fef08a;
+    font-family: 'Space Mono', monospace;
+    backdrop-filter: blur(4px);
   }
   .top-right-btns {
     display: flex;
@@ -713,12 +779,13 @@
     display: flex;
     flex-direction: column;
     cursor: pointer;
-    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    transition: transform 0.28s cubic-bezier(0.34, 1.3, 0.64, 1), box-shadow 0.28s ease, border-color 0.28s ease;
+    will-change: transform, box-shadow;
   }
   .srv-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow);
-    border-color: var(--leaf);
+    transform: translateY(-5px) scale(1.02);
+    border-color: rgba(34, 197, 94, 0.7);
+    box-shadow: 0 14px 28px -4px rgba(15, 61, 36, 0.15), 0 0 0 1.5px rgba(34, 197, 94, 0.35), 0 4px 12px rgba(34, 197, 94, 0.12);
   }
   .srv-thumb-wrap {
     position: relative;
@@ -1126,15 +1193,22 @@
 <!-- Print-Only Header -->
 <div class="print-only-banner">
   <h1 id="printShopTitle" style="margin:0;font-family:'Baloo Da 2',sans-serif;font-size:24px;">সবুজ কম্পিউটার্স — সেবা ও মূল্য তালিকা</h1>
-  <p id="printShopSub" style="margin:4px 0;font-size:13px;">তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর · মোবাইল: ০১৭১৪-০৮৪৩৫০ · ওয়েব: sabujcomputers.pro.bd</p>
+  <p id="printShopSub" style="margin:4px 0;font-size:13px;">তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর · মোবাইল: ০১৭২৪-০৮৪৩৫০ · ওয়েব: sabujcomputers.pro.bd</p>
 </div>
 
 <!-- Hero Banner / Signboard -->
 <div class="hero">
   <div class="top-ctrls wrap">
-    <div class="status-pill status-open" id="shopStatusPill">
-      <span class="status-dot"></span>
-      <span id="shopStatusText">দোকান খোলা আছে</span>
+    <div class="top-left-status-group">
+      <div class="status-pill status-open" id="shopStatusPill" title="দোকানের রিয়েল-টাইম লাইভ স্ট্যাটাস">
+        <span class="status-dot"></span>
+        <span id="shopStatusText">দোকান খোলা আছে</span>
+      </div>
+      <div class="time-pill" id="liveTimePill" title="বর্তমান বাংলাদেশ প্রমাণ সময় (BST)">
+        <span>⏰</span>
+        <span id="liveBstClock">--:--:--</span>
+        <span style="font-family:'Hind Siliguri',sans-serif;font-size:10.5px;color:#cbd5e1;margin-left:2px;">(বাংলাদেশ সময়)</span>
+      </div>
     </div>
     <div class="top-right-btns">
       <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" title="থিম পরিবর্তন">
@@ -1174,7 +1248,7 @@
     <!-- Quick Direct Contact Strip -->
     <div class="hero-quick-strip">
       <a class="hero-quick-pill" id="heroWhatsAppBtn" href="https://wa.me/8801724084350" target="_blank" rel="noopener">
-        <span>💬 WhatsApp: ০১৭১৪-০৮৪৩৫০</span>
+        <span>💬 WhatsApp: ০১৭২৪-০৮৪৩৫০</span>
       </a>
       <a class="hero-quick-pill" id="heroCallBtn" href="tel:01724084350">
         <span>📞 সরাসরি কল: ০১৭২৪-০৮৪৩৫০</span>
@@ -1213,6 +1287,11 @@
       <span style="font-size:11.5px;color:var(--forest);font-weight:700;background:var(--leaf-light);padding:3px 10px;border-radius:var(--radius-pill);">
         ⚡ ক্লাউডিনারি সুরক্ষিত আপলোড
       </span>
+    </div>
+
+    <!-- Night/Closed Friendly Notice -->
+    <div id="quickPrintClosedNotice" style="display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:10px 14px;margin-bottom:12px;color:#991b1b;font-size:12.5px;line-height:1.5;">
+      🌙 <b>দোকান এখন রাতের বিশ্রামের জন্য বন্ধ রয়েছে:</b> আপনি নিশ্চিন্তে ফাইল আপলোড করে এখনই অর্ডার সাবমিট করে রাখতে পারেন। সকাল ৮:০০ টায় দোকান খোলার পর অগ্রাধিকার ভিত্তিতে আপনার প্রিন্ট প্রস্তুত করে রাখা হবে!
     </div>
 
     <!-- Dropzone -->
@@ -1306,6 +1385,50 @@
   <div id="servicesSectionContainer"></div>
 </div>
 
+<!-- Live Rate Card Section -->
+<div class="wrap" id="rateCardSection" style="margin-top:24px;">
+  <div class="sec-heading">
+    <h2>🏷️ সেবাসমূহের অফিসিয়াল মূল্য তালিকা (Rate Card)</h2>
+    <span>স্বচ্ছ ও নির্দিষ্ট মূল্য</span>
+  </div>
+  <div class="rate-card-box" style="background:var(--card-bg);border:1px solid var(--line);border-radius:16px;padding:16px 20px;box-shadow:var(--shadow-sm);">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+      <p style="font-size:13px;color:var(--ink-soft);margin:0;">সবুজ কম্পিউটার্স-এর সকল প্রিন্টিং, ফটোকপি ও অনলাইন সার্ভিসের রেট চার্ট:</p>
+      <input type="text" id="rateSearchInput" class="inp" placeholder="🔍 রেট খুঁজুন..." style="max-width:200px;margin-bottom:0;padding:6px 12px;font-size:12px;" oninput="renderRateCard()">
+    </div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;text-align:left;">
+        <thead>
+          <tr style="background:var(--paper-2);color:var(--forest);font-weight:700;border-bottom:2px solid var(--line);">
+            <th style="padding:10px 12px;border-radius:8px 0 0 8px;">সেবার নাম</th>
+            <th style="padding:10px 12px;">ধরন / পরিমাপ</th>
+            <th style="padding:10px 12px;text-align:right;border-radius:0 8px 8px 0;">নির্ধারিত রেট</th>
+          </tr>
+        </thead>
+        <tbody id="rateCardTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Customer Reviews Section -->
+<div class="wrap" id="reviewsSection" style="margin-top:24px;">
+  <div class="sec-heading">
+    <h2>💬 কাস্টমারদের বাস্তব অভিজ্ঞতা ও রিভিউ</h2>
+    <span>বিশ্বস্ত প্রতিষ্ঠান</span>
+  </div>
+  <div class="reviews-grid" id="reviewsGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px;"></div>
+</div>
+
+<!-- FAQ Accordion Section -->
+<div class="wrap" id="faqsSection" style="margin-top:24px;">
+  <div class="sec-heading">
+    <h2>❓ সচরাচর সাধারণ প্রশ্ন ও উত্তর (FAQ)</h2>
+    <span>সহজ সমাধান</span>
+  </div>
+  <div class="faq-list" id="faqsContainer" style="display:flex;flex-direction:column;gap:10px;"></div>
+</div>
+
 <!-- Shop Photo Gallery Section -->
 <div class="wrap" id="galleryWrapper">
   <div class="sec-heading">
@@ -1374,8 +1497,8 @@
 <!-- Footer -->
 <footer style="text-align:center;padding:32px 16px 20px;color:var(--ink-soft);font-size:13px;line-height:1.8;">
   সব স্বত্ব সংরক্ষিত © <span id="footerShopTitle">সবুজ কম্পিউটার্স</span>, <span id="footerAddress">বাগাতিপাড়া, নাটোর</span><br>
-  প্রোপ্রাইটর: <span id="footerProprietor">মোঃ সবুজ আলী</span> · মোবাইল: <span id="footerPhone">০১৭১৪-০৮৪৩৫০</span><br>
-  ওয়েবসাইট: <a href="https://sabujcomputers.pro.bd/" target="_blank" rel="noopener" style="color:var(--forest);font-weight:700;">sabujcomputers.pro.bd</a> · <a href="admin.html" style="color:inherit;text-decoration:none;opacity:0.35;font-size:11px;" title="অ্যাডমিন">অ্যাডমিন</a>
+  প্রোপ্রাইটর: <span id="footerProprietor">মোঃ সবুজ আলী</span> · মোবাইল: <span id="footerPhone">০১৭২৪-০৮৪৩৫০</span><br>
+  ওয়েবসাইট: <a href="https://sabujcomputers.pro.bd/" target="_blank" rel="noopener" style="color:var(--forest);font-weight:700;">sabujcomputers.pro.bd</a>
 </footer>
 
 <!-- Floating Cart Bar -->
@@ -1933,6 +2056,69 @@ const DEFAULT_GALLERY = [
   }
 ];
 
+const DEFAULT_RATES = [
+  { id: "r1", name: "ডিজিটাল ফটোকপি (এক পিঠ)", emoji: "📄", type: "প্রতি পাতা (A4)", price: "১.৫০৳", active: true },
+  { id: "r2", name: "ডিজিটাল ফটোকপি (উভয় পিঠ)", emoji: "📑", type: "প্রতি পাতা (A4)", price: "২.০০৳", active: true },
+  { id: "r3", name: "কম্পিউটার সাদাকালো প্রিন্ট", emoji: "🖨️", type: "প্রতি পাতা (A4)", price: "৩.০০৳", active: true },
+  { id: "r4", name: "কম্পিউটার রঙিন কালার প্রিন্ট", emoji: "🎨", type: "প্রতি পাতা (A4)", price: "১০.০০৳", active: true },
+  { id: "r5", name: "পাসপোর্ট সাইজ ছবি (৪ কপি)", emoji: "📸", type: "ল্যাব গ্লসি পেপার", price: "২০.০০৳", active: true },
+  { id: "r6", name: "স্ট্যাম্প সাইজ ছবি (৮ কপি)", emoji: "🖼️", type: "ল্যাব গ্লসি পেপার", price: "২০.০০৳", active: true },
+  { id: "r7", name: "স্মার্ট NID / কার্ড লেমিনেটিং", emoji: "🧾", type: "ওয়াটারপ্রুফ কোটিং", price: "১৫.০০৳", active: true },
+  { id: "r8", name: "সার্টিফিকেট ও A4 লেমিনেটিং", emoji: "📜", type: "হেভি থিকনেস", price: "২৫.০০৳", active: true },
+  { id: "r9", name: "চাকরির অনলাইন আবেদন ফি", emoji: "📝", type: "প্রতি আবেদন চার্জ", price: "৫০.০০৳", active: true },
+  { id: "r10", name: "কম্পিউটার বাংলা/ইংরেজি কম্পোজ", emoji: "🖥️", type: "প্রতি পাতা টাইপ", price: "১৫.০০৳", active: true }
+];
+
+const DEFAULT_FAQS = [
+  {
+    id: "f1",
+    question: "অনলাইনে প্রিন্টিং বা ফটোকপির অর্ডার কীভাবে দেব?",
+    answer: "আমাদের ওয়েবসাইটের 'অনলাইন প্রিন্ট অর্ডার' অপশনে গিয়ে ফাইল আপলোড করুন অথবা সরাসরি WhatsApp নম্বরে পাঠিয়ে দিন। কাজ রেডি হলে আপনাকে মেসেজ দেওয়া হবে।"
+  },
+  {
+    id: "f2",
+    question: "কম্পিউটার প্রশিক্ষণ কোর্সের সময়সূচি ও ভর্তি ফি কেমন?",
+    answer: "সকাল, বিকাল ও সন্ধ্যার ব্যাচে ক্লাস করানো হয়। কোর্স শেষে গণপ্রজাতন্ত্রী বাংলাদেশ সরকার অনুমোদিত সার্টিফিকেট প্রদান করা হয়। সরাসরি দোকানে এসে বা ওয়েবসাইটে ফর্ম পূরণ করে ভর্তি হতে পারবেন।"
+  },
+  {
+    id: "f3",
+    question: "পেমেন্ট কীভাবে পরিশোধ করা যায়?",
+    answer: "বিকাশ, নগদ, রকেট এবং যেকোনো ব্যাংকিং অ্যাপের 'বাংলা কিউআর' স্ক্যান করে পেমেন্ট করতে পারবেন। এছাড়াও দোকানে এসে ক্যাশ পরিশোধের সুবিধাও রয়েছে।"
+  },
+  {
+    id: "f4",
+    question: "চাকরির আবেদনের ছবি ও স্বাক্ষর রিসাইজ করা হয় কি?",
+    answer: "হ্যাঁ, সকল সরকারি ও বেসরকারি নিয়োগ বিজ্ঞপ্তির সুনির্দিষ্ট মাপ (৩০০×৩০০ পিক্সেল ও ৩০০×৮০ পিক্সেল) অনুযায়ী নিখুঁতভাবে রিসাইজ ও ফরম পূরণ করে দেওয়া হয়।"
+  }
+];
+
+const DEFAULT_REVIEWS = [
+  {
+    id: "rv1",
+    name: "মোঃ আল-আমিন",
+    location: "বাগাতিপাড়া ডিগ্রি কলেজ",
+    rating: "5",
+    avatar: "👨‍🎓",
+    comment: "সবুজ ভাইয়ের দোকান থেকে অনার্স ৩য় বর্ষের গাইড বই ও অ্যাসাইনমেন্ট প্রিন্ট করিয়েছি। প্রিন্ট কোয়ালিটি খুবই পরিষ্কার এবং দাম অনেক সাশ্রয়ী।"
+  },
+  {
+    id: "rv2",
+    name: "সুমি আক্তার",
+    location: "তমালতলা, নাটোর",
+    rating: "5",
+    avatar: "👩‍💻",
+    comment: "চাকরির অনলাইন আবেদন করার জন্য এলাকার সবচেয়ে বিশ্বস্ত প্রতিষ্ঠান। খুব যত্নসহকারে এবং নির্ভুলভাবে আবেদন করে দেন।"
+  },
+  {
+    id: "rv3",
+    name: "ইঞ্জিনিয়ার তারেক রহমান",
+    location: "নাটোর সদর",
+    rating: "5",
+    avatar: "👨‍🏫",
+    comment: "কম্পিউটার প্রশিক্ষণ ল্যাবের পরিবেশ চমৎকার। প্রতিটি স্টুডেন্টের জন্য আলাদা কম্পিউটার থাকায় সহজে কাজ শেখা যায়।"
+  }
+];
+
 const DEFAULT_META = {
   heroTitle: "সবুজ কম্পিউটার্স",
   heroSub: "বুক ক্যাম্পাস, ফটোস্ট্যাট ও কম্পিউটার প্রশিক্ষণ কেন্দ্র। যা লাগবে, ঘরে বসেই অর্ডার করুন বা ফাইল পাঠিয়ে প্রিন্ট রেডি রাখুন।",
@@ -1941,13 +2127,18 @@ const DEFAULT_META = {
   logoUrl: "https://cdn-icons-png.flaticon.com/512/3067/3067443.png",
   phone: "01724084350",
   whatsappPhone: "8801724084350",
+  shopStatusMode: "auto", // "auto" (সময় অনুযায়ী স্বয়ংক্রিয়), "force_open", "force_closed", "break"
   shopStatus: "open",
+  openTime: "08:00",
+  closeTime: "21:30",
+  breakNote: "নামাজের বিরতি (১৫ মিনিট)",
   businessHours: "সকাল ৮:০০ - রাত ৯:৩০ (প্রতিদিন খোলা)",
   showNotice: true,
   notice: "নতুন কম্পিউটার প্রশিক্ষণ ব্যাচে ভর্তি চলছে! স্বল্প খরচে সার্টিফিকেটসহ কোর্স করুন · জরুরি ফটোকপি ও চাকরির আবেদন দ্রুত করে দেওয়া হয়।",
   printRates: { bw: 2, color: 10, photo: 20, laminate: 30, job: 50 },
   mapEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3697.3716089901327!2d88.93670279999999!3d24.31764609999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39fc05f19d6bd581%3A0x8fb76cba31eaa6d5!2sSabuj%20Computer%2C%20Tomaltola%20Bazar!5e1!3m2!1sen!2sbd!4v1787055740183!5m2!1sen!2sbd",
-  mapDirectionsUrl: "https://maps.google.com/?cid=10355745129654167253&q=Sabuj+Computer+Tomaltola+Bazar"
+  mapDirectionsUrl: "https://maps.google.com/?cid=10355745129654167253&q=Sabuj+Computer+Tomaltola+Bazar",
+  banglaQrImage: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80"
 };
 
 // Global App State
@@ -1955,6 +2146,9 @@ let categories = DEFAULT_CATEGORIES;
 let services = DEFAULT_SERVICES;
 let paymentMethods = DEFAULT_PAYMENT_METHODS;
 let gallery = DEFAULT_GALLERY;
+let rates = DEFAULT_RATES;
+let faqs = DEFAULT_FAQS;
+let reviews = DEFAULT_REVIEWS;
 let meta = { ...DEFAULT_META };
 let activeCategory = "all";
 let searchQuery = "";
@@ -2099,7 +2293,46 @@ async function initAppData(){
         }
       });
 
-      // 5. Settings / Meta
+      // 5. Rates
+      db.collection("rates").onSnapshot(snap => {
+        if (!snap.empty) {
+          const remoteRates = [];
+          snap.forEach(d => remoteRates.push({ id: d.id, ...d.data() }));
+          if (remoteRates.length) {
+            rates = remoteRates;
+            localStorage.setItem("sc_rates", JSON.stringify(rates));
+            renderRateCard();
+          }
+        }
+      });
+
+      // 6. FAQs
+      db.collection("faqs").onSnapshot(snap => {
+        if (!snap.empty) {
+          const remoteFaqs = [];
+          snap.forEach(d => remoteFaqs.push({ id: d.id, ...d.data() }));
+          if (remoteFaqs.length) {
+            faqs = remoteFaqs;
+            localStorage.setItem("sc_faqs", JSON.stringify(faqs));
+            renderFaqs();
+          }
+        }
+      });
+
+      // 7. Reviews
+      db.collection("reviews").onSnapshot(snap => {
+        if (!snap.empty) {
+          const remoteReviews = [];
+          snap.forEach(d => remoteReviews.push({ id: d.id, ...d.data() }));
+          if (remoteReviews.length) {
+            reviews = remoteReviews;
+            localStorage.setItem("sc_reviews", JSON.stringify(reviews));
+            renderReviews();
+          }
+        }
+      });
+
+      // 8. Settings / Meta
       db.collection("settings").doc("global").onSnapshot(doc => {
         if (doc.exists) {
           meta = { ...DEFAULT_META, ...doc.data() };
@@ -2134,6 +2367,21 @@ async function initAppData(){
   } catch(e){}
 
   try {
+    const locR = localStorage.getItem("sc_rates");
+    if(locR) rates = JSON.parse(locR);
+  } catch(e){}
+
+  try {
+    const locF = localStorage.getItem("sc_faqs");
+    if(locF) faqs = JSON.parse(locF);
+  } catch(e){}
+
+  try {
+    const locRv = localStorage.getItem("sc_reviews");
+    if(locRv) reviews = JSON.parse(locRv);
+  } catch(e){}
+
+  try {
     const locM = localStorage.getItem("sc_meta");
     if(locM) meta = { ...DEFAULT_META, ...JSON.parse(locM) };
   } catch(e){}
@@ -2141,10 +2389,219 @@ async function initAppData(){
   applyMeta();
   renderCategoryTabs();
   renderServices();
+  renderRateCard();
+  renderReviews();
+  renderFaqs();
   renderPaymentMethods();
   renderGallery();
   calcQuickPrintPrice();
 }
+
+function renderRateCard(){
+  const tbody = document.getElementById("rateCardTableBody");
+  if(!tbody) return;
+  tbody.innerHTML = "";
+
+  const query = (document.getElementById("rateSearchInput")?.value || "").toLowerCase().trim();
+  const activeRates = rates.filter(r => r.active !== false && (!query || r.name.toLowerCase().includes(query) || (r.type && r.type.toLowerCase().includes(query))));
+
+  if(!activeRates.length){
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:16px;color:var(--ink-soft);">কোনো রেট কার্ড পাওয়া যায়নি।</td></tr>`;
+    return;
+  }
+
+  activeRates.forEach(r => {
+    const tr = document.createElement("tr");
+    tr.style.borderBottom = "1px solid var(--line)";
+    tr.innerHTML = `
+      <td style="padding:10px 12px;font-weight:600;">
+        <span style="margin-right:6px;font-size:16px;">${r.emoji || '🏷️'}</span> ${r.name}
+      </td>
+      <td style="padding:10px 12px;color:var(--ink-soft);font-size:12.5px;">${r.type || 'প্রতি ইউনিট'}</td>
+      <td style="padding:10px 12px;text-align:right;">
+        <span class="mono" style="font-weight:700;color:var(--forest);font-size:14px;background:var(--paper-2);padding:3px 8px;border-radius:6px;">${r.price}</span>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderReviews(){
+  const container = document.getElementById("reviewsGrid");
+  if(!container) return;
+  container.innerHTML = "";
+
+  if(!reviews.length){
+    container.innerHTML = `<p style="color:var(--ink-soft);font-size:13px;">কোনো রিভিউ পাওয়া যায়নি।</p>`;
+    return;
+  }
+
+  reviews.forEach(rv => {
+    const card = document.createElement("div");
+    card.style.background = "var(--card-bg)";
+    card.style.border = "1px solid var(--line)";
+    card.style.borderRadius = "14px";
+    card.style.padding = "16px";
+    card.style.boxShadow = "var(--shadow-sm)";
+    card.style.display = "flex";
+    card.style.flexDirection = "column";
+    card.style.gap = "10px";
+
+    const stars = "⭐".repeat(parseInt(rv.rating) || 5);
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--paper-2);display:flex;align-items:center;justify-content:center;font-size:18px;border:1px solid var(--line);">${rv.avatar || '👤'}</div>
+          <div>
+            <b style="font-size:13.5px;color:var(--ink);display:block;">${rv.name}</b>
+            <span style="font-size:11.5px;color:var(--ink-soft);">${rv.location || 'কাস্টমার'}</span>
+          </div>
+        </div>
+        <span style="font-size:11px;">${stars}</span>
+      </div>
+      <p style="font-size:13px;color:var(--ink);line-height:1.5;margin:0;font-style:italic;">“${rv.comment}”</p>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function renderFaqs(){
+  const container = document.getElementById("faqsContainer");
+  if(!container) return;
+  container.innerHTML = "";
+
+  if(!faqs.length){
+    container.innerHTML = `<p style="color:var(--ink-soft);font-size:13px;">কোনো প্রশ্ন পাওয়া যায়নি।</p>`;
+    return;
+  }
+
+  faqs.forEach((f, idx) => {
+    const item = document.createElement("div");
+    item.style.background = "var(--card-bg)";
+    item.style.border = "1px solid var(--line)";
+    item.style.borderRadius = "12px";
+    item.style.overflow = "hidden";
+
+    item.innerHTML = `
+      <button onclick="toggleFaq('faq_ans_${idx}')" style="width:100%;text-align:left;background:none;border:none;padding:14px 16px;font-family:inherit;font-size:13.5px;font-weight:700;color:var(--forest);display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+        <span>❓ ${f.question}</span>
+        <span id="faq_icon_${idx}" style="font-size:12px;transition:transform 0.2s;">▼</span>
+      </button>
+      <div id="faq_ans_${idx}" style="display:none;padding:0 16px 14px 16px;font-size:13px;color:var(--ink-soft);line-height:1.6;border-top:1px dashed var(--line);margin-top:2px;padding-top:10px;">
+        ${f.answer}
+      </div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+function toggleFaq(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const isHidden = el.style.display === "none";
+  el.style.display = isHidden ? "block" : "none";
+  const iconId = id.replace("faq_ans_", "faq_icon_");
+  const iconEl = document.getElementById(iconId);
+  if(iconEl) iconEl.style.transform = isHidden ? "rotate(180deg)" : "rotate(0deg)";
+}
+
+/* ========================================================
+   REAL-TIME BANGLADESH CLOCK & AUTOMATIC SHOP SCHEDULE
+   ======================================================== */
+function toBanglaDigits(strOrNum) {
+  const bn = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+  return String(strOrNum).replace(/[0-9]/g, d => bn[d]);
+}
+
+function getBangladeshNow() {
+  const now = new Date();
+  // Ensure we compute accurate Bangladesh Standard Time (UTC+6)
+  const bstStr = now.toLocaleString("en-US", { timeZone: "Asia/Dhaka" });
+  return new Date(bstStr);
+}
+
+function formatBanglaClockTime(h24, m) {
+  const h12 = h24 % 12 || 12;
+  const mStr = m ? `:${toBanglaDigits(m.toString().padStart(2, '0'))}` : ':০০';
+  return `${toBanglaDigits(h12)}${mStr}`;
+}
+
+function updateLiveBangladeshTimeAndStatus() {
+  const bst = getBangladeshNow();
+  const h24 = bst.getHours();
+  const m = bst.getMinutes();
+  const s = bst.getSeconds();
+
+  const h12 = h24 % 12 || 12;
+  const ampm = h24 >= 12 ? 'PM' : 'AM';
+  const timeStr = `${toBanglaDigits(h12)}:${toBanglaDigits(m.toString().padStart(2, '0'))}:${toBanglaDigits(s.toString().padStart(2, '0'))} ${ampm}`;
+
+  const clockEl = document.getElementById("liveBstClock");
+  if(clockEl) clockEl.textContent = timeStr;
+
+  // Determine Shop Status Mode (auto, force_open, force_closed, break)
+  const mode = meta.shopStatusMode || (meta.shopStatus === "closed" ? "force_closed" : (meta.shopStatus === "break" ? "break" : "auto"));
+  const openTime = meta.openTime || "08:00";
+  const closeTime = meta.closeTime || "21:30";
+
+  const [oH, oM] = openTime.split(":").map(Number);
+  const [cH, cM] = closeTime.split(":").map(Number);
+
+  const currentMinutes = h24 * 60 + m;
+  const openMinutes = (oH || 8) * 60 + (oM || 0);
+  const closeMinutes = (cH || 21) * 60 + (cM || 30);
+
+  let isOpen = false;
+  let statusText = "";
+  let statusClass = "status-open";
+
+  if (mode === "force_open" || mode === "open") {
+    isOpen = true;
+    statusText = `দোকান খোলা আছে · ${meta.businessHours || 'রাত ৯:৩০ পর্যন্ত'}`;
+    statusClass = "status-open";
+  } else if (mode === "force_closed" || mode === "closed") {
+    isOpen = false;
+    statusText = `দোকান এখন বন্ধ আছে · সকাল ${formatBanglaClockTime(oH || 8, oM || 0)} টায় খুলবে`;
+    statusClass = "status-closed";
+  } else if (mode === "break") {
+    isOpen = false;
+    statusText = `সাময়িক বিরতি · ${meta.breakNote || 'কিছুক্ষণের মধ্যে চালু হবে'}`;
+    statusClass = "status-break";
+  } else {
+    // AUTO MODE based on real-time Bangladesh clock
+    if (currentMinutes >= openMinutes && currentMinutes < closeMinutes) {
+      isOpen = true;
+      const closingLeftMin = closeMinutes - currentMinutes;
+      if (closingLeftMin <= 45 && closingLeftMin > 0) {
+        statusText = `দোকান খোলা আছে (আর ${toBanglaDigits(closingLeftMin)} মিনিট পর বন্ধ হবে)`;
+      } else {
+        statusText = `দোকান খোলা আছে · রাত ${formatBanglaClockTime(cH || 21, cM || 30)} পর্যন্ত`;
+      }
+      statusClass = "status-open";
+    } else {
+      isOpen = false;
+      statusText = `দোকান এখন বন্ধ আছে · সকাল ${formatBanglaClockTime(oH || 8, oM || 0)} টায় খুলবে`;
+      statusClass = "status-closed";
+    }
+  }
+
+  // Update Status Pill UI
+  const pill = document.getElementById("shopStatusPill");
+  const text = document.getElementById("shopStatusText");
+  if (pill && text) {
+    pill.className = `status-pill ${statusClass}`;
+    text.textContent = statusText;
+  }
+
+  // Update Closed Notice Banner in Quick Print Card
+  const closedNotice = document.getElementById("quickPrintClosedNotice");
+  if (closedNotice) {
+    closedNotice.style.display = isOpen ? "none" : "block";
+  }
+}
+
+// Start Real-Time Live Clock Loop immediately
+setInterval(updateLiveBangladeshTimeAndStatus, 1000);
 
 function applyMeta(){
   // Title & Subtitle
@@ -2167,17 +2624,8 @@ function applyMeta(){
     document.getElementById("noticeBar").style.display = "none";
   }
 
-  // Shop Open / Closed Status
-  const statusPill = document.getElementById("shopStatusPill");
-  const statusText = document.getElementById("shopStatusText");
-  if(meta.shopStatus === "closed"){
-    statusText.textContent = "দোকান এখন বন্ধ আছে";
-    statusPill.style.borderColor = "#ef4444";
-  } else if(meta.shopStatus === "break"){
-    statusText.textContent = "সাময়িক বিরতি (" + (meta.businessHours || '') + ")";
-  } else {
-    statusText.textContent = "দোকান খোলা আছে · " + (meta.businessHours || "সকাল ৮টা - রাত ৯:৩০");
-  }
+  // Trigger Real-Time Shop Status & Clock
+  updateLiveBangladeshTimeAndStatus();
 
   // Contact buttons
   const phone = meta.phone || DEFAULT_META.phone;
