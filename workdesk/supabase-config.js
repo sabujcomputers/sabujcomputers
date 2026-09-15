@@ -1,8 +1,12 @@
-// Sabuj Computers Smart Work Desk — Supabase Cloud configuration
-// Browser-safe publishable key. Keep database RLS enabled.
+// Sabuj Computers — Smart Work Desk
+// Browser-safe publishable key only. Database RLS must remain enabled.
 window.SABUJ_SUPABASE_URL='https://usbfqolkrkjugwscvulu.supabase.co';
 window.SABUJ_SUPABASE_PUBLISHABLE_KEY='sb_publishable_UfkOQ5ygV_AEtNdC3Txmng_PTvk-N84';
-// These modules load before the main inline app script, so their DOM-ready hooks are reliable.
-['./enhancements.js?v=3','./pro.js?v=2','./pro2.js?v=2','./pro3.js?v=2'].forEach(src=>{
-  const s=document.createElement('script'); s.src=src; s.async=false; document.head.appendChild(s);
+// Load exactly one Pro integration after the page is ready. This avoids duplicate hooks/modules.
+window.addEventListener('load',()=>{
+  const s=document.createElement('script');
+  s.src='./pro.js?v=20260915-4';
+  s.onload=()=>console.info('Sabuj Work Desk Pro loaded');
+  s.onerror=()=>console.error('Sabuj Work Desk Pro failed to load');
+  document.body.appendChild(s);
 });
