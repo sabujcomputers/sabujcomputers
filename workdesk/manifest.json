@@ -1,0 +1,11 @@
+{
+  "name":"সবুজ কম্পিউটার্স — Smart Work Desk",
+  "short_name":"Sabuj Work Desk",
+  "start_url":"./",
+  "scope":"./",
+  "display":"standalone",
+  "background_color":"#f4f7f6",
+  "theme_color":"#073d28",
+  "lang":"bn",
+  "icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
